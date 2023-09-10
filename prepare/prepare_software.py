@@ -9,8 +9,11 @@ class PrepareSoftware:
     _protect_jar = "protect-v2.3/protect.jar"
     _linx_jar = "linx-v1.21/linx_v1.21.jar"
 
-    def __init__(self, url: str = "https://github.com/hartwigmedical/hmftools/releases/download/",
-                 output_dir: str = "data/software/") -> None:
+    def __init__(
+        self,
+        url: str = "https://github.com/hartwigmedical/hmftools/releases/download/",
+        output_dir: str = "data/software/",
+    ) -> None:
         """
         Initialize this class.
 

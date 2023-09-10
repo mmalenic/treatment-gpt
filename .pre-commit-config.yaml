@@ -1,0 +1,20 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=16384"]
+      - id: check-yaml
+
+  - repo: https://github.com/yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args:
+          ["--baseline", ".secrets.baseline"]
+        exclude: package.lock.json
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 23.9.0
+    hooks:
+      - id: black-jupyter

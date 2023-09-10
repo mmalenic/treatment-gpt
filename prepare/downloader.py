@@ -8,7 +8,9 @@ class Downloader:
     Downloads data from a url or bucket.
     """
 
-    def __init__(self, url: str, prefix: str = "", mode: Literal["url", "s3"] = "url") -> None:
+    def __init__(
+        self, url: str, prefix: str = "", mode: Literal["url", "s3"] = "url"
+    ) -> None:
         """
         Initialize this class.
 
@@ -29,7 +31,6 @@ class Downloader:
 
         :return: return the downloaded data or None if saving.
         """
-
         if self.mode == "url":
             if save_to is None:
                 with urllib.request.urlopen(self.url + self.prefix + name) as f:
@@ -39,7 +40,9 @@ class Downloader:
         else:
             raise NotImplementedError
 
-    def get_or_download(self, output_dir: str, name: str, read_data: bool = True) -> str | None:
+    def get_or_download(
+        self, output_dir: str, name: str, read_data: bool = True
+    ) -> str | None:
         """
         Get the data from the output_dir or download and save it to the output directory.
 

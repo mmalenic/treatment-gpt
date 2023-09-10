@@ -15,7 +15,11 @@ class PrepareServe:
 
     _data: dict[str, str] = {}
 
-    def __init__(self, url: str = "https://storage.googleapis.com/hmf-public/HMFtools-Resources/serve/38/", output_dir: str = "data/serve/") -> None:
+    def __init__(
+        self,
+        url: str = "https://storage.googleapis.com/hmf-public/HMFtools-Resources/serve/38/",
+        output_dir: str = "data/serve/",
+    ) -> None:
         """
         Initialize this class.
 
