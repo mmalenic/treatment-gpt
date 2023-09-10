@@ -15,15 +15,15 @@ class PrepareServe:
 
     _data: dict[str, str] = {}
 
-    def __init__(self, url: str, output_dir: str = "data/serve/") -> None:
+    def __init__(self, url: str = "https://storage.googleapis.com/hmf-public/HMFtools-Resources/serve/38/", output_dir: str = "data/serve/") -> None:
         """
         Initialize this class.
 
         :param url: the url to download data from.
         :param output_dir: the directory to save downloaded files to.
         """
-        self.output_dir = output_dir
-        self.downloader = Downloader(url)
+        self._output_dir = output_dir
+        self._downloader = Downloader(url)
 
     @property
     def characteristics(self) -> str:
@@ -93,5 +93,5 @@ class PrepareServe:
         self._fetch_and_write("ranges", self._hotspots_name)
 
     def _fetch_and_write(self, write_to: str, name: str) -> None:
-        output = self.downloader.get_or_download(self.output_dir, name)
+        output = self._downloader.get_or_download(self._output_dir, name)
         self._data[write_to] = output

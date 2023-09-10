@@ -1,6 +1,6 @@
 import urllib.request
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional
 
 
 class Downloader:
@@ -20,34 +20,45 @@ class Downloader:
         self.prefix = prefix
         self.mode = mode
 
-    def download(self, name: str) -> str:
+    def download(self, name: str, save_to: Optional[str | Path] = None) -> str | None:
         """
         Download data from the url, prefix and data name.
 
-        :return: return the downloaded data.
+        :param name: the name of the file to download
+        :param save_to: save to the file instead of reading to a string.
+
+        :return: return the downloaded data or None if saving.
         """
 
         if self.mode == "url":
-            return urllib.request.urlopen(self.url + self.prefix + name).read()
+            if save_to is None:
+                with urllib.request.urlopen(self.url + self.prefix + name) as f:
+                    return f.read()
+            else:
+                urllib.request.urlretrieve(self.url + self.prefix + name, save_to)
         else:
             raise NotImplementedError
 
-    def get_or_download(self, output_dir: str, name: str) -> str:
+    def get_or_download(self, output_dir: str, name: str, read_data: bool = True) -> str | None:
         """
         Get the data from the output_dir or download and save it to the output directory.
 
         :param output_dir: the directory to save and get data from.
         :param name: the name of the data.
-        :return: the data
+        :param read_data: whether to read the data or just save it.
+
+        :return: the data or None if just saved.
         """
         output_file = Path(output_dir + name)
 
         if not output_file.exists():
             output_file.parent.mkdir(exist_ok=True, parents=True)
 
-            output = self.download(name)
-            output_file.write_text(output)
-
-            return output
-        else:
+            if read_data:
+                output = self.download(name)
+                output_file.write_text(output)
+                return output
+            else:
+                self.download(name, output_file)
+        elif read_data:
             return output_file.read_text()
