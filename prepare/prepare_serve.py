@@ -1,5 +1,4 @@
-import urllib.request
-from pathlib import Path
+from prepare.downloader import Downloader
 
 
 class PrepareServe:
@@ -23,8 +22,8 @@ class PrepareServe:
         :param url: the url to download data from.
         :param output_dir: the directory to save downloaded files to.
         """
-        self.url = url
         self.output_dir = output_dir
+        self.downloader = Downloader(url)
 
     @property
     def characteristics(self) -> str:
@@ -85,6 +84,7 @@ class PrepareServe:
         Prepares all SERVE data by downloading it from the hmftools google storage or reading it
         from a file if present. Writes downloaded data to a file.
         """
+
         self._fetch_and_write("characteristics", self._characteristics_name)
         self._fetch_and_write("fusions", self._fusions_name)
         self._fetch_and_write("genes", self._genes_name)
@@ -93,16 +93,5 @@ class PrepareServe:
         self._fetch_and_write("ranges", self._hotspots_name)
 
     def _fetch_and_write(self, write_to: str, name: str) -> None:
-        output_file = Path(self.output_dir + name)
-
-        if not output_file.exists():
-            output_file.parent.mkdir(exist_ok=True, parents=True)
-
-            output = urllib.request.urlopen(self.url + name).read()
-            output_file.write_text(output)
-
-            self._data[write_to] = output
-        else:
-            output = output_file.read_text()
-
-            self._data[write_to] = output
+        output = self.downloader.get_or_download(self.output_dir, name)
+        self._data[write_to] = output
