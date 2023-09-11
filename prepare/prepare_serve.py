@@ -89,13 +89,21 @@ class PrepareServe:
         from a file if present. Writes downloaded data to a file.
         """
 
-        self._fetch_and_write("characteristics", self._characteristics_name)
-        self._fetch_and_write("fusions", self._fusions_name)
-        self._fetch_and_write("genes", self._genes_name)
-        self._fetch_and_write("hla", self._hla_name)
-        self._fetch_and_write("hotspots", self._hotspots_name)
-        self._fetch_and_write("ranges", self._hotspots_name)
-
-    def _fetch_and_write(self, write_to: str, name: str) -> None:
-        output = self._downloader.get_or_download(self._output_dir, name)
-        self._data[write_to] = output
+        self._data["characteristics"] = self._downloader.get_or_download(
+            self._output_dir, self._characteristics_name
+        )
+        self._data["fusions"] = self._downloader.get_or_download(
+            self._output_dir, self._fusions_name
+        )
+        self._data["genes"] = self._downloader.get_or_download(
+            self._output_dir, self._genes_name
+        )
+        self._data["hla"] = self._downloader.get_or_download(
+            self._output_dir, self._hla_name
+        )
+        self._data["hotspots"] = self._downloader.get_or_download(
+            self._output_dir, self._hotspots_name
+        )
+        self._data["ranges"] = self._downloader.get_or_download(
+            self._output_dir, self._ranges_name
+        )
