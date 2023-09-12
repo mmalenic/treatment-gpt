@@ -16,13 +16,14 @@ class PrepareOther:
     def __init__(
         self,
         bucket: str = "umccr-refdata-dev",
-        prefix: str = "/workflow_data/hmf_reference_data/hmftools/5.33_38--0/",
+        prefix: str = "workflow_data/hmf_reference_data/hmftools/5.33_38--0/",
         output_dir: str = "data/other/",
     ) -> None:
         """
         Initialize this class.
 
-        :param url: the url to download data from.
+        :param bucket: the bucket to download from.
+        :param prefix: the bucket prefix.
         :param output_dir: the directory to save downloaded files to.
         """
         self._output_dir = output_dir
