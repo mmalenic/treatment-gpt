@@ -36,7 +36,7 @@ class Downloader:
         if self.mode == "url":
             if save_to is None:
                 with urllib.request.urlopen(self.url + self.prefix + name) as f:
-                    return f.read()
+                    return f.read().decode("utf-8")
             else:
                 urllib.request.urlretrieve(self.url + self.prefix + name, save_to)
         else:
@@ -44,20 +44,20 @@ class Downloader:
 
             if save_to is None:
                 obj = s3.Object(self.url, self.prefix + name)
-                return obj.get()["Body"].read()
+                return obj.get()["Body"].read().decode("utf-8")
             else:
                 bucket = s3.Bucket(self.url)
                 bucket.download_file(self.prefix + name, save_to)
 
     def sync_or_download(
-        self, output_dir: str, prefix: str, read_data: bool = True
+        self, output_dir: str, additional_prefix: str, read_data: bool = True
     ) -> dict[str, str] | None:
         """
         Sync the data from the prefix in S3 to the output_dir.
         This function returns None is the mode is not s3.
 
         :param output_dir: the directory to save and get data from.
-        :param prefix: the prefix for the s3 bucket.
+        :param additional_prefix: an additional prefix for filtering in the s3 bucket.
         :param read_data: whether to read the data or just save it.
 
         :return: the data or None if just saved.
@@ -65,23 +65,26 @@ class Downloader:
         if self.mode != "s3":
             return None
 
-        output_file = Path(output_dir)
-        output_file.mkdir(exist_ok=True, parents=True)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(exist_ok=True, parents=True)
 
-        files = os.listdir(output_file)
+        files = os.listdir(output_dir)
 
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(self.url)
 
         output = {}
-        for obj in bucket.objects.filter(Prefix=self.prefix + prefix):
-            file = obj.key
-            local_file = os.path.join(output_file, file)
+        for obj in bucket.objects.filter(Prefix=self.prefix + additional_prefix):
+            file = obj.key.removeprefix(self.prefix + additional_prefix)
+            local_file = os.path.join(output_dir, file)
+
+            Path(local_file).parent.mkdir(exist_ok=True, parents=True)
+
             if file not in files:
-                bucket.download_file(file, local_file)
+                bucket.download_file(obj.key, local_file)
 
             if read_data:
-                with open(local_file, "r") as f:
+                with open(local_file, "r", encoding="utf-8") as f:
                     output[file] = f.read()
 
         if read_data:
@@ -106,7 +109,7 @@ class Downloader:
 
             if read_data:
                 output = self.download(name)
-                output_file.write_text(output)
+                output_file.write_text(output, encoding="utf-8")
                 return output
             else:
                 self.download(name, output_file)

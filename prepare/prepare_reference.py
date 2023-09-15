@@ -1,9 +1,11 @@
+import os
+
 from prepare.downloader import Downloader
 
 
-class PrepareOther:
+class PrepareReference:
     """
-    Prepare other data such as disease ontology and ensembl data.
+    Prepare reference data such as disease ontology and ensembl data.
     """
 
     _doid_name = "disease_ontology/doid.json"
@@ -17,7 +19,8 @@ class PrepareOther:
         self,
         bucket: str = "umccr-refdata-dev",
         prefix: str = "workflow_data/hmf_reference_data/hmftools/5.33_38--0/",
-        output_dir: str = "data/other/",
+        output_dir: str = "data/reference/",
+        ensembl_data_directory: str = "ensembl",
     ) -> None:
         """
         Initialize this class.
@@ -28,6 +31,7 @@ class PrepareOther:
         """
         self._output_dir = output_dir
         self._downloader = Downloader(bucket, prefix, "s3")
+        self._ensembl_data_directory = ensembl_data_directory
 
     @property
     def doid(self) -> str:
@@ -81,5 +85,6 @@ class PrepareOther:
         )
 
         self._data["ensembl_data"] = self._downloader.sync_or_download(
-            self._output_dir, self._ensembl_directory_name
+            os.path.join(self._output_dir, self._ensembl_data_directory),
+            self._ensembl_directory_name,
         )
