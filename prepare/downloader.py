@@ -49,7 +49,7 @@ class Downloader:
                 bucket = s3.Bucket(self.url)
                 bucket.download_file(self.prefix + name, save_to)
 
-    def sync_or_download(
+    def sync(
         self, output_dir: str, additional_prefix: str, read_data: bool = True
     ) -> dict[str, str] | None:
         """
@@ -90,9 +90,7 @@ class Downloader:
         if read_data:
             return output
 
-    def get_or_download(
-        self, output_dir: str, name: str, read_data: bool = True
-    ) -> str | None:
+    def get(self, output_dir: str, name: str, read_data: bool = True) -> str | None:
         """
         Get the data from the output_dir or download and save it to the output directory.
 

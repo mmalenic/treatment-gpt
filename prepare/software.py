@@ -1,7 +1,7 @@
 from prepare.downloader import Downloader
 
 
-class PrepareSoftware:
+class Software:
     """
     Prepare all software
     """
@@ -28,5 +28,5 @@ class PrepareSoftware:
         Prepares all software data by downloading it from the hmftools GitHub or checking
         that it exists in the output_dir.
         """
-        self._downloader.get_or_download(self._output_dir, self._protect_jar, False)
-        self._downloader.get_or_download(self._output_dir, self._linx_jar, False)
+        self._downloader.get(self._output_dir, self._protect_jar, False)
+        self._downloader.get(self._output_dir, self._linx_jar, False)

@@ -3,7 +3,7 @@ import os
 from prepare.downloader import Downloader
 
 
-class PrepareReference:
+class Reference:
     """
     Prepare reference data such as disease ontology and ensembl data.
     """
@@ -74,17 +74,15 @@ class PrepareReference:
         Prepares all other data by downloading it from the s3 bucket.
         """
 
-        self._data["doid"] = self._downloader.get_or_download(
-            self._output_dir, self._doid_name
-        )
-        self._data["driver_gene_panel"] = self._downloader.get_or_download(
+        self._data["doid"] = self._downloader.get(self._output_dir, self._doid_name)
+        self._data["driver_gene_panel"] = self._downloader.get(
             self._output_dir, self._driver_gene_panel_name
         )
-        self._data["known_fusion_data"] = self._downloader.get_or_download(
+        self._data["known_fusion_data"] = self._downloader.get(
             self._output_dir, self._known_fusion_data_name
         )
 
-        self._data["ensembl_data"] = self._downloader.sync_or_download(
+        self._data["ensembl_data"] = self._downloader.sync(
             os.path.join(self._output_dir, self._ensembl_data_directory),
             self._ensembl_directory_name,
         )

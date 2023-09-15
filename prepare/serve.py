@@ -1,7 +1,7 @@
 from prepare.downloader import Downloader
 
 
-class PrepareServe:
+class Serve:
     """
     Prepare all data related to SERVE.
     """
@@ -89,21 +89,15 @@ class PrepareServe:
         from a file if present. Writes downloaded data to a file.
         """
 
-        self._data["characteristics"] = self._downloader.get_or_download(
+        self._data["characteristics"] = self._downloader.get(
             self._output_dir, self._characteristics_name
         )
-        self._data["fusions"] = self._downloader.get_or_download(
+        self._data["fusions"] = self._downloader.get(
             self._output_dir, self._fusions_name
         )
-        self._data["genes"] = self._downloader.get_or_download(
-            self._output_dir, self._genes_name
-        )
-        self._data["hla"] = self._downloader.get_or_download(
-            self._output_dir, self._hla_name
-        )
-        self._data["hotspots"] = self._downloader.get_or_download(
+        self._data["genes"] = self._downloader.get(self._output_dir, self._genes_name)
+        self._data["hla"] = self._downloader.get(self._output_dir, self._hla_name)
+        self._data["hotspots"] = self._downloader.get(
             self._output_dir, self._hotspots_name
         )
-        self._data["ranges"] = self._downloader.get_or_download(
-            self._output_dir, self._ranges_name
-        )
+        self._data["ranges"] = self._downloader.get(self._output_dir, self._ranges_name)
