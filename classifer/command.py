@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 
 
-class Run:
+class Command:
     """
     Run a command.
     """
@@ -21,7 +21,7 @@ class Run:
         """
         self._output_dir = output_dir
 
-    def add_command(self, command: str) -> None:
+    def add_arg(self, command: str) -> None:
         """
         Add a command to run.
         :param command: command
