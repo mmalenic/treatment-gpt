@@ -1,7 +1,7 @@
 from classifer.command import Command
 
 
-class RunLinx:
+class Linx:
     """
     Run linx on a sample.
     """
@@ -15,7 +15,7 @@ class RunLinx:
         jar_file: str = "data/software/linx-v1.21/linx_v1.21.jar",
         ensembl_data_directory: str = "data/reference/ensembl",
         known_fusion_file: str = "data/reference/known_fusion_data.38.csv",
-        driver_gene_panel: str = "data/other/DriverGenePanel.38.tsv",
+        driver_gene_panel: str = "data/reference/DriverGenePanel.38.tsv",
     ) -> None:
         """
         Initialize this class.

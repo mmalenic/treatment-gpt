@@ -6,10 +6,10 @@ class Sample:
     Prepare subject data for running PROTECT
     """
 
-    _chord_directory = "chord/"
-    _lilac_directory = "lilac/"
-    _purple_directory = "purple/"
-    _virus_interpreter_directory = "virusinterpreter/"
+    chord_directory = "chord/"
+    lilac_directory = "lilac/"
+    purple_directory = "purple/"
+    virus_interpreter_directory = "virusinterpreter/"
 
     _data: dict[str, dict[str, str]] = {}
 
@@ -18,6 +18,7 @@ class Sample:
         prefix: str,
         output_dir: str,
         bucket: str = "org.umccr.data.oncoanalyser",
+        **kwargs,
     ) -> None:
         """
         Initialize this class.
@@ -26,6 +27,8 @@ class Sample:
         :param bucket: the bucket to download from.
         :param output_dir: the directory to save downloaded files to.
         """
+        self.__dict__.update(kwargs)
+
         self._output_dir = output_dir
         self._downloader = Downloader(bucket, prefix, "s3")
 
@@ -34,15 +37,15 @@ class Sample:
         Prepares all sample data by downloading it from the s3 bucket.
         """
         self._data["chord"] = self._downloader.sync(
-            self._output_dir + self._chord_directory, self._chord_directory
+            self._output_dir + self.chord_directory, self.chord_directory
         )
         self._data["lilac"] = self._downloader.sync(
-            self._output_dir + self._lilac_directory, self._lilac_directory
+            self._output_dir + self.lilac_directory, self.lilac_directory
         )
         self._data["purple"] = self._downloader.sync(
-            self._output_dir + self._purple_directory, self._purple_directory
+            self._output_dir + self.purple_directory, self.purple_directory
         )
         self._data["virusinterpreter"] = self._downloader.sync(
-            self._output_dir + self._virus_interpreter_directory,
-            self._virus_interpreter_directory,
+            self._output_dir + self.virus_interpreter_directory,
+            self.virus_interpreter_directory,
         )

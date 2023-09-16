@@ -6,12 +6,12 @@ class Serve:
     Prepare all data related to SERVE.
     """
 
-    _characteristics_name = "ActionableCharacteristics.38.tsv"
-    _fusions_name = "ActionableFusions.38.tsv"
-    _genes_name = "ActionableGenes.38.tsv"
-    _hla_name = "ActionableHLA.38.tsv"
-    _hotspots_name = "ActionableHotspots.38.tsv"
-    _ranges_name = "ActionableRanges.38.tsv"
+    characteristics_name = "ActionableCharacteristics.38.tsv"
+    fusions_name = "ActionableFusions.38.tsv"
+    genes_name = "ActionableGenes.38.tsv"
+    hla_name = "ActionableHLA.38.tsv"
+    hotspots_name = "ActionableHotspots.38.tsv"
+    ranges_name = "ActionableRanges.38.tsv"
 
     _data: dict[str, str] = {}
 
@@ -19,6 +19,7 @@ class Serve:
         self,
         url: str = "https://storage.googleapis.com/hmf-public/HMFtools-Resources/serve/38/",
         output_dir: str = "data/serve/",
+        **kwargs,
     ) -> None:
         """
         Initialize this class.
@@ -26,6 +27,8 @@ class Serve:
         :param url: the url to download data from.
         :param output_dir: the directory to save downloaded files to.
         """
+        self.__dict__.update(kwargs)
+
         self._output_dir = output_dir
         self._downloader = Downloader(url)
 
@@ -90,14 +93,14 @@ class Serve:
         """
 
         self._data["characteristics"] = self._downloader.get(
-            self._output_dir, self._characteristics_name
+            self._output_dir, self.characteristics_name
         )
         self._data["fusions"] = self._downloader.get(
-            self._output_dir, self._fusions_name
+            self._output_dir, self.fusions_name
         )
-        self._data["genes"] = self._downloader.get(self._output_dir, self._genes_name)
-        self._data["hla"] = self._downloader.get(self._output_dir, self._hla_name)
+        self._data["genes"] = self._downloader.get(self._output_dir, self.genes_name)
+        self._data["hla"] = self._downloader.get(self._output_dir, self.hla_name)
         self._data["hotspots"] = self._downloader.get(
-            self._output_dir, self._hotspots_name
+            self._output_dir, self.hotspots_name
         )
-        self._data["ranges"] = self._downloader.get(self._output_dir, self._ranges_name)
+        self._data["ranges"] = self._downloader.get(self._output_dir, self.ranges_name)
