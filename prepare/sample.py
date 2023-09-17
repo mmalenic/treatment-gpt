@@ -3,7 +3,7 @@ from prepare.downloader import Downloader
 
 class Sample:
     """
-    Prepare subject data for running PROTECT
+    Prepare sample data for running PROTECT
     """
 
     chord_directory = "chord/"
@@ -37,15 +37,22 @@ class Sample:
         Prepares all sample data by downloading it from the s3 bucket.
         """
         self._data["chord"] = self._downloader.sync(
-            self._output_dir + self.chord_directory, self.chord_directory
+            self._output_dir + self.chord_directory,
+            self.chord_directory,
+            False,
         )
         self._data["lilac"] = self._downloader.sync(
-            self._output_dir + self.lilac_directory, self.lilac_directory
+            self._output_dir + self.lilac_directory,
+            self.lilac_directory,
+            False,
         )
         self._data["purple"] = self._downloader.sync(
-            self._output_dir + self.purple_directory, self.purple_directory
+            self._output_dir + self.purple_directory,
+            self.purple_directory,
+            False,
         )
         self._data["virusinterpreter"] = self._downloader.sync(
             self._output_dir + self.virus_interpreter_directory,
             self.virus_interpreter_directory,
+            False,
         )

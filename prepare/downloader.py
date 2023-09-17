@@ -73,9 +73,12 @@ class Downloader:
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(self.url)
 
+        objects = bucket.objects.filter(Prefix=self.prefix)
+        objects = [obj for obj in objects if additional_prefix in obj.key]
+
         output = {}
-        for obj in bucket.objects.filter(Prefix=self.prefix + additional_prefix):
-            file = obj.key.removeprefix(self.prefix + additional_prefix)
+        for obj in objects:
+            file = obj.key[obj.key.find(additional_prefix) :]
             local_file = os.path.join(output_dir, file)
 
             Path(local_file).parent.mkdir(exist_ok=True, parents=True)
