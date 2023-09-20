@@ -44,6 +44,8 @@ class Downloader:
 
             if save_to is None:
                 obj = s3.Object(self.url, self.prefix + name)
+                print(obj)
+
                 return obj.get()["Body"].read().decode("utf-8")
             else:
                 bucket = s3.Bucket(self.url)
@@ -74,15 +76,25 @@ class Downloader:
         bucket = s3.Bucket(self.url)
 
         objects = bucket.objects.filter(Prefix=self.prefix)
-        objects = [obj for obj in objects if additional_prefix in obj.key]
+        objects = [
+            obj
+            for obj in objects
+            if additional_prefix in obj.key and not obj.key.endswith("/")
+        ]
+        print("objects:", objects)
 
         output = {}
         for obj in objects:
-            file = obj.key[obj.key.find(additional_prefix) :]
+            file = obj.key[obj.key.find(additional_prefix) + len(additional_prefix) :]
+
+            if file is None or file == "":
+                continue
+
+            print("object file:", file)
+
             local_file = os.path.join(output_dir, file)
 
             Path(local_file).parent.mkdir(exist_ok=True, parents=True)
-
             if file not in files:
                 bucket.download_file(obj.key, local_file)
 
@@ -103,7 +115,7 @@ class Downloader:
 
         :return: the data or None if just saved.
         """
-        output_file = Path(output_dir + name)
+        output_file = Path(os.path.join(output_dir, name))
 
         if not output_file.exists():
             output_file.parent.mkdir(exist_ok=True, parents=True)

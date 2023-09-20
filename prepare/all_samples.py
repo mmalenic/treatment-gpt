@@ -12,9 +12,11 @@ class AllSamples:
 
     def __init__(
         self,
+        prefix: str,
         output_dir: str,
         bucket: str = "org.umccr.data.oncoanalyser",
     ) -> None:
+        self._prefix = prefix
         self._output_dir = output_dir
         self._bucket = bucket
 
@@ -23,11 +25,15 @@ class AllSamples:
         Prepare all samples from the bucket.
         """
         client = boto3.client("s3")
-        result = client.list_objects(Bucket=self._bucket, Delimiter="/")
+        result = client.list_objects_v2(
+            Bucket=self._bucket, Prefix=self._prefix, Delimiter="/"
+        )
 
         for obj in result.get("CommonPrefixes"):
             prefix = obj.get("Prefix")
-            output_dir = os.path.join(self._output_dir, prefix)
+            output_dir = os.path.join(
+                self._output_dir, os.path.basename(os.path.normpath(prefix))
+            )
 
             sample = Sample(prefix, output_dir, self._bucket)
             sample.prepare()
