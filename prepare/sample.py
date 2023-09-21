@@ -42,19 +42,23 @@ class Sample:
             os.path.join(self._output_dir, self.chord_directory),
             self.chord_directory,
             False,
+            True,
         )
         self._data["lilac"] = self._downloader.sync(
             os.path.join(self._output_dir, self.lilac_directory),
             self.lilac_directory,
             False,
+            True,
         )
         self._data["purple"] = self._downloader.sync(
             os.path.join(self._output_dir, self.purple_directory),
             self.purple_directory,
             False,
+            True,
         )
         self._data["virusinterpreter"] = self._downloader.sync(
             os.path.join(self._output_dir, self.virus_interpreter_directory),
             self.virus_interpreter_directory,
             False,
+            True,
         )

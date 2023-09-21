@@ -35,24 +35,34 @@ class Downloader:
         """
         if self.mode == "url":
             if save_to is None:
-                with urllib.request.urlopen(self.url + self.prefix + name) as f:
+                url = self.url + self.prefix + name
+                print("downloading url file:", url)
+
+                with urllib.request.urlopen(url) as f:
                     return f.read().decode("utf-8")
             else:
+                print("downloading url file:", save_to)
                 urllib.request.urlretrieve(self.url + self.prefix + name, save_to)
         else:
             s3 = boto3.resource("s3")
 
             if save_to is None:
                 obj = s3.Object(self.url, self.prefix + name)
-                print(obj)
 
+                print("downloading object file:", obj)
                 return obj.get()["Body"].read().decode("utf-8")
             else:
                 bucket = s3.Bucket(self.url)
+
+                print("downloading object file:", save_to)
                 bucket.download_file(self.prefix + name, save_to)
 
     def sync(
-        self, output_dir: str, additional_prefix: str, read_data: bool = True
+        self,
+        output_dir: str,
+        additional_prefix: str,
+        read_data: bool = True,
+        lazy_check: bool = False,
     ) -> dict[str, str] | None:
         """
         Sync the data from the prefix in S3 to the output_dir.
@@ -61,6 +71,7 @@ class Downloader:
         :param output_dir: the directory to save and get data from.
         :param additional_prefix: an additional prefix for filtering in the s3 bucket.
         :param read_data: whether to read the data or just save it.
+        :param lazy_check: check to see if the folder exists rather than listing all objects in s3.
 
         :return: the data or None if just saved.
         """
@@ -68,9 +79,11 @@ class Downloader:
             return None
 
         output_dir = Path(output_dir)
-        output_dir.mkdir(exist_ok=True, parents=True)
 
-        files = os.listdir(output_dir)
+        if lazy_check and output_dir.exists():
+            return None
+
+        output_dir.mkdir(exist_ok=True, parents=True)
 
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(self.url)
@@ -90,12 +103,11 @@ class Downloader:
             if file is None or file == "":
                 continue
 
-            print("object file:", file)
+            local_file = Path(os.path.join(output_dir, file))
+            local_file.parent.mkdir(exist_ok=True, parents=True)
 
-            local_file = os.path.join(output_dir, file)
-
-            Path(local_file).parent.mkdir(exist_ok=True, parents=True)
-            if file not in files:
+            if not local_file.exists():
+                print("downloading object file:", local_file)
                 bucket.download_file(obj.key, local_file)
 
             if read_data:

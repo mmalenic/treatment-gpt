@@ -12,10 +12,17 @@ class AllSamples:
 
     def __init__(
         self,
-        prefix: str,
-        output_dir: str,
+        prefix: str = "analysis_data/",
+        output_dir: str = "data/samples/",
         bucket: str = "org.umccr.data.oncoanalyser",
     ) -> None:
+        """
+        Initialize this class.
+
+        :param prefix: common prefix for samples.
+        :param output_dir: output directory.
+        :param bucket: bucket to use.
+        """
         self._prefix = prefix
         self._output_dir = output_dir
         self._bucket = bucket
