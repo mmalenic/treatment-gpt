@@ -3,6 +3,8 @@ import os
 from classifer.command import Command
 from pathlib import Path
 
+from classifer.util import find_file
+
 
 class Protect:
     """
@@ -13,6 +15,8 @@ class Protect:
     lilac_directory = "lilac/"
     purple_directory = "purple/"
     virus_interpreter_directory = "virusinterpreter/"
+    linx_directory = "linx/"
+    protect_directory = "protect/"
 
     annotated_virus_tsv_ending = ".virus.annotated.tsv"
     chord_prediction_txt_ending = "_chord_prediction.txt"
@@ -34,27 +38,17 @@ class Protect:
 
     def __init__(
         self,
-        tumor_sample_id: str,
-        reference_sample_id: str,
         sample_dir: str,
-        linx_dir: str,
-        purple_dir: str,
-        output_dir: str,
         jar_file: str = "data/software/linx-v1.21/linx_v1.21.jar",
         doid_json: str = "data/reference/disease_ontology/doid.json",
         serve_dir: str = "data/serve/",
-        driver_gene_panel: str = "data/reference/DriverGenePanel.38.tsv",
+        driver_gene_panel: str = "data/reference/dna_pipeline/common/DriverGenePanel.38.tsv",
         **kwargs
     ) -> None:
         """
         Initialize this class.
 
-        :param tumor_sample_id: tumor sample id
-        :param reference_sample_id: reference sample id
         :param sample_dir: sample directory
-        :param linx_dir: linx directory
-        :param purple_dir: purple directory
-        :param output_dir: output directory
         :param jar_file: linx jar file
         :param doid_json: doid json
         :param serve_dir: serve directory
@@ -62,93 +56,84 @@ class Protect:
         """
         self.__dict__.update(kwargs)
 
-        self._tumor_sample_id = tumor_sample_id
-        self._reference_sample_id = reference_sample_id
         self._sample_dir = sample_dir
-        self._linx_dir = linx_dir
-        self._purple_dir = purple_dir
 
-        self._output_dir = output_dir
+        self._tumor_sample_id = os.path.basename(os.path.normpath(self._sample_dir))
+        self._reference_sample_id = os.path.basename(os.path.normpath(self._sample_dir))
+
+        self._output_dir = os.path.join(self._sample_dir, self.protect_directory)
+        Path(self._output_dir).mkdir(parents=True, exist_ok=True)
+
         self._jar_file = jar_file
         self._doid_json = doid_json
         self._serve_dir = serve_dir
         self._driver_gene_panel = driver_gene_panel
 
-        self._annotated_virus_tsv = self.find_file(
-            self.virus_interpreter_directory,
+        self._annotated_virus_tsv = find_file(
+            os.path.join(self._sample_dir, self.virus_interpreter_directory),
             "*" + self.annotated_virus_tsv_ending,
         )
-        self._chord_prediction_txt = self.find_file(
-            self.chord_directory,
+        self._chord_prediction_txt = find_file(
+            os.path.join(self._sample_dir, self.chord_directory),
             "*" + self.chord_prediction_txt_ending,
         )
 
-        self._lilac_qc_csv = self.find_file(
-            self.lilac_directory,
+        self._lilac_qc_csv = find_file(
+            os.path.join(self._sample_dir, self.lilac_directory),
             "*" + self.lilac_qc_csv_ending,
         )
-        self._lilac_result_csv = self.find_file(
-            self.lilac_directory,
+        self._lilac_result_csv = find_file(
+            os.path.join(self._sample_dir, self.lilac_directory),
             "*" + self.lilac_result_csv_ending,
         )
 
-        self._linx_breakend_tsv = self.find_file(
-            self._linx_dir,
+        self._linx_breakend_tsv = find_file(
+            os.path.join(self._sample_dir, self.linx_directory),
             "*" + self.linx_breakend_tsv_ending,
         )
-        self.linx_driver_catalog_tsv = self.find_file(
-            self._linx_dir,
+        self._linx_driver_catalog_tsv = find_file(
+            os.path.join(self._sample_dir, self.linx_directory),
             "*" + self.linx_driver_catalog_tsv_ending,
         )
-        self._linx_fusion_tsv = self.find_file(
-            self._linx_dir,
+        self._linx_fusion_tsv = find_file(
+            os.path.join(self._sample_dir, self.linx_directory),
             "*" + self.linx_fusion_tsv_ending,
         )
 
-        self._purple_gene_copy_number_tsv = self.find_file(
-            self._purple_dir,
+        self._purple_gene_copy_number_tsv = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_gene_copy_number_tsv_ending,
         )
-        self._purple_germline_driver_catalog_tsv = self.find_file(
-            self._purple_dir,
+        self._purple_germline_driver_catalog_tsv = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_germline_driver_catalog_tsv_ending,
         )
-        self._purple_germline_variant_vcf = self.find_file(
-            self._purple_dir,
+        self._purple_germline_variant_vcf = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_germline_variant_vcf_ending,
         )
-        self._purple_purity_tsv = self.find_file(
-            self._purple_dir,
+        self._purple_purity_tsv = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_purity_tsv_ending,
         )
-        self._purple_qc_file = self.find_file(
-            self._purple_dir,
+        self._purple_qc_file = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_qc_file_ending,
         )
-        self._purple_somatic_driver_catalog_tsv = self.find_file(
-            self._purple_dir,
+        self._purple_somatic_driver_catalog_tsv = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_somatic_driver_catalog_tsv_ending,
         )
-        self._purple_somatic_variant_vcf = self.find_file(
-            self._purple_dir,
+        self._purple_somatic_variant_vcf = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_somatic_variant_vcf_ending,
         )
-
-    def find_file(self, in_dir: str, file: str) -> str:
-        """
-        Find a file in a directory.
-
-        :param in_dir: directory to search
-        :param file: file to search for
-        :return: path to file
-        """
-        for path in Path(os.path.join(self._sample_dir, in_dir)).rglob(file):
-            return str(path)
 
     def run(self) -> None:
         """
         Run linx
         """
+        print("running protect for:", self._tumor_sample_id)
 
         command = Command(self._output_dir)
 
@@ -178,7 +163,7 @@ class Protect:
         command.add_arg("-linx_breakend_tsv")
         command.add_arg(self._linx_breakend_tsv)
         command.add_arg("-linx_driver_catalog_tsv")
-        command.add_arg(self.linx_driver_catalog_tsv)
+        command.add_arg(self._linx_driver_catalog_tsv)
         command.add_arg("-linx_fusion_tsv")
         command.add_arg(self._linx_fusion_tsv)
 

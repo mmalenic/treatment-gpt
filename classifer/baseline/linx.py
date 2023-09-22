@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from classifer.command import Command
+from classifer.util import find_file
+import os
 
 
 class Linx:
@@ -6,33 +10,40 @@ class Linx:
     Run linx on a sample.
     """
 
+    purple_sv_file_ending = ".purple.sv.vcf.gz"
+    purple_directory = "purple/"
+    linx_directory = "linx/"
+
     def __init__(
         self,
-        sample_id: str,
-        purple_directory: str,
-        purple_sv_vcf_file: str,
-        output_dir: str,
+        sample_dir: str,
         jar_file: str = "data/software/linx-v1.21/linx_v1.21.jar",
         ensembl_data_directory: str = "data/reference/ensembl",
-        known_fusion_file: str = "data/reference/known_fusion_data.38.csv",
-        driver_gene_panel: str = "data/reference/DriverGenePanel.38.tsv",
+        known_fusion_file: str = "data/reference/dna_pipeline/sv/known_fusion_data.38.csv",
+        driver_gene_panel: str = "data/reference/dna_pipeline/common/DriverGenePanel.38.tsv",
+        **kwargs
     ) -> None:
         """
         Initialize this class.
 
-        :param sample_id: sample id
-        :param purple_directory: purple directory
-        :param purple_sv_vcf_file: purple sv vcf file
-        :param output_dir: output directory
+        :param sample_dir: sample directory
         :param jar_file: linx jar file
         :param ensembl_data_directory: ensembl data
         :param known_fusion_file: fusion file
         :param driver_gene_panel: driver gene panel
         """
-        self._sample_id = sample_id
-        self._purple_directory = purple_directory
-        self._purple_sv_vcf_file = purple_sv_vcf_file
-        self._output_dir = output_dir
+        self.__dict__.update(kwargs)
+
+        self._sample_dir = sample_dir
+        self._sample_id = os.path.basename(os.path.normpath(self._sample_dir))
+        self._sample_dir = sample_dir
+        self._purple_sv_vcf_file = find_file(
+            os.path.join(self._sample_dir, self.purple_directory),
+            "*" + self.purple_sv_file_ending,
+        )
+        self._output_dir = os.path.join(sample_dir, self.linx_directory)
+        Path(self._output_dir).mkdir(parents=True, exist_ok=True)
+
         self._jar_file = jar_file
         self._ensembl_data_directory = ensembl_data_directory
         self._known_fusion_file = known_fusion_file
@@ -42,6 +53,7 @@ class Linx:
         """
         Run linx
         """
+        print("running linx for:", self._sample_id)
 
         command = Command(self._output_dir)
 
@@ -53,7 +65,7 @@ class Linx:
         command.add_arg("-sv_vcf")
         command.add_arg(self._purple_sv_vcf_file)
         command.add_arg("-purple_dir")
-        command.add_arg(self._purple_directory)
+        command.add_arg(os.path.join(self._sample_dir, self.purple_directory))
         command.add_arg("-ref_genome_version")
         command.add_arg("38")
         command.add_arg("-ensembl_data_dir")
