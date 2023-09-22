@@ -87,5 +87,6 @@ class Reference:
 
         self._data["ensembl_data"] = self._downloader.sync(
             os.path.join(self._output_dir, self._ensembl_data_directory),
+            [self.ensembl_directory_name],
             self.ensembl_directory_name,
         )

@@ -12,6 +12,7 @@ class Sample:
     lilac_directory = "lilac/"
     purple_directory = "purple/"
     virus_interpreter_directory = "virusinterpreter/"
+    samplesheet_csv = "samplesheet.csv"
 
     _data: dict[str, dict[str, str]] = {}
 
@@ -40,25 +41,37 @@ class Sample:
         """
         self._data["chord"] = self._downloader.sync(
             os.path.join(self._output_dir, self.chord_directory),
+            [self.chord_directory],
             self.chord_directory,
             False,
             True,
         )
         self._data["lilac"] = self._downloader.sync(
             os.path.join(self._output_dir, self.lilac_directory),
+            [self.lilac_directory],
             self.lilac_directory,
             False,
             True,
         )
         self._data["purple"] = self._downloader.sync(
             os.path.join(self._output_dir, self.purple_directory),
+            [self.purple_directory],
             self.purple_directory,
             False,
             True,
         )
         self._data["virusinterpreter"] = self._downloader.sync(
             os.path.join(self._output_dir, self.virus_interpreter_directory),
+            [self.virus_interpreter_directory],
             self.virus_interpreter_directory,
+            False,
+            True,
+        )
+
+        self._data["samplesheet"] = self._downloader.sync(
+            self._output_dir,
+            [self.samplesheet_csv, "oncoanalyser"],
+            None,
             False,
             True,
         )

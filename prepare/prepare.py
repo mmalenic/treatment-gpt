@@ -51,5 +51,5 @@ class Prepare:
         print("running reference prepare")
         self._reference.prepare()
 
-        print("running all samles prepare")
+        print("running all samples prepare")
         self._all_samples.prepare()

@@ -1,6 +1,7 @@
 import os
 import boto3
 from prepare.sample import Sample
+import shutil
 
 
 class AllSamples:
@@ -44,5 +45,14 @@ class AllSamples:
 
             sample = Sample(prefix, output_dir, self._bucket)
             sample.prepare()
+
+            if all(
+                [
+                    len(os.listdir(x[0])) == 0
+                    for x in os.walk(output_dir)
+                    if x[0] != output_dir
+                ]
+            ):
+                shutil.rmtree(output_dir)
 
             self._samples[prefix] = sample

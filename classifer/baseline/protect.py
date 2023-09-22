@@ -39,7 +39,7 @@ class Protect:
     def __init__(
         self,
         sample_dir: str,
-        jar_file: str = "data/software/linx-v1.21/linx_v1.21.jar",
+        jar_file: str = "data/software/protect-v2.3/protect.jar",
         doid_json: str = "data/reference/disease_ontology/doid.json",
         serve_dir: str = "data/serve/",
         driver_gene_panel: str = "data/reference/dna_pipeline/common/DriverGenePanel.38.tsv",
@@ -112,6 +112,14 @@ class Protect:
             os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_germline_variant_vcf_ending,
         )
+
+        self._tumor_sample_id = (
+            Path(self._purple_germline_variant_vcf)
+            .resolve()
+            .stem.split(".", maxsplit=1)[0]
+        )
+        self._reference_sample_id = "PRJ230736"
+
         self._purple_purity_tsv = find_file(
             os.path.join(self._sample_dir, self.purple_directory),
             "*" + self.purple_purity_tsv_ending,

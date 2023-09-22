@@ -1,7 +1,7 @@
 import os
 import urllib.request
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 import boto3
 
 
@@ -60,7 +60,8 @@ class Downloader:
     def sync(
         self,
         output_dir: str,
-        additional_prefix: str,
+        additional_prefixes: List[str],
+        find_on_prefix: Optional[str],
         read_data: bool = True,
         lazy_check: bool = False,
     ) -> dict[str, str] | None:
@@ -68,8 +69,9 @@ class Downloader:
         Sync the data from the prefix in S3 to the output_dir.
         This function returns None is the mode is not s3.
 
+        :param find_on_prefix: find the file for this prefix.
         :param output_dir: the directory to save and get data from.
-        :param additional_prefix: an additional prefix for filtering in the s3 bucket.
+        :param additional_prefixes: an additional prefixes for filtering in the s3 bucket.
         :param read_data: whether to read the data or just save it.
         :param lazy_check: check to see if the folder exists rather than listing all objects in s3.
 
@@ -92,13 +94,17 @@ class Downloader:
         objects = [
             obj
             for obj in objects
-            if additional_prefix in obj.key and not obj.key.endswith("/")
+            if all([(prefix in obj.key) for prefix in additional_prefixes])
+            and not obj.key.endswith("/")
         ]
         print("objects:", objects)
 
         output = {}
         for obj in objects:
-            file = obj.key[obj.key.find(additional_prefix) + len(additional_prefix) :]
+            if find_on_prefix is not None:
+                file = obj.key[obj.key.find(find_on_prefix) + len(find_on_prefix) :]
+            else:
+                file = obj.key[obj.key.rfind("/") + 1 :]
 
             if file is None or file == "":
                 continue
