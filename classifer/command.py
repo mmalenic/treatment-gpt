@@ -8,8 +8,6 @@ class Command:
     Run a command.
     """
 
-    _commands: list[str] = []
-
     def __init__(
         self,
         output_dir: str,
@@ -20,6 +18,7 @@ class Command:
         :param output_dir: output directory
         """
         self._output_dir = output_dir
+        self._commands = []
 
     def add_arg(self, command: str) -> None:
         """

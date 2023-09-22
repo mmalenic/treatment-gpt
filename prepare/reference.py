@@ -13,8 +13,6 @@ class Reference:
     known_fusion_data_name = "dna_pipeline/sv/known_fusion_data.38.csv"
     ensembl_directory_name = "dna_pipeline/common/ensembl_data/"
 
-    _data: dict[str, str | dict[str, str]] = {}
-
     def __init__(
         self,
         bucket: str = "umccr-refdata-dev",
@@ -35,6 +33,8 @@ class Reference:
         self._output_dir = output_dir
         self._downloader = Downloader(bucket, prefix, "s3")
         self._ensembl_data_directory = ensembl_data_directory
+
+        self._data = {}
 
     @property
     def doid(self) -> str:

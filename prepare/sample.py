@@ -14,8 +14,6 @@ class Sample:
     virus_interpreter_directory = "virusinterpreter/"
     samplesheet_csv = "samplesheet.csv"
 
-    _data: dict[str, dict[str, str]] = {}
-
     def __init__(
         self,
         prefix: str,
@@ -34,6 +32,8 @@ class Sample:
 
         self._output_dir = output_dir
         self._downloader = Downloader(bucket, prefix, "s3")
+
+        self._data = {}
 
     def prepare(self) -> None:
         """

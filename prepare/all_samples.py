@@ -9,8 +9,6 @@ class AllSamples:
     Prepare all samples from the s3 bucket.
     """
 
-    _samples: dict[str, Sample] = {}
-
     def __init__(
         self,
         prefix: str = "analysis_data/",
@@ -27,6 +25,7 @@ class AllSamples:
         self._prefix = prefix
         self._output_dir = output_dir
         self._bucket = bucket
+        self._samples = {}
 
     def prepare(self) -> None:
         """

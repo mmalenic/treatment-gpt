@@ -13,8 +13,6 @@ class Serve:
     hotspots_name = "ActionableHotspots.38.tsv"
     ranges_name = "ActionableRanges.38.tsv"
 
-    _data: dict[str, str] = {}
-
     def __init__(
         self,
         url: str = "https://storage.googleapis.com/hmf-public/HMFtools-Resources/serve/38/",
@@ -31,6 +29,8 @@ class Serve:
 
         self._output_dir = output_dir
         self._downloader = Downloader(url)
+
+        self._data = {}
 
     @property
     def characteristics(self) -> str:
