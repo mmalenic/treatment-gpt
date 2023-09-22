@@ -276,7 +276,6 @@ class Protect:
         command.add_arg("-output_dir")
         command.add_arg(self._output_dir)
 
-        print(command._commands)
         command.run()
 
     @staticmethod
