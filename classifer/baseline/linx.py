@@ -1,8 +1,9 @@
 from pathlib import Path
 
 from classifer.command import Command
-from classifer.util import find_file
+from classifer.util import find_file, check_prerequisite
 import os
+import pandas as pd
 
 
 class Linx:
@@ -35,6 +36,13 @@ class Linx:
         self.__dict__.update(kwargs)
 
         self._sample_dir = sample_dir
+
+        sample_sheet = pd.read_csv(os.path.join(sample_dir, "samplesheet.csv"))
+        self._sample_id = sample_sheet[
+            (sample_sheet["sample_type"] == "tumor")
+            & (sample_sheet["sequence_type"] == "wgs")
+        ]["sample_name"].item()
+
         self._sample_id = os.path.basename(os.path.normpath(self._sample_dir))
         self._sample_dir = sample_dir
         self._purple_sv_vcf_file = find_file(
@@ -62,6 +70,7 @@ class Linx:
         command.add_arg(self._jar_file)
         command.add_arg("-sample")
         command.add_arg(self._sample_id)
+        check_prerequisite(self._purple_sv_vcf_file, "sv_vcf")
         command.add_arg("-sv_vcf")
         command.add_arg(self._purple_sv_vcf_file)
         command.add_arg("-purple_dir")
