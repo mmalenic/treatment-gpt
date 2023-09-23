@@ -1,3 +1,4 @@
+import json
 import os
 
 from classifer.baseline.linx import Linx
@@ -42,7 +43,7 @@ class AllProtect:
                 print(
                     "failed to run linx for: {0}, with error: {1}".format(sample_dir, e)
                 )
-                self._runs[sample_dir] = {"status": "failed", "errors": [e]}
+                self._runs[sample_dir] = {"status": "failed", "errors": [str(e)]}
 
             try:
                 protect = Protect(sample_dir)
@@ -54,9 +55,31 @@ class AllProtect:
                     )
                 )
                 if sample_dir in self._runs:
-                    self._runs[sample_dir]["errors"].append(e)
+                    self._runs[sample_dir]["errors"].append(str(e))
                 else:
-                    self._runs[sample_dir] = {"status": "failed", "errors": [e]}
+                    self._runs[sample_dir] = {"status": "failed", "errors": [str(e)]}
 
             if sample_dir not in self._runs:
                 self._runs[sample_dir] = {"status": "success", "errors": []}
+
+        def check_status(x, status: str) -> bool:
+            return isinstance(x, dict) and "status" in x and x["status"] == status
+
+        self._runs["total_success"] = len(
+            [x for x in self._runs.values() if check_status(x, "success")]
+        )
+        self._runs["total_failed"] = len(
+            [x for x in self._runs.values() if check_status(x, "failed")]
+        )
+        self._runs["total_skipped"] = len(
+            [x for x in self._runs.values() if check_status(x, "skipped")]
+        )
+
+        print(self._runs)
+
+        with open(
+            os.path.join(self._sample_dir, "protect_results.json"),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(self._runs, f)
