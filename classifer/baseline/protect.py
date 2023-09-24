@@ -43,6 +43,7 @@ class Protect:
     def __init__(
         self,
         sample_dir: str,
+        primary_tumor_doids: str = "",
         jar_file: str = "data/software/protect-v2.3/protect.jar",
         doid_json: str = "data/reference/disease_ontology/doid.json",
         serve_dir: str = "data/serve/",
@@ -53,6 +54,7 @@ class Protect:
         Initialize this class.
 
         :param sample_dir: sample directory
+        :param primary_tumor_doids: tumor doid
         :param jar_file: linx jar file
         :param doid_json: doid json
         :param serve_dir: serve directory
@@ -61,6 +63,7 @@ class Protect:
         self.__dict__.update(kwargs)
 
         self._sample_dir = sample_dir
+        self._primary_tumor_doid = primary_tumor_doids
 
         self._tumor_sample_id = os.path.basename(os.path.normpath(self._sample_dir))
         self._reference_sample_id = os.path.basename(os.path.normpath(self._sample_dir))
@@ -203,7 +206,7 @@ class Protect:
             command.add_arg(self._reference_sample_id)
 
         command.add_arg("-primary_tumor_doids")
-        command.add_arg("''")
+        command.add_arg(self._primary_tumor_doid)
         command.add_arg("-ref_genome_version")
         command.add_arg("38")
 
