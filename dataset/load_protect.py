@@ -23,7 +23,7 @@ class LoadProtect:
 
         self._sample_dir = sample_dir
 
-    def load(self) -> xr.Dataset:
+    def load(self) -> pd.DataFrame:
         """
         load the data.
         """
@@ -47,4 +47,4 @@ class LoadProtect:
 
             dfs[sample_id] = pd.read_table(protect_file, sep="\t")
 
-        return xr.Dataset(dfs)
+        return pd.concat(dfs, ignore_index=True)

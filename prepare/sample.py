@@ -73,5 +73,5 @@ class Sample:
             [self.samplesheet_csv, "oncoanalyser"],
             None,
             False,
-            True,
+            False,
         )
