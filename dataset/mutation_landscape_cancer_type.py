@@ -1,3 +1,5 @@
+from typing import Optional, List
+
 import pandas as pd
 import numpy as np
 
@@ -19,9 +21,21 @@ class MutationLandscapeCancerType:
 
         :param mutations_across_cancer_file: supplementary data file.
         """
+        self._df: pd.DataFrame = pd.DataFrame()
         self.__dict__.update(kwargs)
 
         self._mutations_across_cancer_file = mutations_across_cancer_file
+
+    def doids(self) -> List[str]:
+        """
+        Get the doids for the data
+        """
+        if self._df is None:
+            self.load()
+
+        doids = self._df["doids"]
+
+        return doids[doids != ""].unique().tolist()
 
     def load(self) -> pd.DataFrame:
         """
@@ -291,6 +305,112 @@ class MutationLandscapeCancerType:
         ] = "a thyroid gland cancer that has_material_basis_in epithelial cells."
         df.loc[df["tumortype"] == "THCA", "doids"] = "3963"
 
+        df.loc[df["tumortype"] == "SCLC", "canonicalName"] = "lung small cell carcinoma"
+        df.loc[df["tumortype"] == "SCLC", "otherNames"] = ""
+        df.loc[
+            df["tumortype"] == "SCLC", "definition"
+        ] = "A lung carcinoma that has material basis in primitive-appearing cells that are smaller than normal cells and is located_in the lung."
+        df.loc[df["tumortype"] == "SCLC", "doids"] = "5409"
+
+        # AMPCA not in the serve actionable genes, although direct parent is.
+        df.loc[df["tumortype"] == "ACYC", "canonicalName"] = "cancer"
+        df.loc[
+            df["tumortype"] == "ACYC", "otherNames"
+        ] = "malignant neoplasm, primary cancer, malignant tumor"
+        df.loc[
+            df["tumortype"] == "ACYC", "definition"
+        ] = "A disease of cellular proliferation that is malignant and primary, characterized by uncontrolled cellular proliferation, local cell invasion and metastasis."
+        df.loc[df["tumortype"] == "ACYC", "doids"] = "162"
+
+        # AMPCA not in the serve actionable genes, although direct parent is.
+        df.loc[df["tumortype"] == "AMPCA", "canonicalName"] = "cancer"
+        df.loc[
+            df["tumortype"] == "AMPCA", "otherNames"
+        ] = "malignant neoplasm, primary cancer, malignant tumor"
+        df.loc[
+            df["tumortype"] == "AMPCA", "definition"
+        ] = "A disease of cellular proliferation that is malignant and primary, characterized by uncontrolled cellular proliferation, local cell invasion and metastasis."
+        df.loc[df["tumortype"] == "AMPCA", "doids"] = "162"
+
+        df.loc[df["tumortype"] == "ESCC", "canonicalName"] = "cancer"
+        df.loc[
+            df["tumortype"] == "ESCC", "otherNames"
+        ] = "malignant neoplasm, primary cancer, malignant tumor"
+        df.loc[
+            df["tumortype"] == "ESCC", "definition"
+        ] = "A disease of cellular proliferation that is malignant and primary, characterized by uncontrolled cellular proliferation, local cell invasion and metastasis."
+        df.loc[df["tumortype"] == "ESCC", "doids"] = "162"
+
+        df.loc[
+            df["tumortype"] == "CLL", "canonicalName"
+        ] = "chronic lymphocytic leukemia"
+        df.loc[
+            df["tumortype"] == "CLL", "otherNames"
+        ] = "B-cell chronic lymphocytic leukaemia, chronic lymphatic leukaemia, chronic lymphocytic leukaemia, chronic lymphatic leukemia, lymphoplasmacytic leukaemia, lymphoplasmacytic leukemia, CLL, B-cell chronic lymphocytic leukemia, B-cell chronic lymphoid leukemia"
+        df.loc[
+            df["tumortype"] == "CLL", "definition"
+        ] = "A lymphocytic leukemia characterized by over production of B-cells and their accumulation in bone marrow and blood."
+        df.loc[df["tumortype"] == "CLL", "doids"] = "1040"
+
+        df.loc[
+            df["tumortype"] == "GIST", "canonicalName"
+        ] = "gastrointestinal stromal tumor"
+        df.loc[
+            df["tumortype"] == "GIST", "otherNames"
+        ] = "gastrointestinal stromal tumour, GIST, Stromal tumor of gastrointestinal tract, Stromal tumour of gastrointestinal tract, GANT"
+        df.loc[df["tumortype"] == "GIST", "definition"] = ""
+        df.loc[df["tumortype"] == "GIST", "doids"] = "9253"
+
+        df.loc[df["tumortype"] == "HCC", "canonicalName"] = "hepatocellular carcinoma"
+        df.loc[df["tumortype"] == "HCC", "otherNames"] = "hepatoma"
+        df.loc[
+            df["tumortype"] == "HCC", "definition"
+        ] = "A liver carcinoma that has material basis in undifferentiated hepatocytes and located in the liver."
+        df.loc[df["tumortype"] == "HCC", "doids"] = "684"
+
+        # IHCH not in the serve actionable genes, although direct parent is.
+        df.loc[df["tumortype"] == "IHCH", "canonicalName"] = "cholangiocarcinoma"
+        df.loc[
+            df["tumortype"] == "IHCH", "otherNames"
+        ] = "adult primary cholangiocellular carcinoma, cholangiosarcoma, adult primary cholangiocarcinoma"
+        df.loc[
+            df["tumortype"] == "IHCH", "definition"
+        ] = "A bile duct adenocarcinoma that has material basis in bile duct epithelial cells."
+        df.loc[df["tumortype"] == "IHCH", "doids"] = "4947"
+
+        # MBL not in serve database
+
+        df.loc[df["tumortype"] == "MM", "canonicalName"] = "multiple myeloma"
+        df.loc[df["tumortype"] == "MM", "otherNames"] = "myeloma"
+        df.loc[
+            df["tumortype"] == "MM", "definition"
+        ] = "A myeloid neoplasm that is located in the plasma cells in bone marrow."
+        df.loc[df["tumortype"] == "MM", "doids"] = "9538"
+
+        df.loc[
+            df["tumortype"] == "MPN", "canonicalName"
+        ] = "myeloproliferative neoplasm"
+        df.loc[
+            df["tumortype"] == "MPN", "otherNames"
+        ] = "chronic myeloproliferative disease, CMPD, CMPD, U"
+        df.loc[
+            df["tumortype"] == "MPN", "definition"
+        ] = "A myeloid neoplasm that is characterized by a group of slow growing blood cancers in which large numbers of abnormal red blood cells, white blood cells, or platelets grow and spread in the bone marrow and the peripheral blood."
+        df.loc[df["tumortype"] == "MPN", "doids"] = "2226"
+
+        df.loc[
+            df["tumortype"] == "NSCLC", "canonicalName"
+        ] = "lung non-small cell carcinoma"
+        df.loc[
+            df["tumortype"] == "NSCLC", "otherNames"
+        ] = "NSCLC, non-small cell lung carcinoma, non-small cell lung cancer"
+        df.loc[
+            df["tumortype"] == "NSCLC", "definition"
+        ] = "A lung carcinoma that is characterized as any type of epithelial lung cancer other than small cell lung carcinoma."
+        df.loc[df["tumortype"] == "NSCLC", "doids"] = "3908"
+
         df.to_excel(self.processed_file)
+
+        self._df = df
 
         return df
