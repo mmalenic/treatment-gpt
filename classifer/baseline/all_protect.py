@@ -1,5 +1,6 @@
 import json
 import os
+from typing import List, Optional
 
 from classifer.baseline.linx import Linx
 from classifer.baseline.protect import Protect
@@ -11,15 +12,18 @@ class AllProtect:
     """
 
     def __init__(
-        self,
-        sample_dir: str = "data/samples/",
+        self, sample_dir: str = "data/samples/", doids: Optional[List[str]] = None
     ) -> None:
         """
         Initialize this class.
 
         :param sample_dir: sample directory.
         """
+        if doids is None:
+            doids = []
+
         self._sample_dir = sample_dir
+        self._doids = doids
         self._runs = {}
 
     def run(self) -> None:
@@ -45,22 +49,42 @@ class AllProtect:
                 )
                 self._runs[sample_dir] = {"status": "failed", "errors": [str(e)]}
 
-            try:
-                protect = Protect(sample_dir)
-                protect.run()
-            except Exception as e:
-                print(
-                    "failed to run protect for: {0}, with error: {1}".format(
-                        sample_dir, e
+            protect_runs = []
+            if not self._doids:
+                protect_runs.append((Protect(sample_dir), sample_dir))
+            else:
+                for doid in self._doids:
+                    protect_runs.append(
+                        (
+                            Protect(
+                                sample_dir,
+                                primary_tumor_doids=doid,
+                                protect_directory="protect_" + doid + "/",
+                            ),
+                            sample_dir + "_" + doid,
+                        )
                     )
-                )
-                if sample_dir in self._runs:
-                    self._runs[sample_dir]["errors"].append(str(e))
-                else:
-                    self._runs[sample_dir] = {"status": "failed", "errors": [str(e)]}
 
-            if sample_dir not in self._runs:
-                self._runs[sample_dir] = {"status": "success", "errors": []}
+            for protect, sample_dir in protect_runs:
+                try:
+                    print("running protect for:", sample_dir)
+                    protect.run()
+                except Exception as e:
+                    print(
+                        "failed to run protect for: {0}, with error: {1}".format(
+                            sample_dir, e
+                        )
+                    )
+                    if sample_dir in self._runs:
+                        self._runs[sample_dir]["errors"].append(str(e))
+                    else:
+                        self._runs[sample_dir] = {
+                            "status": "failed",
+                            "errors": [str(e)],
+                        }
+
+                if sample_dir not in self._runs:
+                    self._runs[sample_dir] = {"status": "success", "errors": []}
 
         def check_status(x, status: str) -> bool:
             return isinstance(x, dict) and "status" in x and x["status"] == status
