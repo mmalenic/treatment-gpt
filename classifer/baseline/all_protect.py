@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from classifer.baseline.linx import Linx
 from classifer.baseline.protect import Protect
+from classifer.util import find_file
 
 
 class AllProtect:
@@ -11,14 +12,21 @@ class AllProtect:
     Run protect for all samples
     """
 
+    protect_ending = ".protect.tsv"
+
     def __init__(
-        self, sample_dir: str = "data/samples/", doids: Optional[List[str]] = None
+        self,
+        sample_dir: str = "data/samples/",
+        doids: Optional[List[str]] = None,
+        **kwargs
     ) -> None:
         """
         Initialize this class.
 
         :param sample_dir: sample directory.
         """
+        self.__dict__.update(kwargs)
+
         if doids is None:
             doids = []
 
@@ -32,11 +40,6 @@ class AllProtect:
         """
         for sample in os.listdir(self._sample_dir):
             sample_dir = os.path.join(self._sample_dir, sample)
-
-            # if os.path.exists(os.path.join(sample_dir, "protect")):
-            #     print("skipping running protect for:", sample_dir)
-            #     self._runs[sample_dir] = {"status": "skipped", "errors": []}
-            #     continue
 
             print("running protect for:", sample_dir)
 
@@ -66,6 +69,13 @@ class AllProtect:
                     )
 
             for protect, sample_dir in protect_runs:
+                if os.path.exists(sample_dir) and find_file(
+                    sample_dir, "*" + self.protect_ending
+                ):
+                    print("skipping running protect for:", sample, sample_dir)
+                    self._runs[sample_dir] = {"status": "skipped", "errors": []}
+                    continue
+
                 try:
                     print("running protect for:", sample_dir)
                     protect.run()
