@@ -39,6 +39,9 @@ class AllProtect:
         Run this class.
         """
         for sample in os.listdir(self._sample_dir):
+            if "SBJ" not in sample:
+                continue
+
             sample_dir = os.path.join(self._sample_dir, sample)
 
             print("running protect for:", sample_dir)
@@ -65,12 +68,13 @@ class AllProtect:
                                 protect_directory="protect_" + doid + "/",
                             ),
                             sample_dir + "_" + doid,
+                            os.path.join(sample_dir, "protect_" + doid + "/"),
                         )
                     )
 
-            for protect, sample_dir in protect_runs:
-                if os.path.exists(sample_dir) and find_file(
-                    sample_dir, "*" + self.protect_ending
+            for protect, sample_dir, protect_directory in protect_runs:
+                if os.path.exists(protect_directory) and find_file(
+                    protect_directory, "*" + self.protect_ending
                 ):
                     print("skipping running protect for:", sample, sample_dir)
                     self._runs[sample_dir] = {"status": "skipped", "errors": []}
