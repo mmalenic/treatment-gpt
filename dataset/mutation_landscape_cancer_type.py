@@ -21,7 +21,8 @@ class MutationLandscapeCancerType:
 
         :param mutations_across_cancer_file: supplementary data file.
         """
-        self._df: pd.DataFrame = pd.DataFrame()
+        self._df = None
+        self._stats = None
         self.__dict__.update(kwargs)
 
         self._mutations_across_cancer_file = mutations_across_cancer_file
@@ -36,6 +37,22 @@ class MutationLandscapeCancerType:
         doids = self._df["doids"]
 
         return doids[doids != ""].unique().tolist()
+
+    @property
+    def stats(self) -> pd.DataFrame:
+        """
+        Get the stats for this class.
+        """
+        return self._stats
+
+    def df(self) -> pd.DataFrame:
+        """
+        Get the dataframe for this class.
+        """
+        if self._df is None:
+            self.load()
+
+        return self._df
 
     def load(self) -> pd.DataFrame:
         """
@@ -412,5 +429,6 @@ class MutationLandscapeCancerType:
         df.to_excel(self.processed_file)
 
         self._df = df
+        self._stats = df.describe()
 
         return df
