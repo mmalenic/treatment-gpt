@@ -70,6 +70,15 @@ class LoadProtect:
         """
         load the data.
         """
+
+        def split_urls(x) -> List[str]:
+            urls = str(x).split("||")[-1].split("|")[-1].split(",")
+            return [
+                url
+                for url in urls
+                if "pubmed.ncbi.nlm.nih.gov" in url or "ncbi.nlm.nih.gov/pubmed" in url
+            ]
+
         dfs = {}
         for sample in os.listdir(self._sample_dir):
             sample_dir = os.path.join(self._sample_dir, sample)
@@ -91,11 +100,13 @@ class LoadProtect:
 
                 print("loading protect for:", protect_dir)
 
+                frame = pd.read_table(protect_file, sep="\t")
+
                 doid = protect_dir.split("_", 1)[1]
                 cancer_type = self._cancer_types.cancer_type(doid)
-
-                frame = pd.read_table(protect_file, sep="\t")
                 frame["cancer_type"] = cancer_type
+
+                frame["sources"] = frame["sources"].map(lambda x: split_urls(x))
 
                 df[protect_dir] = frame
 
