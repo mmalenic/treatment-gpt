@@ -54,6 +54,17 @@ class MutationLandscapeCancerType:
 
         return self._df
 
+    def cancer_type(self, doid: str) -> str:
+        """
+        Get the cancer type from the doid.
+
+        :param doid: doid
+        """
+        if self._df is None:
+            self.load()
+
+        return self._df[self._df["doids"] == doid]["canonicalName"].unique()[0]
+
     def load(self) -> pd.DataFrame:
         """
         load the data.

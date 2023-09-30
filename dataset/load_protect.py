@@ -91,7 +91,13 @@ class LoadProtect:
 
                 print("loading protect for:", protect_dir)
 
-                df[protect_dir] = pd.read_table(protect_file, sep="\t")
+                doid = protect_dir.split("_", 1)[1]
+                cancer_type = self._cancer_types.cancer_type(doid)
+
+                frame = pd.read_table(protect_file, sep="\t")
+                frame["cancer_type"] = cancer_type
+
+                df[protect_dir] = frame
 
             try:
                 dfs[sample_id] = pd.concat(df)
