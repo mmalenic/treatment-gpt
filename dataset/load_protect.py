@@ -108,6 +108,10 @@ class LoadProtect:
 
                 frame["sources"] = frame["sources"].map(lambda x: split_urls(x))
 
+                frame["treatment_with_source"] = list(
+                    zip(frame["treatment"], frame["sources"])
+                )
+
                 df[protect_dir] = frame
 
             try:
