@@ -88,7 +88,7 @@ class PubmedDownloader:
                     output_abstract += ": "
                     output_abstract += part
                     output_abstract += "\n"
-                except AttributeError as _:
+                except (AttributeError, KeyError) as _:
                     output_abstract += part
                     output_abstract += "\n"
 
