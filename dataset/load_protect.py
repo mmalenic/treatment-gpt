@@ -135,6 +135,38 @@ class LoadProtect:
                 "treatment_with_source_y",
             ]
 
+            output = output[
+                [
+                    "gene_x",
+                    "gene_y",
+                    "transcript_x",
+                    "transcript_y",
+                    "isCanonical_x",
+                    "isCanonical_y",
+                    "event_x",
+                    "event_y",
+                    "eventIsHighDriver_x",
+                    "eventIsHighDriver_y",
+                    "germline_x",
+                    "germline_y",
+                    "reported_x",
+                    "reported_y",
+                    "treatment_x",
+                    "treatment_y",
+                    "onLabel_x",
+                    "onLabel_y",
+                    "level_x",
+                    "level_y",
+                    "direction_x",
+                    "direction_y",
+                    "sources_x",
+                    "sources_y",
+                    "cancer_type_x",
+                    "cancer_type_y",
+                    "treatment_with_source_x",
+                    "treatment_with_source_y",
+                ]
+            ]
             return output
 
         dfs = {}
@@ -174,7 +206,8 @@ class LoadProtect:
                 )
 
                 frame = frame[frame["onLabel"]]
-                # frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
+                frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
+                frame = frame[frame["direction"] == "RESPONSIVE"]
 
                 if frame.empty:
                     continue
@@ -185,6 +218,23 @@ class LoadProtect:
                     .apply(gene_combinations)
                     .reset_index()
                 )
+
+                pairs = (
+                    self._cancer_types.df()
+                    .groupby(["canonicalName"])[["genex", "geney"]]
+                    .agg(list)
+                    .apply(lambda x: list(zip(x["genex"], x["geney"])), axis=1)
+                    .reset_index()
+                )
+                pairs = pairs.loc[pairs["canonicalName"] == cancer_type][0].tolist()[0]
+                pairs += [(pair[1], pair[0]) for pair in pairs]
+
+                if frame.empty:
+                    continue
+
+                frame = frame[
+                    [pair in pairs for pair in zip(frame["gene_x"], frame["gene_y"])]
+                ]
 
                 df[protect_dir] = frame
 

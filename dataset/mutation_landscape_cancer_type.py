@@ -74,8 +74,8 @@ class MutationLandscapeCancerType:
                 "41598_2023_39608_MOESM3_ESM.xlsx",
                 sheet_name="Each Gene Pair in Cancer Type",
             )
-            .groupby("tumortype")
-            .head(2)
+            .groupby("tumortype", as_index=False)
+            .apply(lambda x: x)
             .sort_values(["tumortype", "pval"])
         )
 
