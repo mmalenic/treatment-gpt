@@ -14,6 +14,7 @@ class LoadProtect:
     """
 
     protect_ending = ".protect.tsv"
+    random_state = 42
 
     def __init__(
         self,
@@ -262,6 +263,10 @@ class LoadProtect:
         print("number of samples:", len(dfs))
 
         output = pd.concat(dfs)
+        output = output.sample(frac=1, random_state=self.random_state).reset_index(
+            drop=True
+        )
+
         self._stats = output.describe()
 
         self._df = output
