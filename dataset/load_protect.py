@@ -6,6 +6,7 @@ import itertools
 
 from classifer.util import find_file
 from dataset.mutation_landscape_cancer_type import MutationLandscapeCancerType
+from prepare.pubmed_downloader import PubmedDownloader
 
 
 class LoadProtect:
@@ -59,11 +60,14 @@ class LoadProtect:
 
         def split_urls(x) -> List[str]:
             urls = str(x).split("||")[-1].split("|")[-1].split(",")
-            return [
-                url
-                for url in urls
-                if "pubmed.ncbi.nlm.nih.gov" in url or "ncbi.nlm.nih.gov/pubmed" in url
-            ]
+
+            output_urls = []
+            for url in urls:
+                url_match = PubmedDownloader.pubmed_url_regex.match(url)
+                if url_match:
+                    output_urls.append(url_match.group("pubmed_id"))
+
+            return output_urls
 
         def gene_combinations(x) -> pd.DataFrame:
             x = x.astype("str")
@@ -95,7 +99,7 @@ class LoadProtect:
                 + ";"
                 + x["cancer_type"]
                 + ";"
-                + x["treatment_with_source"]
+                + x["treatment_with_source_and_level"]
             )
 
             new = pd.DataFrame([y for y in itertools.combinations(x.temp, 2)])
@@ -119,7 +123,7 @@ class LoadProtect:
                 "direction_x",
                 "sources_x",
                 "cancer_type_x",
-                "treatment_with_source_x",
+                "treatment_with_source_and_level_x",
                 "gene_y",
                 "transcript_y",
                 "isCanonical_y",
@@ -133,7 +137,7 @@ class LoadProtect:
                 "direction_y",
                 "sources_y",
                 "cancer_type_y",
-                "treatment_with_source_y",
+                "treatment_with_source_and_level_y",
             ]
 
             output = output[
@@ -164,8 +168,8 @@ class LoadProtect:
                     "sources_y",
                     "cancer_type_x",
                     "cancer_type_y",
-                    "treatment_with_source_x",
-                    "treatment_with_source_y",
+                    "treatment_with_source_and_level_x",
+                    "treatment_with_source_and_level_y",
                 ]
             ]
             return output
@@ -207,8 +211,8 @@ class LoadProtect:
 
                 frame["sources"] = frame["sources"].map(lambda x: split_urls(x))
 
-                frame["treatment_with_source"] = list(
-                    zip(frame["treatment"], frame["sources"])
+                frame["treatment_with_source_and_level"] = list(
+                    zip(frame["treatment"], frame["sources"], frame["level"])
                 )
 
                 frame = frame[frame["onLabel"]]

@@ -11,13 +11,16 @@ from datetime import datetime
 import re
 
 
-class PubMedDownloader:
+class PubmedDownloader:
     """
     Downloads data from pubmed.
     """
 
     abstract_pdf_delay = 5
     pubmed_download_delay = 300
+    pubmed_url_regex = re.compile(
+        "(https|http)://(www\.)?(pubmed\.ncbi\.nlm\.nih\.gov/|ncbi\.nlm\.nih\.gov/pubmed/)(?P<pubmed_id>\d+)/?"
+    )
 
     def __init__(self, email: str, output_dir: str = "data/pubmed/", **kwargs) -> None:
         """
@@ -29,9 +32,6 @@ class PubMedDownloader:
 
         self._output_dir = output_dir
         self._datetime = None
-        self._pubmed_url_regex = re.compile(
-            "(https|http)://(www)?(pubmed.ncbi.nlm.nih.gov/|ncbi.nlm.nih.gov/pubmed/)(?P<pubmed_id>\d+)/?"
-        )
 
         Entrez.email = email
 
@@ -49,7 +49,7 @@ class PubMedDownloader:
         if Path(save_abstract_to).exists():
             return Path(save_abstract_to).read_text(encoding="utf-8")
 
-        url_match = self._pubmed_url_regex.match(pubmed_id)
+        url_match = self.pubmed_url_regex.match(pubmed_id)
         if url_match:
             pubmed_id = url_match.group("pubmed_id")
 
