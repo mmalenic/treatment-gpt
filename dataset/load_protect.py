@@ -169,6 +169,11 @@ class LoadProtect:
             ]
             return output
 
+        def p_val(x) -> pd.DataFrame:
+            return next(
+                y[2] for y in pairs if y[0] == x["gene_x"] and y[1] == x["gene_y"]
+            )
+
         dfs = {}
         for sample in os.listdir(self._sample_dir):
             sample_dir = os.path.join(self._sample_dir, sample)
@@ -221,20 +226,30 @@ class LoadProtect:
 
                 pairs = (
                     self._cancer_types.df()
-                    .groupby(["canonicalName"])[["genex", "geney"]]
+                    .groupby(["canonicalName"])[["genex", "geney", "pval"]]
                     .agg(list)
-                    .apply(lambda x: list(zip(x["genex"], x["geney"])), axis=1)
+                    .apply(
+                        lambda x: list(zip(x["genex"], x["geney"], x["pval"])), axis=1
+                    )
                     .reset_index()
                 )
                 pairs = pairs.loc[pairs["canonicalName"] == cancer_type][0].tolist()[0]
-                pairs += [(pair[1], pair[0]) for pair in pairs]
+                pairs += [(pair[1], pair[0], pair[2]) for pair in pairs]
 
                 if frame.empty:
                     continue
 
                 frame = frame[
-                    [pair in pairs for pair in zip(frame["gene_x"], frame["gene_y"])]
+                    [
+                        pair in [(p[0], p[1]) for p in pairs]
+                        for pair in zip(frame["gene_x"], frame["gene_y"])
+                    ]
                 ]
+
+                if frame.empty:
+                    continue
+
+                frame["p_val"] = frame.apply(lambda x: p_val(x), axis=1)
 
                 df[protect_dir] = frame
 
