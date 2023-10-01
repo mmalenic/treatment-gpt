@@ -297,9 +297,9 @@ class LoadProtect:
             drop=True
         )
 
-        self._stats = output.describe()
-
         self._df = output
+        self._df = self._df.drop_duplicates(subset=["cancer_type", "gene_x", "gene_y"])
+        self._stats = self._df.describe()
 
         print("saving protect to:", self._output_to)
         self._df.to_csv(self._output_to)
