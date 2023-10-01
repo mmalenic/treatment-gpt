@@ -1,3 +1,4 @@
+import os.path
 from pathlib import Path
 from typing import Optional
 from urllib.request import urlretrieve
@@ -17,7 +18,7 @@ class PubmedDownloader:
     """
 
     abstract_pdf_delay = 5
-    pubmed_download_delay = 300
+    pubmed_download_delay = 60
     pubmed_url_regex = re.compile(
         "(https|http)://(www\.)?(pubmed\.ncbi\.nlm\.nih\.gov/|ncbi\.nlm\.nih\.gov/pubmed/)(?P<pubmed_id>\d+)/?"
     )
@@ -38,7 +39,7 @@ class PubmedDownloader:
     def download(
         self,
         pubmed_id: str,
-        save_abstract_to: str | Path,
+        save_abstract_to: Optional[str | Path] = None,
         save_pdf_to: Optional[str | Path] = None,
     ) -> str:
         """
@@ -46,7 +47,13 @@ class PubmedDownloader:
         """
         Path(self._output_dir).mkdir(exist_ok=True, parents=True)
 
+        if save_abstract_to is None:
+            save_abstract_to = os.path.join(self._output_dir, f"{pubmed_id}")
+        if save_pdf_to is None:
+            save_pdf_to = os.path.join(self._output_dir, f"{pubmed_id}.pdf")
+
         if Path(save_abstract_to).exists():
+            print("loading pubmed id from file:", pubmed_id)
             return Path(save_abstract_to).read_text(encoding="utf-8")
 
         url_match = self.pubmed_url_regex.match(pubmed_id)
@@ -72,9 +79,20 @@ class PubmedDownloader:
             records = Entrez.read(handle)
             abstract = records["PubmedArticle"][0]["MedlineCitation"]["Article"][
                 "Abstract"
-            ]["AbstractText"][0]
+            ]["AbstractText"]
 
-            Path(save_abstract_to).write_text(abstract, encoding="utf-8")
+            output_abstract = ""
+            for part in abstract:
+                try:
+                    output_abstract += part.attributes["Label"].lower().title()
+                    output_abstract += ": "
+                    output_abstract += part
+                    output_abstract += "\n"
+                except AttributeError as _:
+                    output_abstract += part
+                    output_abstract += "\n"
+
+            Path(save_abstract_to).write_text(output_abstract, encoding="utf-8")
         except Exception as e:
             print("failed to read pubmed id:", pubmed_id, "with error:", e)
             handle.close()
@@ -82,10 +100,13 @@ class PubmedDownloader:
         time.sleep(self.abstract_pdf_delay)
 
         if save_pdf_to is not None:
-            print("downloading pubmed pdf:", pubmed_id)
             url = metapub.FindIt(pubmed_id).url
 
-            urlretrieve(url, save_pdf_to)
+            if url is not None:
+                print(f"downloading pubmed pdf: {pubmed_id}, url: {url}")
+                urlretrieve(url, save_pdf_to)
+            else:
+                print("no pubmed article pdf found for:", pubmed_id)
 
         self._datetime = datetime.now()
 

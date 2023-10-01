@@ -1,4 +1,5 @@
 import os
+from ast import literal_eval
 from typing import List
 
 import pandas as pd
@@ -21,18 +22,21 @@ class LoadProtect:
         self,
         cancer_types: MutationLandscapeCancerType,
         sample_dir: str = "data/samples/",
+        output_to: str = "data/load_protect.csv",
         **kwargs
     ) -> None:
         """
         Initialize this class.
 
         :param sample_dir: sample directory.
+        :param output_to: output to.
         :param cancer_types: list of cancer_types to load.
         """
         self.__dict__.update(kwargs)
 
         self._cancer_types = cancer_types
         self._sample_dir = sample_dir
+        self._output_to = output_to
 
         self._df = None
         self._stats = None
@@ -52,6 +56,21 @@ class LoadProtect:
         Get the stats.
         """
         return self._stats
+
+    def sources(self) -> set[str]:
+        """
+        Get unique sources.
+        """
+        sources = list(self.df()["sources_x"]) + list(self.df()["sources_y"])
+        return set(
+            [
+                x[0]
+                for x in itertools.chain.from_iterable(
+                    [literal_eval(x) for x in sources]
+                )
+                if x
+            ]
+        )
 
     def load(self) -> pd.DataFrame:
         """
@@ -179,6 +198,13 @@ class LoadProtect:
                 y[2] for y in pairs if y[0] == x["gene_x"] and y[1] == x["gene_y"]
             )
 
+        if os.path.exists(self._output_to):
+            print("loading protect from:", self._output_to)
+            self._df = pd.read_csv(self._output_to)
+            self._stats = self._df.describe()
+
+            return self._df
+
         dfs = {}
         for sample in os.listdir(self._sample_dir):
             sample_dir = os.path.join(self._sample_dir, sample)
@@ -216,8 +242,8 @@ class LoadProtect:
                 )
 
                 frame = frame[frame["onLabel"]]
-                frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
-                frame = frame[frame["direction"] == "RESPONSIVE"]
+                # frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
+                # frame = frame[frame["direction"] == "RESPONSIVE"]
 
                 if frame.empty:
                     continue
@@ -274,5 +300,8 @@ class LoadProtect:
         self._stats = output.describe()
 
         self._df = output
+
+        print("saving protect to:", self._output_to)
+        self._df.to_csv(self._output_to)
 
         return output
