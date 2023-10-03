@@ -1,5 +1,6 @@
 import os
 from ast import literal_eval
+from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -23,6 +24,7 @@ class LoadProtect:
         cancer_types: MutationLandscapeCancerType,
         sample_dir: str = "data/samples/",
         output_to: str = "data/load_protect.csv",
+        pubmed_dir: str = "data/pubmed/",
         **kwargs
     ) -> None:
         """
@@ -37,6 +39,7 @@ class LoadProtect:
         self._cancer_types = cancer_types
         self._sample_dir = sample_dir
         self._output_to = output_to
+        self._pubmed_dir = pubmed_dir
 
         self._df = None
         self._stats = None
@@ -71,6 +74,38 @@ class LoadProtect:
                 if x
             ]
         )
+
+    def load_pubmed(self) -> pd.DataFrame:
+        def get_text_source(x):
+            output = []
+            for source in x:
+                treatment = source[1]
+
+                out = None
+                if len(treatment) != 0 and treatment is not None:
+                    treatment = treatment[0]
+                    treatment = find_file(self._pubmed_dir, treatment)
+
+                    if treatment is not None:
+                        out = (
+                            source[0],
+                            Path(treatment).read_text(encoding="utf-8"),
+                            source[2],
+                        )
+
+                if treatment is None:
+                    out = (source[0], "", source[2])
+
+                output.append(out)
+
+        if self._df is None:
+            self.load()
+
+        self.df()["treatment_with_text_sources"] = self.df().apply(
+            lambda x: get_text_source(x), axis=1
+        )
+
+        return self.df()
 
     def load(self) -> pd.DataFrame:
         """
