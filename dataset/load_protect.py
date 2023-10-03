@@ -75,14 +75,14 @@ class LoadProtect:
             ]
         )
 
-    def treatments_and_sources(self) -> set[Tuple[str, str]]:
+    def treatments_and_sources(self) -> set[Tuple[str, str, str]]:
         """
         Get unique sources.
         """
         sources = list(self.df()["treatment_with_text_sources_x"]) + list(
             self.df()["treatment_with_text_sources_y"]
         )
-        return set([(x[0], x[1]) for x in sources])
+        return set([(y[0], y[1], y[2]) for x in sources for y in x])
 
     def load_pubmed(self) -> pd.DataFrame:
         def get_text_source(x, column):

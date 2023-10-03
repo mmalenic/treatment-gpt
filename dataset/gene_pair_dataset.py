@@ -38,13 +38,16 @@ class GenePairDataset:
                 {"treatment": x[0], "source": x[1], "level": x[2]} for x in treatments
             ]
 
-            y_true = [x for x, _, _ in treatments]
+            y_true = [x["treatment"] for x in treatments]
 
             all_treatments = self._from_protect.treatments_and_sources()
             all_treatments = list([x for x in all_treatments if x[0] not in treatments])
 
             random.shuffle(all_treatments)
-            treatments += all_treatments[: len(treatments)]
+            treatments += [
+                {"treatment": x[0], "source": x[1], "level": x[2]}
+                for x in all_treatments[: len(treatments)]
+            ]
 
             self._dataset.append(
                 {
