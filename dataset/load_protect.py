@@ -1,7 +1,7 @@
 import os
 from ast import literal_eval
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import pandas as pd
 import itertools
@@ -75,10 +75,19 @@ class LoadProtect:
             ]
         )
 
+    def treatments_and_sources(self) -> set[Tuple[str, str]]:
+        """
+        Get unique sources.
+        """
+        sources = list(self.df()["treatment_with_text_sources_x"]) + list(
+            self.df()["treatment_with_text_sources_y"]
+        )
+        return set([(x[0], x[1]) for x in sources])
+
     def load_pubmed(self) -> pd.DataFrame:
-        def get_text_source(x):
+        def get_text_source(x, column):
             output = []
-            for source in x:
+            for source in x[column]:
                 treatment = source[1]
 
                 out = None
@@ -101,8 +110,11 @@ class LoadProtect:
         if self._df is None:
             self.load()
 
-        self.df()["treatment_with_text_sources"] = self.df().apply(
-            lambda x: get_text_source(x), axis=1
+        self.df()["treatment_with_text_sources_x"] = self.df().apply(
+            lambda x: get_text_source(x, "treatment_with_source_and_level_x"), axis=1
+        )
+        self.df()["treatment_with_text_sources_y"] = self.df().apply(
+            lambda x: get_text_source(x, "treatment_with_source_and_level_y"), axis=1
         )
 
         return self.df()

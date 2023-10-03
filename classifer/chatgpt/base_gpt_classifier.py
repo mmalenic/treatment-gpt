@@ -12,11 +12,16 @@ class BaseGPTClassifier(ABC):
     def __init__(
         self, model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo"
     ):
+        super().__init__()
+
         """Initialize this class."""
         self._model_type = model_type
         self.X = None
         self.y = None
         self._predictions = None
+
+    def n_samples(self) -> int:
+        return len(self.X)
 
     def loss(self) -> float | int:
         return metrics.hamming_loss(self.y, self._predictions)
