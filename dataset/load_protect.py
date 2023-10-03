@@ -87,14 +87,13 @@ class LoadProtect:
     def load_pubmed(self) -> pd.DataFrame:
         def get_text_source(x, column):
             output = []
-            for source in x[column]:
+            for source in literal_eval(x[column]):
                 treatment = source[1]
 
                 out = None
                 if len(treatment) != 0 and treatment is not None:
                     treatment = treatment[0]
                     treatment = find_file(self._pubmed_dir, treatment)
-
                     if treatment is not None:
                         out = (
                             source[0],
@@ -106,6 +105,8 @@ class LoadProtect:
                     out = (source[0], "", source[2])
 
                 output.append(out)
+
+            return output
 
         if self._df is None:
             self.load()
