@@ -101,13 +101,16 @@ class PubmedDownloader:
         time.sleep(self.abstract_pdf_delay)
 
         if save_pdf_to is not None:
-            url = metapub.FindIt(pubmed_id).url
+            try:
+                url = metapub.FindIt(pubmed_id).url
 
-            if url is not None:
-                print(f"downloading pubmed pdf: {pubmed_id}, url: {url}")
-                urlretrieve(url, save_pdf_to)
-            else:
-                print("no pubmed article pdf found for:", pubmed_id)
+                if url is not None:
+                    print(f"downloading pubmed pdf: {pubmed_id}, url: {url}")
+                    urlretrieve(url, save_pdf_to)
+                else:
+                    print("no pubmed article pdf found for:", pubmed_id)
+            except Exception as e:
+                print("failed to download pdf of id:", pubmed_id, "with error:", e)
 
         self._datetime = datetime.now()
 

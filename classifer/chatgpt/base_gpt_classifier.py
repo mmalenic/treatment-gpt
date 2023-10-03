@@ -1,7 +1,7 @@
 import ast
 import json
 from json import JSONDecoder
-from typing import Literal, List, Any
+from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
 
 import openai
