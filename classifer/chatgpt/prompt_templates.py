@@ -1,219 +1,249 @@
-ZERO_SHOT_PROMPT_TEMPLATE = """
+_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE = """
+Provide your response in a JSON format containing a single key `treatments` and a value corresponding to the array of assigned treatments.
+"""
+
+_SINGLE_LABEL_JSON_TASK_PROMPT_TEMPLATE = """
+Provide your response in a JSON format containing a single key `treatment` and a value corresponding to the treatment.
+"""
+
+_JSON_RESPONSE_PROMPT_TEMPLATE = """
+Your JSON response:
+"""
+
+_NO_ADDITIONAL_INFORMATION_PROMPT_TEMPLATE = """
+Do no provide any additional information.
+"""
+
+_PATIENT_TREATMENT_TASK_PROMPT_TEMPLATE = """
 You are tasked with classifying a cancer patient into treatments.
 You will have the following information available:
 1. The patient's cancer type.
 2. A pair of the patient's actionable genes.
 3. The list of possible treatments, delimited with square brackets. Not all treatments are correct.
-
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Provide your response in a list format. Do no provide any additional information except for the treatments.
-
-List of treatments: {treatments}
-
-A patient has {cancer_type} with the following actionable genes: {genes}.
-What treatments are available for this patient?
 """
 
-FEW_SHOT_PROMPT_TEMPLATE = """
-You are tasked with classifying a cancer patient into treatments.
-You will have the following information available:
-1. The patient's cancer type.
-2. A pair of the patient's actionable genes.
-3. The list of possible treatments, delimited with square brackets. Not all treatments are correct.
-4. A few prior examples of classifications.
-
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Provide your response in a list format. Do no provide any additional information except for the treatments.
-
-List of treatments: {treatments}
-
-{examples}
-
-A patient has {cancer_type} with the following actionable genes: {genes}.
-What treatments are available for this patient?
-"""
-
-ZERO_SHOT_COT_PROMPT_TEMPLATE = """
-You are tasked with classifying a cancer patient into treatments.
-You will have the following information available:
-1. The patient's cancer type.
-2. A pair of the patient's actionable genes.
-3. The list of possible treatments, delimited with square brackets. Not all treatments are correct.
-
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Think step by step about which treatment is best and reason about your decision.
-3. Provide the treatments in a list format after your reasoning steps.
-
-List of treatments: {treatments}
-
-A patient has {cancer_type} with the following actionable genes: {genes}.
-What treatments are available for this patient?
-"""
-
-FEW_SHOT_COT_PROMPT_TEMPLATE = """
-You are tasked with classifying a cancer patient into treatments.
-You will have the following information available:
-1. The patient's cancer type.
-2. A pair of the patient's actionable genes.
-3. The list of possible treatments, delimited with square brackets. Not all treatments are correct.
-4. A few prior examples of classifications.
-
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Think step by step about which treatment is best and reason about your decision.
-3. Provide the treatments in a list format after your reasoning steps.
-
-List of treatments: {treatments}
-
-{examples}
-
-A patient has {cancer_type} with the following actionable genes: {genes}.
-What treatments are available for this patient?
-"""
-
-ZERO_SHOT_WITH_SOURCES_PROMPT_TEMPLATE = """
+_PATIENT_TREATMENT_SOURCE_TASK_PROMPT_TEMPLATE = """
 You are tasked with classifying a cancer patient into treatments.
 You will have the following information available:
 1. The patient's cancer type.
 2. A pair of the patient's actionable genes.
 3. The list of pairs of possible treatments and abstracts outlining the source of the treatment. Each treatment and source pair is delimited by triple quotes. Not all treatments are correct.
+"""
 
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Provide your response in a list format. Do no provide any additional information except for the treatments.
+_MULTI_LABEL_TASK_PROMPT_TEMPLATE = """
+Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
+"""
 
-List of treatments and sources: {treatments_and_sources}
+_LIST_OF_TREATMENTS_PROMPT_TEMPLATE = """
+List of treatments: {treatments}
+"""
 
+_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE = """
 A patient has {cancer_type} with the following actionable genes: {genes}.
 What treatments are available for this patient?
 """
 
-FEW_SHOT_WITH_SOURCES_PROMPT_TEMPLATE = """
-You are tasked with classifying a cancer patient into treatments.
-You will have the following information available:
-1. The patient's cancer type.
-2. A pair of the patient's actionable genes.
-3. The list of pairs of possible treatments and abstracts outlining the source of the treatment. Each treatment and source pair is delimited by triple quotes. Not all treatments are correct.
-4. A few prior examples of classifications.
+_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE = """
+A few prior examples of classifications.
+"""
 
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Provide your response in a list format. Do no provide any additional information except for the treatments.
-
-List of treatments and sources: {treatments_and_sources}
-
+_EXAMPLES_PROMPT_TEMPLATE = """
 {examples}
-
-A patient has {cancer_type} with the following actionable genes: {genes}.
-What treatments are available for this patient?
 """
 
-ZERO_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE = """
-You are tasked with classifying a cancer patient into treatments.
-You will have the following information available:
-1. The patient's cancer type.
-2. A pair of the patient's actionable genes.
-3. The list of pairs of possible treatments and abstracts outlining the source of the treatment. Each treatment and source pair is delimited by triple quotes. Not all treatments are correct.
-
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Think step by step about which treatment is best and reason about your decision.
-3. Provide the treatments in a list format after your reasoning steps.
-
-List of treatments and sources: {treatments_and_sources}
-
-A patient has {cancer_type} with the following actionable genes: {genes}.
-What treatments are available for this patient?
+_COT_PROMPT_TEMPLATE = """
+Think step by step about which treatment is best and reason about your decision.
 """
 
-FEW_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE = """
-You are tasked with classifying a cancer patient into treatments.
-You will have the following information available:
-1. The patient's cancer type.
-2. A pair of the patient's actionable genes.
-3. The list of pairs of possible treatments and abstracts outlining the source of the treatment. Each treatment and source pair is delimited by triple quotes. Not all treatments are correct.
-4. A few prior examples of classifications.
-
-Perform the following tasks:
-1. Assign this patient to at least 1 and up to {max_treatments} treatments based on probabilities.
-2. Think step by step about which treatment is best and reason about your decision.
-3. Provide the treatments in a list format after your reasoning steps.
-
-List of treatments and sources: {treatments_and_sources}
-
-{examples}
-
-A patient has {cancer_type} with the following actionable genes: {genes}.
-What treatments are available for this patient?
-"""
-
-ZERO_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE = """
+_TREATMENT_ONLY_TASK_PROMPT_TEMPLATE = """
 You are tasked with determining the treatment type for a journal abstract.
 You will have the following information available:
 1. The journal abstract.
 2. The list of possible treatments, delimited with square brackets. Only one treatment is correct.
+"""
 
-Perform the following tasks:
-1. Classify the journal abstract into a treatment.
-2. Provide the treatment as a response. Do no provide any additional information except for the treatment.
+_TREATMENT_ONLY_CLASSIFICATION_TASK_PROMPT_TEMPLATE = """
+Classify the journal abstract into a treatment.
+"""
 
-List of treatments: {treatments}
-
+_TREATMENT_ONLY_RESPONSE_PROMPT_TEMPLATE = """
 What treatment is this journal abstract about: {source}?
 """
 
-FEW_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE = """
-You are tasked with determining the treatment type for a journal abstract.
-You will have the following information available:
-1. The journal abstract.
-2. The list of possible treatments, delimited with square brackets. Only one treatment is correct.
-4. A few prior examples of classifications.
-
-Perform the following tasks:
-1. Classify the journal abstract into a treatment.
-2. Provide the treatment as a response. Do no provide any additional information except for the treatment.
-
-List of treatments: {treatments}
-
-{examples}
-
-What treatment is this journal abstract about: {source}?
+_TREATMENT_ONLY_COT_PROMPT_TEMPLATE = """
+Think step by step about which treatment the abstract refers to and reason about your decision.
 """
 
-ZERO_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE = """
-You are tasked with determining the treatment type for a journal abstract.
-You will have the following information available:
-1. The journal abstract.
-2. The list of possible treatments, delimited with square brackets. Only one treatment is correct.
+ZERO_SHOT_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_TASK_PROMPT_TEMPLATE}
 
 Perform the following tasks:
-1. Classify the journal abstract into a treatment.
-2. Think step by step about which treatment the abstract refers to and reason about your decision.
-3. Provide the treatment as a response after your reasoning steps.
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE} {_NO_ADDITIONAL_INFORMATION_PROMPT_TEMPLATE}
 
-List of treatments: {treatments}
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
 
-What treatment is this journal abstract about: {source}?
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+{_JSON_RESPONSE_PROMPT_TEMPLATE}
 """
 
-FEW_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE = """
-You are tasked with determining the treatment type for a journal abstract.
-You will have the following information available:
-1. The journal abstract.
-2. The list of possible treatments, delimited with square brackets. Only one treatment is correct.
-4. A few prior examples of classifications.
+FEW_SHOT_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_TASK_PROMPT_TEMPLATE}
+4. {_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE}
 
 Perform the following tasks:
-1. Classify the journal abstract into a treatment.
-2. Think step by step about which treatment the abstract refers to and reason about your decision.
-3. Provide the treatment as a response after your reasoning steps.
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE} {_NO_ADDITIONAL_INFORMATION_PROMPT_TEMPLATE}
 
-List of treatments: {treatments}
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
 
-{examples}
+{_EXAMPLES_PROMPT_TEMPLATE}
 
-What treatment is this journal abstract about: {source}?
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+{_JSON_RESPONSE_PROMPT_TEMPLATE}
+"""
+
+ZERO_SHOT_COT_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_TASK_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_COT_PROMPT_TEMPLATE}
+3. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+"""
+
+FEW_SHOT_COT_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_TASK_PROMPT_TEMPLATE}
+4. {_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_COT_PROMPT_TEMPLATE}
+3. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_EXAMPLES_PROMPT_TEMPLATE}
+
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+"""
+
+ZERO_SHOT_WITH_SOURCES_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_SOURCE_TASK_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE} {_NO_ADDITIONAL_INFORMATION_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+{_JSON_RESPONSE_PROMPT_TEMPLATE}
+"""
+
+FEW_SHOT_WITH_SOURCES_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_SOURCE_TASK_PROMPT_TEMPLATE}
+4. {_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE} {_NO_ADDITIONAL_INFORMATION_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_EXAMPLES_PROMPT_TEMPLATE}
+
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+{_JSON_RESPONSE_PROMPT_TEMPLATE}
+"""
+
+ZERO_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_SOURCE_TASK_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_COT_PROMPT_TEMPLATE}
+3. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+"""
+
+FEW_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE = f"""
+{_PATIENT_TREATMENT_SOURCE_TASK_PROMPT_TEMPLATE}
+4. {_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_MULTI_LABEL_TASK_PROMPT_TEMPLATE}
+2. {_COT_PROMPT_TEMPLATE}
+3. {_MULTI_LABEL_JSON_TASK_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_EXAMPLES_PROMPT_TEMPLATE}
+
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+"""
+
+ZERO_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE = f"""
+{_TREATMENT_ONLY_TASK_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_TREATMENT_ONLY_CLASSIFICATION_TASK_PROMPT_TEMPLATE}
+2. {_SINGLE_LABEL_JSON_TASK_PROMPT_TEMPLATE} {_NO_ADDITIONAL_INFORMATION_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_TREATMENT_ONLY_RESPONSE_PROMPT_TEMPLATE}
+{_JSON_RESPONSE_PROMPT_TEMPLATE}
+"""
+
+FEW_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE = f"""
+{_TREATMENT_ONLY_TASK_PROMPT_TEMPLATE}
+4. {_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_TREATMENT_ONLY_CLASSIFICATION_TASK_PROMPT_TEMPLATE}
+2. {_SINGLE_LABEL_JSON_TASK_PROMPT_TEMPLATE} {_NO_ADDITIONAL_INFORMATION_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_EXAMPLES_PROMPT_TEMPLATE}
+
+{_TREATMENT_ONLY_RESPONSE_PROMPT_TEMPLATE}
+{_JSON_RESPONSE_PROMPT_TEMPLATE}
+"""
+
+ZERO_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE = f"""
+{_TREATMENT_ONLY_TASK_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_TREATMENT_ONLY_CLASSIFICATION_TASK_PROMPT_TEMPLATE}
+2. {_TREATMENT_ONLY_COT_PROMPT_TEMPLATE}
+3. {_SINGLE_LABEL_JSON_TASK_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_TREATMENT_ONLY_RESPONSE_PROMPT_TEMPLATE}
+"""
+
+FEW_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE = f"""
+{_TREATMENT_ONLY_TASK_PROMPT_TEMPLATE}
+4. {_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE}
+
+Perform the following tasks:
+1. {_TREATMENT_ONLY_CLASSIFICATION_TASK_PROMPT_TEMPLATE}
+2. {_TREATMENT_ONLY_COT_PROMPT_TEMPLATE}
+3. {_SINGLE_LABEL_JSON_TASK_PROMPT_TEMPLATE}
+
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_EXAMPLES_PROMPT_TEMPLATE}
+
+{_TREATMENT_ONLY_RESPONSE_PROMPT_TEMPLATE}
 """
