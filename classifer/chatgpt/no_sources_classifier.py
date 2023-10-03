@@ -58,9 +58,9 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
                 break
 
             template = GENE_PAIR_EXAMPLE_PROMPT_TEMPLATE.format(
-                treatments=[y["treatment"] for y in x["treatments"]],
-                cancer_type=x["cancer_type"],
-                genes=x["gene_x"] + "and " + x["gene_y"],
+                treatments=[y["treatment"] for y in treatment["treatments"]],
+                cancer_type=treatment["cancer_type"],
+                genes=treatment["gene_x"] + "and " + treatment["gene_y"],
             )
             examples += template
 

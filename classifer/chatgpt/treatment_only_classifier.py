@@ -8,14 +8,15 @@ from classifer.chatgpt.base_gpt_classifier import BaseGPTClassifier
 from classifer.chatgpt.prompt_templates import *
 from dataset.gene_pair_dataset import GenePairDataset
 from dataset.load_protect import LoadProtect
+from dataset.treatment_source_dataset import TreatmentSourceDataset
 
 
-class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
+class TreatmentSourceGPTClassifier(BaseGPTClassifier):
     random_state = 42
 
     def __init__(
         self,
-        base_dataset: GenePairDataset,
+        base_dataset: TreatmentSourceDataset,
         prompt_template: str,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
         n_examples: int = 2,
@@ -36,29 +37,15 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
     def _construct_prompt(self, x) -> str:
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
-                treatments_and_sources=self._construct_treatments_and_source(x),
-                cancer_type=x["cancer_type"],
-                genes=x["gene_x"] + "and " + x["gene_y"],
+                treatments=x["treatments"],
+                source=x["source"],
                 examples=self._construct_examples(x),
             )
         else:
             return self.prompt_template.format(
-                treatments_and_sources=self._construct_treatments_and_source(x),
-                cancer_type=x["cancer_type"],
-                genes=x["gene_x"] + "and " + x["gene_y"],
+                treatments=x["treatments"],
+                source=x["source"],
             )
-
-    @staticmethod
-    def _construct_treatments_and_source(x) -> str:
-        treatments_and_sources = ""
-
-        for treatment in x["treatments"]:
-            treatments_and_sources += TREATMENT_AND_SOURCE_PROMPT_TEMPLATE.format(
-                treatment=treatment["treatment"],
-                source=treatment["source"],
-            )
-
-        return treatments_and_sources
 
     def _construct_examples(self, x) -> str:
         dataset = copy.deepcopy(self.base_dataset.dataset())
@@ -69,14 +56,13 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = GENE_PAIR_SOURCES_EXAMPLE_PROMPT_TEMPLATE.format(
-                treatments_and_sources=self._construct_treatments_and_source(treatment),
-                cancer_type=treatment["cancer_type"],
-                genes=treatment["gene_x"] + "and " + treatment["gene_y"],
+            template = TREATMENT_SOURCE_PROMPT_TEMPLATE.format(
+                treatments=treatment["treatments"],
+                source=treatment["source"],
             )
             examples += template
 
         return examples
 
     def _label(self) -> str:
-        return "treatments"
+        return "treatment"
