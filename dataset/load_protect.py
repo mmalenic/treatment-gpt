@@ -101,7 +101,7 @@ class LoadProtect:
                             source[2],
                         )
 
-                if treatment is None:
+                if treatment is None or len(treatment) == 0:
                     out = (source[0], "", source[2])
 
                 output.append(out)

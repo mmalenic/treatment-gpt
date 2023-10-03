@@ -42,7 +42,8 @@ class TreatmentSourceDataset:
             self._dataset.append(
                 {
                     "source": source,
-                    "treatment": treatment,
+                    "treatments": list(set([x[0] for x in all_treatments])),
+                    "y_true": treatment,
                 }
             )
 
