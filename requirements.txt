@@ -1,4 +1,8 @@
 boto3~=1.26.54
-pandas~=2.1.1
+pandas~=2.0.3
 xarray~=2023.8.0
 openpyxl~=3.0.9
+numpy~=1.25.2
+metapub~=0.5.5
+openai~=0.28.1
+scikit-learn~=1.2.2

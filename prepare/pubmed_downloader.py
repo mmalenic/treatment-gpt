@@ -95,6 +95,7 @@ class PubmedDownloader:
             Path(save_abstract_to).write_text(output_abstract, encoding="utf-8")
         except Exception as e:
             print("failed to read pubmed id:", pubmed_id, "with error:", e)
+            Path(save_abstract_to).write_text("", encoding="utf-8")
             handle.close()
 
         time.sleep(self.abstract_pdf_delay)
