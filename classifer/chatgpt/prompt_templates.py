@@ -29,7 +29,7 @@ _LIST_OF_TREATMENTS_AND_SOURCES_PROMPT_TEMPLATE = (
 _PATIENT_CANCER_TYPE_PROMPT_TEMPLATE = """A patient has {cancer_type} with the following actionable genes: {genes}.
 What treatments are available for this patient?"""
 
-_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE = "A few prior examples of classifications."
+_FEW_SHOT_EXAMPLES_PROMPT_TEMPLATE = "A few prior examples of classifications. The examples are delimited with triple backticks."
 
 _EXAMPLES_PROMPT_TEMPLATE = "{examples}"
 
@@ -51,6 +51,22 @@ _TREATMENT_ONLY_RESPONSE_PROMPT_TEMPLATE = (
 )
 
 _TREATMENT_ONLY_COT_PROMPT_TEMPLATE = "Think step by step about which treatment the abstract refers to and reason about your decision."
+
+GENE_PAIR_EXAMPLE_PROMPT_TEMPLATE = f"""
+```
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_PATIENT_CANCER_TYPE_PROMPT_TEMPLATE}
+```
+"""
+
+TREATMENT_SOURCE_PROMPT_TEMPLATE = f"""
+```
+{_LIST_OF_TREATMENTS_PROMPT_TEMPLATE}
+
+{_TREATMENT_ONLY_RESPONSE_PROMPT_TEMPLATE}
+```
+"""
 
 ZERO_SHOT_PROMPT_TEMPLATE = f"""
 {_PATIENT_TREATMENT_TASK_PROMPT_TEMPLATE}

@@ -10,14 +10,19 @@ from sklearn import metrics
 
 class BaseGPTClassifier(ABC):
     def __init__(
-        self, model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo"
+        self,
+        X,
+        y,
+        model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
     ):
+        """
+        Initialize this class.
+        """
         super().__init__()
 
-        """Initialize this class."""
         self._model_type = model_type
-        self.X = None
-        self.y = None
+        self.X = X
+        self.y = y
         self._predictions = None
 
     def n_samples(self) -> int:
@@ -34,14 +39,9 @@ class BaseGPTClassifier(ABC):
     def f1_score(self):
         return metrics.f1_score(self.y, self._predictions, average="samples")
 
-    def fit(self, X, y):
-        """Fit the model."""
-        self.X = X
-        self.y = y
-
-    def predict(self, X):
+    def predict(self):
         """Predict the labels."""
-        self._predictions = [y for x in self._predict_single(X) for y in x]
+        self._predictions = [y for x in self._predict_single(self.X) for y in x]
         return self._predictions
 
     def _predict_single(self, x) -> List[str]:
@@ -52,7 +52,7 @@ class BaseGPTClassifier(ABC):
                 {"role": "system", "content": "You are a text classification model."},
                 {"role": "user", "content": self._construct_prompt(x)},
             ],
-            n=3,
+            n=1,
         )
 
         responses = []

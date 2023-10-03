@@ -38,9 +38,10 @@ class TreatmentSourceDataset:
             for treatment in treatments:
                 all_treatments.add((treatment[0], treatment[1]))
 
-        for treatment, source in all_treatments:
+        for index, (treatment, source) in enumerate(all_treatments):
             self._dataset.append(
                 {
+                    "index": index,
                     "source": source,
                     "treatments": list(set([x[0] for x in all_treatments])),
                     "y_true": treatment,
