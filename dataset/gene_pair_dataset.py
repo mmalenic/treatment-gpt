@@ -35,20 +35,23 @@ class GenePairDataset:
                 + row["treatment_with_text_sources_y"]
             )
             treatments = [
-                {"treatment": x[0], "source": x[1], "level": x[2]} for x in treatments
+                {"treatment": x[0], "source": x[1], "level": x[2]}
+                for i, x in enumerate(treatments)
+                if not any((x[0] == y[0] for y in treatments[:i]))
             ]
 
             y_true = [x["treatment"] for x in treatments]
 
             all_treatments = self._from_protect.treatments_and_sources()
-            all_treatments = list([x for x in all_treatments if x[0] not in treatments])
+            all_treatments = list([x for x in all_treatments if x[0] not in y_true])
 
             random.shuffle(all_treatments)
             treatments += [
                 {"treatment": x[0], "source": x[1], "level": x[2]}
-                for x in all_treatments[: len(treatments)]
+                for x in all_treatments[: len(y_true)]
             ]
 
+            random.shuffle(treatments)
             self._dataset.append(
                 {
                     "index": index,

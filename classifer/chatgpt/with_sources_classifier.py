@@ -40,16 +40,16 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
             return self.prompt_template.format(
                 treatments_and_sources=treatments,
                 cancer_type=x["cancer_type"],
-                genes=x["gene_x"] + "and " + x["gene_y"],
+                genes=x["gene_x"] + " and " + x["gene_y"],
                 examples=self._construct_examples(x),
-                n_treatments=len(treatments) / 2,
+                n_treatments=len(x["y_true"]),
             )
         else:
             return self.prompt_template.format(
                 treatments_and_sources=treatments,
-                n_treatments=len(treatments) / 2,
+                n_treatments=len(x["y_true"]),
                 cancer_type=x["cancer_type"],
-                genes=x["gene_x"] + "and " + x["gene_y"],
+                genes=x["gene_x"] + " and " + x["gene_y"],
             )
 
     @staticmethod
@@ -69,14 +69,24 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
         random.shuffle(dataset)
 
         examples = ""
-        for i, treatment in enumerate([y for y in dataset if y["index"] != x["index"]]):
+        genes = [x["gene_x"], x["gene_y"]]
+        for i, treatment in enumerate(
+            [
+                y
+                for y in dataset
+                if y["index"] != x["index"]
+                and y["gene_x"] not in genes
+                and y["gene_y"] not in genes
+            ]
+        ):
             if i == self.n_examples:
                 break
 
             template = GENE_PAIR_SOURCES_EXAMPLE_PROMPT_TEMPLATE.format(
                 treatments_and_sources=self._construct_treatments_and_source(treatment),
                 cancer_type=treatment["cancer_type"],
-                genes=treatment["gene_x"] + "and " + treatment["gene_y"],
+                genes=treatment["gene_x"] + " and " + treatment["gene_y"],
+                answer={"treatments": treatment["y_true"]},
             )
             examples += template
 

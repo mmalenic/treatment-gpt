@@ -40,16 +40,16 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
             return self.prompt_template.format(
                 treatments=treatments,
                 cancer_type=x["cancer_type"],
-                genes=x["gene_x"] + "and " + x["gene_y"],
-                n_treatments=len(treatments) / 2,
+                genes=x["gene_x"] + " and " + x["gene_y"],
+                n_treatments=len(x["y_true"]),
                 examples=self._construct_examples(x),
             )
         else:
             return self.prompt_template.format(
                 treatments=treatments,
                 cancer_type=x["cancer_type"],
-                genes=x["gene_x"] + "and " + x["gene_y"],
-                n_treatments=len(treatments) / 2,
+                genes=x["gene_x"] + " and " + x["gene_y"],
+                n_treatments=len(x["y_true"]),
             )
 
     def _construct_examples(self, x) -> str:
@@ -57,14 +57,24 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         random.shuffle(dataset)
 
         examples = ""
-        for i, treatment in enumerate([y for y in dataset if y["index"] != x["index"]]):
+        genes = [x["gene_x"], x["gene_y"]]
+        for i, treatment in enumerate(
+            [
+                y
+                for y in dataset
+                if y["index"] != x["index"]
+                and y["gene_x"] not in genes
+                and y["gene_y"] not in genes
+            ]
+        ):
             if i == self.n_examples:
                 break
 
             template = GENE_PAIR_EXAMPLE_PROMPT_TEMPLATE.format(
                 treatments=[y["treatment"] for y in treatment["treatments"]],
                 cancer_type=treatment["cancer_type"],
-                genes=treatment["gene_x"] + "and " + treatment["gene_y"],
+                genes=treatment["gene_x"] + " and " + treatment["gene_y"],
+                answer={"treatments": treatment["y_true"]},
             )
             examples += template
 
