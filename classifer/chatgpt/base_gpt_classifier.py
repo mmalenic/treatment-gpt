@@ -46,21 +46,24 @@ class BaseGPTClassifier(ABC):
 
     def _predict_single(self, x) -> List[str]:
         """Predict a single sample."""
-        response = openai.ChatCompletion.create(
-            model=self._model_type,
-            messages=[
-                {"role": "system", "content": "You are a text classification model."},
-                {"role": "user", "content": self._construct_prompt(x)},
-            ],
-            n=1,
-        )
 
-        responses = []
-        for choice in response["choices"]:
-            content = choice["message"]["content"]
-            responses.append(self._extract_response(content, label=self._label()))
-
-        return responses
+        print("predicting for:", x)
+        return []
+        # response = openai.ChatCompletion.create(
+        #     model=self._model_type,
+        #     messages=[
+        #         {"role": "system", "content": "You are a text classification model."},
+        #         {"role": "user", "content": self._construct_prompt(x)},
+        #     ],
+        #     n=1,
+        # )
+        #
+        # responses = []
+        # for choice in response["choices"]:
+        #     content = choice["message"]["content"]
+        #     responses.append(self._extract_response(content, label=self._label()))
+        #
+        # return responses
 
     def _extract_response(self, content: str, label: str):
         """Extract the response."""
