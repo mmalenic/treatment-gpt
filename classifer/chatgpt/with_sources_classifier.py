@@ -1,4 +1,5 @@
 import copy
+import json
 import random
 from typing import Literal
 
@@ -86,7 +87,7 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
                 treatments_and_sources=self._construct_treatments_and_source(treatment),
                 cancer_type=treatment["cancer_type"],
                 genes=treatment["gene_x"] + " and " + treatment["gene_y"],
-                answer={"treatments": treatment["y_true"]},
+                answer=json.dumps({"treatments": treatment["y_true"]}),
             )
             examples += template
 

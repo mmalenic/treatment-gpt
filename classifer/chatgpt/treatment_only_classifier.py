@@ -1,4 +1,5 @@
 import copy
+import json
 import random
 from typing import Literal
 
@@ -37,13 +38,13 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
     def _construct_prompt(self, x) -> str:
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
-                treatments=x["treatments"],
+                treatments=json.dumps(x["treatments"]),
                 source=x["source"],
                 examples=self._construct_examples(x),
             )
         else:
             return self.prompt_template.format(
-                treatments=x["treatments"],
+                treatments=json.dumps(x["treatments"]),
                 source=x["source"],
             )
 
@@ -58,7 +59,7 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
 
             template = TREATMENT_SOURCE_PROMPT_TEMPLATE.format(
                 source=treatment["source"],
-                answer={"treatment": treatment["y_true"]},
+                answer=json.dumps({"treatment": treatment["y_true"]}),
             )
             examples += template
 

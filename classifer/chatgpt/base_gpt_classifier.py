@@ -80,11 +80,10 @@ class BaseGPTClassifier(ABC):
             raise ValueError("More than one JSON object found.")
         if len(json_content) == 0:
             raise ValueError("No JSON object found.")
-
         json_content = json_content[0]
 
         results = []
-        json.loads(json_content, object_hook=decode_dict)
+        json.loads(json.dumps(json_content), object_hook=decode_dict)
 
         if len(results) > 1:
             raise ValueError("More than one label found.")

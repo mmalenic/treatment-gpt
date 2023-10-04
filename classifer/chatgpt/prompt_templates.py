@@ -14,7 +14,7 @@ You will have the following information available:
 
 _PATIENT_TREATMENT_SOURCE_TASK_PROMPT_TEMPLATE = """You are tasked with classifying a cancer patient into treatments.
 You will have the following information available:
-1. The list of pairs of possible treatments and abstracts outlining the source of the treatment. Each treatment and source pair is delimited by triple quotes.
+1. The pairs of possible treatments and abstracts outlining the source of the treatment.
 2. The patient's cancer type.
 3. A pair of the patient's actionable genes."""
 

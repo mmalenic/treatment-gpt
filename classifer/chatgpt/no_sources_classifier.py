@@ -1,4 +1,5 @@
 import copy
+import json
 import random
 from typing import Literal
 
@@ -38,7 +39,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
-                treatments=treatments,
+                treatments=json.dumps(treatments),
                 cancer_type=x["cancer_type"],
                 genes=x["gene_x"] + " and " + x["gene_y"],
                 n_treatments=len(x["y_true"]),
@@ -46,7 +47,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
             )
         else:
             return self.prompt_template.format(
-                treatments=treatments,
+                treatments=json.dumps(treatments),
                 cancer_type=x["cancer_type"],
                 genes=x["gene_x"] + " and " + x["gene_y"],
                 n_treatments=len(x["y_true"]),
@@ -71,10 +72,12 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
                 break
 
             template = GENE_PAIR_EXAMPLE_PROMPT_TEMPLATE.format(
-                treatments=[y["treatment"] for y in treatment["treatments"]],
+                treatments=json.dumps(
+                    [y["treatment"] for y in treatment["treatments"]]
+                ),
                 cancer_type=treatment["cancer_type"],
                 genes=treatment["gene_x"] + " and " + treatment["gene_y"],
-                answer={"treatments": treatment["y_true"]},
+                answer=json.dumps({"treatments": treatment["y_true"]}),
             )
             examples += template
 
