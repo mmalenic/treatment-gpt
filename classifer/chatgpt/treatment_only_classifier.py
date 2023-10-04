@@ -65,5 +65,5 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
 
         return examples
 
-    def _label(self) -> str:
-        return "treatment"
+    def _index(self, x) -> str:
+        return x["index"]

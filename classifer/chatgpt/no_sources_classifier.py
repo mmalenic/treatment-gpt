@@ -26,6 +26,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         """
 
         y_true = [x["y_true"] for x in base_dataset.dataset()]
+
         super().__init__(base_dataset, y_true, model_type)
 
         self.base_dataset = base_dataset
@@ -83,5 +84,5 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
         return examples
 
-    def _label(self) -> str:
-        return "treatments"
+    def _index(self, x) -> str:
+        return x["index"]

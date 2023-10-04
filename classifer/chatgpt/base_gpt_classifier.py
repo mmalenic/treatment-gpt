@@ -1,6 +1,8 @@
 import ast
 import json
+import os
 from json import JSONDecoder
+from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
 
@@ -13,6 +15,7 @@ class BaseGPTClassifier(ABC):
         self,
         X,
         y,
+        save_dir: str,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
     ):
         """
@@ -23,6 +26,8 @@ class BaseGPTClassifier(ABC):
         self._model_type = model_type
         self.X = X
         self.y = y
+        Path(save_dir).mkdir(parents=True, exist_ok=True)
+        self.save_dir = save_dir
         self._predictions = None
 
     def n_samples(self) -> int:
@@ -41,36 +46,45 @@ class BaseGPTClassifier(ABC):
 
     def predict(self):
         """Predict the labels."""
-        self._predictions = [y for x in self._predict_single(self.X) for y in x]
+        self._predictions = [y for i, x in self.X for y in self._predict_single(x)]
         return self._predictions
 
     def _predict_single(self, x) -> List[str]:
         """Predict a single sample."""
+        index = self._index(x)
+        if Path(os.path.join(self.save_dir, index)).exists():
+            with open(os.path.join(self.save_dir, index), "r", encoding="utf-8") as f:
+                response = json.load(f)
+        else:
+            response = openai.ChatCompletion.create(
+                model=self._model_type,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a text classification model.",
+                    },
+                    {"role": "user", "content": self._construct_prompt(x)},
+                ],
+                n=1,
+            )
 
-        print("predicting for:", x)
-        return []
-        # response = openai.ChatCompletion.create(
-        #     model=self._model_type,
-        #     messages=[
-        #         {"role": "system", "content": "You are a text classification model."},
-        #         {"role": "user", "content": self._construct_prompt(x)},
-        #     ],
-        #     n=1,
-        # )
-        #
-        # responses = []
-        # for choice in response["choices"]:
-        #     content = choice["message"]["content"]
-        #     responses.append(self._extract_response(content, label=self._label()))
-        #
-        # return responses
+        responses = []
+        for choice in response["choices"]:
+            content = choice["message"]["content"]
+            responses.append(self._extract_response(content))
 
-    def _extract_response(self, content: str, label: str):
+        return responses
+
+    def _extract_response(self, content: str):
         """Extract the response."""
 
         def decode_dict(json_dict):
             try:
-                results.append(json_dict[label])
+                results.append(json_dict["treatment"])
+            except KeyError:
+                pass
+            try:
+                results.append(json_dict["treatments"])
             except KeyError:
                 pass
             return json_dict
@@ -118,5 +132,5 @@ class BaseGPTClassifier(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _label(self) -> str:
+    def _index(self, x) -> str:
         raise NotImplementedError
