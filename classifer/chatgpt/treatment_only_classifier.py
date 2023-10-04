@@ -18,7 +18,10 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
     def __init__(
         self,
         base_dataset: TreatmentSourceDataset,
-        prompt_template: str,
+        prompt_template: Prompts.ZERO_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE_TYPE
+        | Prompts.FEW_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE_TYPE
+        | Prompts.ZERO_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE_TYPE
+        | Prompts.FEW_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE_TYPE,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
         n_examples: int = 2,
     ):
@@ -57,7 +60,7 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = TREATMENT_SOURCE_PROMPT_TEMPLATE.format(
+            template = Prompts.TREATMENT_SOURCE_PROMPT_TEMPLATE.format(
                 source=treatment["source"],
                 answer=json.dumps({"treatment": treatment["y_true"]}),
             )

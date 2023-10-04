@@ -17,7 +17,10 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
     def __init__(
         self,
         base_dataset: GenePairDataset,
-        prompt_template: str,
+        prompt_template: Prompts.ZERO_SHOT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE
+        | Prompts.FEW_SHOT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE
+        | Prompts.ZERO_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE
+        | Prompts.FEW_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
         n_examples: int = 2,
     ):
@@ -58,9 +61,11 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
         treatments_and_sources = ""
 
         for treatment in x["treatments"]:
-            treatments_and_sources += TREATMENT_AND_SOURCE_PROMPT_TEMPLATE.format(
-                treatment=treatment["treatment"],
-                source=treatment["source"],
+            treatments_and_sources += (
+                Prompts.TREATMENT_AND_SOURCE_PROMPT_TEMPLATE.format(
+                    treatment=treatment["treatment"],
+                    source=treatment["source"],
+                )
             )
 
         return treatments_and_sources
@@ -83,7 +88,7 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = GENE_PAIR_SOURCES_EXAMPLE_PROMPT_TEMPLATE.format(
+            template = Prompts.GENE_PAIR_SOURCES_EXAMPLE_PROMPT_TEMPLATE.format(
                 treatments_and_sources=self._construct_treatments_and_source(treatment),
                 cancer_type=treatment["cancer_type"],
                 genes=treatment["gene_x"] + " and " + treatment["gene_y"],

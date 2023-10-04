@@ -1,7 +1,7 @@
 import copy
 import json
 import random
-from typing import Literal
+from typing import Literal, get_args
 
 import pandas as pd
 
@@ -17,7 +17,10 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
     def __init__(
         self,
         base_dataset: GenePairDataset,
-        prompt_template: str,
+        prompt_template: Prompts.ZERO_SHOT_PROMPT_TEMPLATE_TYPE
+        | Prompts.FEW_SHOT_PROMPT_TEMPLATE_TYPE
+        | Prompts.ZERO_SHOT_COT_PROMPT_TEMPLATE_TYPE
+        | Prompts.FEW_SHOT_COT_PROMPT_TEMPLATE_TYPE,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
         n_examples: int = 2,
     ):
@@ -31,6 +34,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
         self.base_dataset = base_dataset
         self.prompt_template = prompt_template
+        print(self.prompt_template)
         self.n_examples = n_examples
 
         random.seed(self.random_state)
@@ -72,7 +76,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = GENE_PAIR_EXAMPLE_PROMPT_TEMPLATE.format(
+            template = Prompts.GENE_PAIR_EXAMPLE_PROMPT_TEMPLATE.format(
                 treatments=json.dumps(
                     [y["treatment"] for y in treatment["treatments"]]
                 ),
