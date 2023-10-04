@@ -46,7 +46,7 @@ class TreatmentSourceDataset:
                     {
                         "index": index,
                         "source": source,
-                        "treatments": list(set([x[0] for x in all_treatments])),
+                        "treatments": treatments,
                         "y_true": treatment,
                     }
                 )

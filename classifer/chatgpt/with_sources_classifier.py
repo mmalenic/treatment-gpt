@@ -1,6 +1,7 @@
 import copy
 import json
 import random
+from hashlib import md5
 from typing import Literal
 
 import pandas as pd
@@ -108,4 +109,6 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
         return examples
 
     def _index(self, x) -> str:
-        return x["index"]
+        return md5(
+            f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}"
+        ).hexdigest()

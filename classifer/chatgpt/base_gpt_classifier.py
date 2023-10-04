@@ -45,16 +45,20 @@ class BaseGPTClassifier(ABC):
         return metrics.f1_score(self.y, self._predictions, average="samples")
 
     def predict(self):
-        """Predict the labels."""
+        """
+        Predict the labels.
+        """
         self._predictions = [y for i, x in self.X for y in self._predict_single(x)]
         return self._predictions
 
     def _predict_single(self, x) -> List[str]:
-        """Predict a single sample."""
+        """
+        Predict a single sample.
+        """
         index = self._index(x)
         if Path(os.path.join(self.save_dir, index)).exists():
             with open(os.path.join(self.save_dir, index), "r", encoding="utf-8") as f:
-                response = json.load(f)
+                response = json.load(f)["response"]
         else:
             response = openai.ChatCompletion.create(
                 model=self._model_type,
@@ -67,6 +71,8 @@ class BaseGPTClassifier(ABC):
                 ],
                 n=1,
             )
+            with open(os.path.join(self.save_dir, index), "w", encoding="utf-8") as f:
+                json.dump({"x": x, "response": response}, f)
 
         responses = []
         for choice in response["choices"]:
@@ -76,7 +82,9 @@ class BaseGPTClassifier(ABC):
         return responses
 
     def _extract_response(self, content: str):
-        """Extract the response."""
+        """
+        Extract the response.
+        """
 
         def decode_dict(json_dict):
             try:

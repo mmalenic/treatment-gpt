@@ -1,6 +1,7 @@
 import copy
 import json
 import random
+from hashlib import md5
 from typing import Literal
 
 import pandas as pd
@@ -79,4 +80,4 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
         return examples
 
     def _index(self, x) -> str:
-        return x["index"]
+        return md5(f"{x['source']}_{x['y_true']}").hexdigest()
