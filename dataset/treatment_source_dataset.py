@@ -40,14 +40,16 @@ class TreatmentSourceDataset:
                     all_treatments.add((treatment[0], treatment[1]))
 
         for index, (treatment, source) in enumerate(all_treatments):
-            self._dataset.append(
-                {
-                    "index": index,
-                    "source": source,
-                    "treatments": list(set([x[0] for x in all_treatments])),
-                    "y_true": treatment,
-                }
-            )
+            treatments = list(set([x[0] for x in all_treatments]))
+            if treatments and source is not None and source != "":
+                self._dataset.append(
+                    {
+                        "index": index,
+                        "source": source,
+                        "treatments": list(set([x[0] for x in all_treatments])),
+                        "y_true": treatment,
+                    }
+                )
 
     def dataset(self):
         """
