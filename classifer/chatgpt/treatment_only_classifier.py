@@ -18,10 +18,10 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
     def __init__(
         self,
         base_dataset: TreatmentSourceDataset,
-        prompt_template: Prompts.ZERO_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE_TYPE
-        | Prompts.FEW_SHOT_TREATMENT_ONLY_PROMPT_TEMPLATE_TYPE
-        | Prompts.ZERO_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE_TYPE
-        | Prompts.FEW_SHOT_TREATMENT_ONLY_COT_PROMPT_TEMPLATE_TYPE,
+        prompt_template: Prompts.zero_shot_treatment_source_literal
+        | Prompts.few_shot_treatment_source_literal
+        | Prompts.zero_shot_treatment_source_cot_literal
+        | Prompts.few_shot_treatment_source_cot_literal,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
         n_examples: int = 2,
     ):
@@ -29,11 +29,21 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
         Initialize this class.
         """
 
+        if (
+            prompt_template != Prompts.zero_shot_treatment_source_name
+            and prompt_template != Prompts.few_shot_treatment_source_name
+            and prompt_template != Prompts.zero_shot_treatment_source_cot_name
+            and prompt_template != Prompts.few_shot_treatment_source_cot_name
+        ):
+            raise TypeError(
+                f"Invalid prompt template for this classifier: {prompt_template}"
+            )
+
         y_true = [x["y_true"] for x in base_dataset.dataset()]
         super().__init__(base_dataset, y_true, model_type)
 
         self.base_dataset = base_dataset
-        self.prompt_template = prompt_template
+        self.prompt_template = Prompts.from_name(prompt_template)
         self.n_examples = n_examples
 
         random.seed(self.random_state)
@@ -60,7 +70,7 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = Prompts.TREATMENT_SOURCE_PROMPT_TEMPLATE.format(
+            template = Prompts.treatment_source_prompt_template.format(
                 source=treatment["source"],
                 answer=json.dumps({"treatment": treatment["y_true"]}),
             )

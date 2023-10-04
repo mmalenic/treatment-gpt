@@ -17,24 +17,32 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
     def __init__(
         self,
         base_dataset: GenePairDataset,
-        prompt_template: Prompts.ZERO_SHOT_PROMPT_TEMPLATE_TYPE
-        | Prompts.FEW_SHOT_PROMPT_TEMPLATE_TYPE
-        | Prompts.ZERO_SHOT_COT_PROMPT_TEMPLATE_TYPE
-        | Prompts.FEW_SHOT_COT_PROMPT_TEMPLATE_TYPE,
+        prompt_template: Prompts.zero_shot_no_sources_literal
+        | Prompts.few_shot_no_sources_literal
+        | Prompts.zero_shot_no_sources_cot_literal
+        | Prompts.few_shot_no_sources_cot_literal,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
         n_examples: int = 2,
     ):
         """
         Initialize this class.
         """
+        if (
+            prompt_template != Prompts.zero_shot_no_sources_name
+            and prompt_template != Prompts.few_shot_no_sources_name
+            and prompt_template != Prompts.zero_shot_no_sources_cot_name
+            and prompt_template != Prompts.few_shot_no_sources_cot_name
+        ):
+            raise TypeError(
+                f"Invalid prompt template for this classifier: {prompt_template}"
+            )
 
         y_true = [x["y_true"] for x in base_dataset.dataset()]
 
         super().__init__(base_dataset, y_true, model_type)
 
         self.base_dataset = base_dataset
-        self.prompt_template = prompt_template
-        print(self.prompt_template)
+        self.prompt_template = Prompts.from_name(prompt_template)
         self.n_examples = n_examples
 
         random.seed(self.random_state)
@@ -76,7 +84,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = Prompts.GENE_PAIR_EXAMPLE_PROMPT_TEMPLATE.format(
+            template = Prompts.gene_pair_example_prompt_template.format(
                 treatments=json.dumps(
                     [y["treatment"] for y in treatment["treatments"]]
                 ),

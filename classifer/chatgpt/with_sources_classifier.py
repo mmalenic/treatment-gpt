@@ -17,22 +17,31 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
     def __init__(
         self,
         base_dataset: GenePairDataset,
-        prompt_template: Prompts.ZERO_SHOT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE
-        | Prompts.FEW_SHOT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE
-        | Prompts.ZERO_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE
-        | Prompts.FEW_SHOT_COT_WITH_SOURCES_PROMPT_TEMPLATE_TYPE,
+        prompt_template: Prompts.zero_shot_with_sources_literal
+        | Prompts.few_shot_with_sources_literal
+        | Prompts.zero_shot_with_sources_cot_literal
+        | Prompts.few_shot_with_sources_cot_literal,
         model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
         n_examples: int = 2,
     ):
         """
         Initialize this class.
         """
+        if (
+            prompt_template != Prompts.zero_shot_with_sources_name
+            and prompt_template != Prompts.few_shot_with_sources_name
+            and prompt_template != Prompts.zero_shot_with_sources_cot_name
+            and prompt_template != Prompts.few_shot_with_sources_cot_name
+        ):
+            raise TypeError(
+                f"Invalid prompt template for this classifier: {prompt_template}"
+            )
 
         y_true = [x["y_true"] for x in base_dataset.dataset()]
         super().__init__(base_dataset, y_true, model_type)
 
         self.base_dataset = base_dataset
-        self.prompt_template = prompt_template
+        self.prompt_template = Prompts.from_name(prompt_template)
         self.n_examples = n_examples
 
         random.seed(self.random_state)
@@ -62,7 +71,7 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
         for treatment in x["treatments"]:
             treatments_and_sources += (
-                Prompts.TREATMENT_AND_SOURCE_PROMPT_TEMPLATE.format(
+                Prompts.treatment_and_source_prompt_template.format(
                     treatment=treatment["treatment"],
                     source=treatment["source"],
                 )
@@ -88,7 +97,7 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = Prompts.GENE_PAIR_SOURCES_EXAMPLE_PROMPT_TEMPLATE.format(
+            template = Prompts.gene_pair_sources_example_prompt_template.format(
                 treatments_and_sources=self._construct_treatments_and_source(treatment),
                 cancer_type=treatment["cancer_type"],
                 genes=treatment["gene_x"] + " and " + treatment["gene_y"],
