@@ -36,7 +36,8 @@ class TreatmentSourceDataset:
                 + row["treatment_with_text_sources_y"]
             )
             for treatment in treatments:
-                all_treatments.add((treatment[0], treatment[1]))
+                if treatment[1] is not None and treatment[1] != "":
+                    all_treatments.add((treatment[0], treatment[1]))
 
         for index, (treatment, source) in enumerate(all_treatments):
             self._dataset.append(

@@ -27,25 +27,29 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         y_true = [x["y_true"] for x in base_dataset.dataset()]
         super().__init__(base_dataset, y_true, model_type)
 
-        self.base_dataset = base_dataset.dataset()
+        self.base_dataset = base_dataset
         self.prompt_template = prompt_template
         self.n_examples = n_examples
 
         random.seed(self.random_state)
 
     def _construct_prompt(self, x) -> str:
+        treatments = [y["treatment"] for y in x["treatments"]]
+
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
-                treatments=[y["treatment"] for y in x["treatments"]],
+                treatments=treatments,
                 cancer_type=x["cancer_type"],
                 genes=x["gene_x"] + "and " + x["gene_y"],
+                n_treatments=len(treatments) / 2,
                 examples=self._construct_examples(x),
             )
         else:
             return self.prompt_template.format(
-                treatments=[y["treatment"] for y in x["treatments"]],
+                treatments=treatments,
                 cancer_type=x["cancer_type"],
                 genes=x["gene_x"] + "and " + x["gene_y"],
+                n_treatments=len(treatments) / 2,
             )
 
     def _construct_examples(self, x) -> str:

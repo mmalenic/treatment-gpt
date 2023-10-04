@@ -28,7 +28,7 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
         y_true = [x["y_true"] for x in base_dataset.dataset()]
         super().__init__(base_dataset, y_true, model_type)
 
-        self.base_dataset = base_dataset.dataset()
+        self.base_dataset = base_dataset
         self.prompt_template = prompt_template
         self.n_examples = n_examples
 
@@ -57,8 +57,8 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
                 break
 
             template = TREATMENT_SOURCE_PROMPT_TEMPLATE.format(
-                treatments=treatment["treatments"],
                 source=treatment["source"],
+                answer={"treatment": treatment["y_true"]},
             )
             examples += template
 
