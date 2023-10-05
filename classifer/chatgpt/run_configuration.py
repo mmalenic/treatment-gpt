@@ -277,4 +277,15 @@ class RunConfiguration:
 
     @property
     def run_configuration(self):
+        """
+        Get the run configuration
+        """
         return self._run_configuration
+
+    def calculate_costs(self):
+        """
+        Calculate the cost of each run.
+        """
+        for run in self.run_configuration["runs"]:
+            run["cost_estimate"] = run["classifier"].cost_estimate
+            run["max_tokens"] = run["classifier"].max_token_number
