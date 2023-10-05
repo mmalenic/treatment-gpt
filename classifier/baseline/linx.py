@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from classifer.command import Command
-from classifer.util import find_file, check_prerequisite
+from classifier.command import Command
+from classifier.util import find_file, check_prerequisite
 import os
 import pandas as pd
 

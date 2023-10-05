@@ -6,7 +6,7 @@ from typing import List, Tuple
 import pandas as pd
 import itertools
 
-from classifer.util import find_file
+from classifier.util import find_file
 from dataset.mutation_landscape_cancer_type import MutationLandscapeCancerType
 from prepare.pubmed_downloader import PubmedDownloader
 

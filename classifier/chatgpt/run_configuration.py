@@ -1,7 +1,7 @@
-from classifer.chatgpt.no_sources_classifier import NoSourcesGenePairGPTClassifier
-from classifer.chatgpt.prompt_templates import *
-from classifer.chatgpt.treatment_only_classifier import TreatmentSourceGPTClassifier
-from classifer.chatgpt.with_sources_classifier import WithSourcesGenePairGPTClassifier
+from classifier.chatgpt.no_sources_classifier import NoSourcesGenePairGPTClassifier
+from classifier.chatgpt.prompt_templates import *
+from classifier.chatgpt.treatment_only_classifier import TreatmentSourceGPTClassifier
+from classifier.chatgpt.with_sources_classifier import WithSourcesGenePairGPTClassifier
 from dataset.treatment_source_dataset import TreatmentSourceDataset
 from dataset.gene_pair_dataset import GenePairDataset
 

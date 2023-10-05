@@ -2,10 +2,10 @@ import os
 
 import pandas as pd
 
-from classifer.command import Command
+from classifier.command import Command
 from pathlib import Path
 
-from classifer.util import find_file, check_prerequisite
+from classifier.util import find_file, check_prerequisite
 
 
 class Protect:

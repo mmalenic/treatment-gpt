@@ -2,9 +2,9 @@ import json
 import os
 from typing import List, Optional
 
-from classifer.baseline.linx import Linx
-from classifer.baseline.protect import Protect
-from classifer.util import find_file
+from classifier.baseline.linx import Linx
+from classifier.baseline.protect import Protect
+from classifier.util import find_file
 
 
 class AllProtect:
