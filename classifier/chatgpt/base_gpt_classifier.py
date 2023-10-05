@@ -13,7 +13,12 @@ from sklearn import metrics
 
 
 class BaseGPTClassifier(ABC):
-    output_n_tokens_estimate = 100
+    output_n_tokens_estimate = 200
+    output_n_tokens_estimate_cot = 1000
+    max_4k_input = 4097 - output_n_tokens_estimate
+    max_4k_input_cot = 4097 - output_n_tokens_estimate_cot
+    max_8k_input = 8192 - output_n_tokens_estimate
+    max_8k_input_cot = 8192 - output_n_tokens_estimate_cot
 
     def __init__(
         self,
@@ -87,12 +92,18 @@ class BaseGPTClassifier(ABC):
         self._predictions = [y for x in self.X for y in self._predict_single(x)]
         return self._predictions
 
+    def _n_tokens(self, prompt) -> int:
+        """
+        Get the number of tokens in a prompt.
+        """
+        encoding = tiktoken.encoding_for_model(self._model_type)
+        return len(encoding.encode(prompt))
+
     def _cost_estimate_single(self, x) -> (int, Decimal):
         """
         Cost for a single sample.
         """
-        encoding = tiktoken.encoding_for_model(self._model_type)
-        n_tokens = len(encoding.encode(self._construct_prompt(x)))
+        n_tokens = self._n_tokens(self._construct_prompt(x))
 
         if self._model_type == "gpt-3.5-turbo":
             return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.0015)) + (
@@ -113,6 +124,14 @@ class BaseGPTClassifier(ABC):
                 (Decimal(self.output_n_tokens_estimate) / Decimal(1000)) * Decimal(0.12)
             )
 
+    def _get_model_type(self, n_tokens: int, prompt: str) -> str:
+        """
+        Get the best model type based on the number of tokens.
+        """
+        model_type = self._model_type
+
+        # if model_type == "gpt-3.5-turbo" and n_tokens > self.
+
     def _predict_single(self, x) -> List[str]:
         """
         Predict a single sample.
@@ -122,6 +141,12 @@ class BaseGPTClassifier(ABC):
             with open(os.path.join(self.save_dir, index), "r", encoding="utf-8") as f:
                 response = json.load(f)["response"]
         else:
+            prompt = self._construct_prompt(x)
+            n_tokens = self._n_tokens(prompt)
+            model_type = self._model_type
+
+            # if model_type == "gpt-3.5-turbo" and n_tokens > self.
+
             response = openai.ChatCompletion.create(
                 model=self._model_type,
                 messages=[
@@ -133,6 +158,11 @@ class BaseGPTClassifier(ABC):
                 ],
                 n=1,
             )
+
+            for choice in response["choices"]:
+                if choice["finish_reason"] == "length":
+                    raise ValueError("Model returned a truncated response.")
+
             with open(os.path.join(self.save_dir, index), "w", encoding="utf-8") as f:
                 json.dump({"x": x, "response": response}, f)
 
