@@ -22,8 +22,12 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         | Prompts.few_shot_no_sources_literal
         | Prompts.zero_shot_no_sources_cot_literal
         | Prompts.few_shot_no_sources_cot_literal,
-        model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
+        model_type: Literal["gpt-3.5-turbo"]
+        | Literal["gpt-3.5-turbo-16k"]
+        | Literal["gpt-4"]
+        | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         n_examples: int = 2,
+        **kwargs,
     ):
         """
         Initialize this class.
@@ -40,7 +44,8 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
         y_true = [x["y_true"] for x in base_dataset.dataset()]
 
-        super().__init__(base_dataset, y_true, model_type)
+        self.__dict__.update(kwargs)
+        super().__init__(base_dataset, y_true, prompt_template, model_type, **kwargs)
 
         self.base_dataset = base_dataset
         self.prompt_template = Prompts.from_name(prompt_template)
