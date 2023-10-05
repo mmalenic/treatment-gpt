@@ -290,8 +290,8 @@ class LoadProtect:
                 )
 
                 frame = frame[frame["onLabel"]]
-                # frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
-                # frame = frame[frame["direction"] == "RESPONSIVE"]
+                # frame = frame[(frame["level"] == "A") | (frame["level"] == "B") | (frame["level"] == "C")]
+                frame = frame[frame["direction"] == "RESPONSIVE"]
 
                 if frame.empty:
                     continue
@@ -344,9 +344,9 @@ class LoadProtect:
         output = output.sample(frac=1, random_state=self.random_state).reset_index(
             drop=True
         )
+        output = output.drop_duplicates(subset=["cancer_type", "gene_x", "gene_y"])
 
         self._df = output
-        self._df = self._df.drop_duplicates(subset=["cancer_type", "gene_x", "gene_y"])
         self._stats = self._df.describe()
 
         print("saving protect to:", self._output_to)
