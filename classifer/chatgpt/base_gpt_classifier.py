@@ -5,23 +5,31 @@ from json import JSONDecoder
 from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
+import tiktoken
 
 import openai
 from sklearn import metrics
 
 
 class BaseGPTClassifier(ABC):
+    output_n_tokens_estimate = 100
+
     def __init__(
         self,
         X,
         y,
         save_dir: str,
-        model_type: Literal["gpt-3.5-turbo"] | Literal["gpt-4"] = "gpt-3.5-turbo",
+        model_type: Literal["gpt-3.5-turbo"]
+        | Literal["gpt-3.5-turbo-16k"]
+        | Literal["gpt-4"]
+        | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
+        **kwargs,
     ):
         """
         Initialize this class.
         """
         super().__init__()
+        self.__dict__.update(kwargs)
 
         self._model_type = model_type
         self.X = X
@@ -29,6 +37,8 @@ class BaseGPTClassifier(ABC):
         Path(save_dir).mkdir(parents=True, exist_ok=True)
         self.save_dir = save_dir
         self._predictions = None
+        self._cost_estimate = None
+        self._max_token_number = None
 
     def n_samples(self) -> int:
         return len(self.X)
@@ -44,12 +54,57 @@ class BaseGPTClassifier(ABC):
     def f1_score(self):
         return metrics.f1_score(self.y, self._predictions, average="samples")
 
+    @property
+    def cost_estimate(self):
+        """
+        Estimate costs
+        """
+        estimates = []
+        for x in self.X:
+            n_tokens, estimate = self._cost_estimate_single(x)
+
+            if n_tokens > self._max_token_number:
+                self._max_token_number = n_tokens
+
+            estimates.append(estimate)
+
+        self._cost_estimate = sum(estimates)
+
+        return self._cost_estimate
+
+    @property
+    def max_token_number(self):
+        """
+        Maximum number of tokens in the dataset
+        """
+        return self._max_token_number
+
     def predict(self):
         """
         Predict the labels.
         """
-        self._predictions = [y for i, x in self.X for y in self._predict_single(x)]
+        self._predictions = [y for x in self.X for y in self._predict_single(x)]
         return self._predictions
+
+    def _cost_estimate_single(self, x) -> (int, float):
+        """
+        Cost for a single sample.
+        """
+        encoding = tiktoken.encoding_for_model(self._model_type)
+        n_tokens = len(encoding.encode(self._construct_prompt(x)))
+
+        if self._model_type == "gpt-3.5-turbo":
+            return n_tokens, (n_tokens * 0.0015) + (
+                self.output_n_tokens_estimate * 0.002
+            )
+        elif self._model_type == "gpt-3.5-turbo-16k":
+            return n_tokens, (n_tokens * 0.003) + (
+                self.output_n_tokens_estimate * 0.004
+            )
+        elif self._model_type == "gpt-4":
+            return n_tokens, (n_tokens * 0.03) + (self.output_n_tokens_estimate * 0.06)
+        else:
+            return n_tokens, (n_tokens * 0.06) + (self.output_n_tokens_estimate * 0.12)
 
     def _predict_single(self, x) -> List[str]:
         """
