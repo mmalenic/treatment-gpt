@@ -289,3 +289,9 @@ class RunConfiguration:
         for run in self.run_configuration["runs"]:
             run["cost_estimate"] = run["classifier"].cost_estimate
             run["max_tokens"] = run["classifier"].max_token_number
+
+    def total_cost(self):
+        """
+        Calculate the total cost
+        """
+        return sum([x["cost_estimate"] for x in self.run_configuration["runs"]])
