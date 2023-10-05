@@ -52,6 +52,9 @@ class GenePairDataset:
 
             y_true = [x["treatment"] for x in treatments]
 
+            if len(y_true) == 0:
+                continue
+
             all_treatments = self._from_protect.treatments_and_sources()
             all_treatments = list([x for x in all_treatments if x[0] not in y_true])
 
