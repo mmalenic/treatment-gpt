@@ -40,6 +40,9 @@ class TreatmentSourceDataset:
                     all_treatments.add((treatment[0], treatment[1]))
 
         for index, (treatment, source) in enumerate(all_treatments):
+            if treatment is None or len(treatment) == 0:
+                continue
+
             treatments = list(set([x[0] for x in all_treatments]))
             if treatments and source is not None and source != "":
                 self._dataset.append(

@@ -52,7 +52,7 @@ class GenePairDataset:
 
             y_true = [x["treatment"] for x in treatments]
 
-            if len(y_true) == 0:
+            if len(y_true) == 0 or y_true is None:
                 continue
 
             all_treatments = self._from_protect.treatments_and_sources()
