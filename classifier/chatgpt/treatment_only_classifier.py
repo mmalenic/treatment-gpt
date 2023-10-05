@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 import random
 from hashlib import md5
 from typing import Literal
@@ -28,6 +29,7 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         n_examples: int = 2,
+        base_save_dir: str = "data/results",
         **kwargs,
     ):
         """
@@ -48,7 +50,16 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
 
         self.__dict__.update(kwargs)
         super().__init__(
-            base_dataset.dataset(), y_true, prompt_template, model_type, **kwargs
+            base_dataset.dataset(),
+            y_true,
+            os.path.join(
+                base_save_dir,
+                (prompt_template + "_" + model_type)
+                .replace(".", "_")
+                .replace("-", "_"),
+            ),
+            model_type,
+            **kwargs,
         )
 
         self.base_dataset = base_dataset
