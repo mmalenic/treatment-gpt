@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
 import tiktoken
+from decimal import *
 
 import openai
 from sklearn import metrics
@@ -63,7 +64,7 @@ class BaseGPTClassifier(ABC):
         for x in self.X:
             n_tokens, estimate = self._cost_estimate_single(x)
 
-            if n_tokens > self._max_token_number:
+            if self._max_token_number is None or n_tokens > self._max_token_number:
                 self._max_token_number = n_tokens
 
             estimates.append(estimate)
@@ -86,7 +87,7 @@ class BaseGPTClassifier(ABC):
         self._predictions = [y for x in self.X for y in self._predict_single(x)]
         return self._predictions
 
-    def _cost_estimate_single(self, x) -> (int, float):
+    def _cost_estimate_single(self, x) -> (int, Decimal):
         """
         Cost for a single sample.
         """
@@ -94,17 +95,23 @@ class BaseGPTClassifier(ABC):
         n_tokens = len(encoding.encode(self._construct_prompt(x)))
 
         if self._model_type == "gpt-3.5-turbo":
-            return n_tokens, (n_tokens * 0.0015) + (
-                self.output_n_tokens_estimate * 0.002
+            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.0015)) + (
+                (Decimal(self.output_n_tokens_estimate) / Decimal(1000))
+                * Decimal(0.002)
             )
         elif self._model_type == "gpt-3.5-turbo-16k":
-            return n_tokens, (n_tokens * 0.003) + (
-                self.output_n_tokens_estimate * 0.004
+            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.003)) + (
+                (Decimal(self.output_n_tokens_estimate) / Decimal(1000))
+                * Decimal(0.004)
             )
         elif self._model_type == "gpt-4":
-            return n_tokens, (n_tokens * 0.03) + (self.output_n_tokens_estimate * 0.06)
+            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.03)) + (
+                (Decimal(self.output_n_tokens_estimate) / Decimal(1000)) * Decimal(0.06)
+            )
         else:
-            return n_tokens, (n_tokens * 0.06) + (self.output_n_tokens_estimate * 0.12)
+            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.06)) + (
+                (Decimal(self.output_n_tokens_estimate) / Decimal(1000)) * Decimal(0.12)
+            )
 
     def _predict_single(self, x) -> List[str]:
         """

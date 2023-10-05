@@ -47,7 +47,9 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
         y_true = [x["y_true"] for x in base_dataset.dataset()]
 
         self.__dict__.update(kwargs)
-        super().__init__(base_dataset, y_true, prompt_template, model_type, **kwargs)
+        super().__init__(
+            base_dataset.dataset(), y_true, prompt_template, model_type, **kwargs
+        )
 
         self.base_dataset = base_dataset
         self.prompt_template = Prompts.from_name(prompt_template)
