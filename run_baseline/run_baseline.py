@@ -14,9 +14,21 @@ class RunBaseline:
 
         self._all_protect = AllProtect(doids=self._cancer_types.doids())
 
+    def prepare_samples(self):
+        """
+        Fetch all samples.
+        """
+        self._all_samples.prepare()
+
+    def run_protect(self):
+        """
+        Run protect for all samples.
+        """
+        self._all_protect.run()
+
     def run(self):
         """
         Run the baseline protect model.
         """
-        self._all_samples.prepare()
-        self._all_protect.run()
+        self.prepare_samples()
+        self.run_protect()
