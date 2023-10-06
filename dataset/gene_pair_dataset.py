@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 
 from dataset.load_protect import LoadProtect
@@ -12,7 +14,11 @@ class GenePairDataset:
     random_state = 42
 
     def __init__(
-        self, from_protect: LoadProtect, remove_empty_sources: bool = False, **kwargs
+        self,
+        from_protect: LoadProtect,
+        remove_empty_sources: bool = False,
+        split_to_n_treatments: Optional[int] = 3,
+        **kwargs
     ) -> None:
         """
         Initialize this class.
@@ -24,6 +30,7 @@ class GenePairDataset:
         self._dataset = []
         self._from_protect = from_protect
         self._remove_empty_sources = remove_empty_sources
+        self._split_to_n_treatments = split_to_n_treatments
 
         random.seed(self.random_state)
 
@@ -50,37 +57,47 @@ class GenePairDataset:
                     if x["source"] is not None and x["source"] != ""
                 ]
 
-            y_true = [x["treatment"] for x in treatments]
+            random.shuffle(treatments)
+            if self._split_to_n_treatments is not None:
+                split_to = np.ceil(len(treatments) / self._split_to_n_treatments)
+                treatments = [
+                    x.tolist() for x in np.array_split(np.array(treatments), split_to)
+                ]
+            else:
+                treatments = [treatments]
 
-            if len(y_true) == 0 or y_true is None:
-                continue
+            for treatment_sublist in treatments:
+                y_true = [x["treatment"] for x in treatment_sublist]
 
-            all_treatments = self._from_protect.treatments_and_sources()
-            all_treatments = list([x for x in all_treatments if x[0] not in y_true])
+                if len(y_true) == 0 or y_true is None:
+                    continue
 
-            if self._remove_empty_sources:
-                all_treatments = [
-                    x for x in all_treatments if x[1] is not None and x[1] != ""
+                all_treatments = self._from_protect.treatments_and_sources()
+                all_treatments = list([x for x in all_treatments if x[0] not in y_true])
+
+                if self._remove_empty_sources:
+                    all_treatments = [
+                        x for x in all_treatments if x[1] is not None and x[1] != ""
+                    ]
+
+                random.shuffle(all_treatments)
+                treatment_sublist += [
+                    {"treatment": x[0], "source": x[1], "level": x[2]}
+                    for x in all_treatments[: len(y_true)]
                 ]
 
-            random.shuffle(all_treatments)
-            treatments += [
-                {"treatment": x[0], "source": x[1], "level": x[2]}
-                for x in all_treatments[: len(y_true)]
-            ]
-
-            random.shuffle(treatments)
-            if treatments and y_true:
-                self._dataset.append(
-                    {
-                        "index": index,
-                        "cancer_type": row["cancer_type"],
-                        "gene_x": row["gene_x"],
-                        "gene_y": row["gene_y"],
-                        "treatments": treatments,
-                        "y_true": y_true,
-                    }
-                )
+                random.shuffle(treatment_sublist)
+                if treatment_sublist and y_true:
+                    self._dataset.append(
+                        {
+                            "index": index,
+                            "cancer_type": row["cancer_type"],
+                            "gene_x": row["gene_x"],
+                            "gene_y": row["gene_y"],
+                            "treatments": treatment_sublist,
+                            "y_true": y_true,
+                        }
+                    )
 
     def dataset(self):
         """
