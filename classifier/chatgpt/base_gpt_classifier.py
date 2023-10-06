@@ -11,6 +11,8 @@ from decimal import *
 import openai
 from sklearn import metrics
 
+from classifier.chatgpt.prompt_templates import Prompts
+
 
 class BaseGPTClassifier(ABC):
     output_n_tokens_estimate = 200
@@ -67,7 +69,10 @@ class BaseGPTClassifier(ABC):
         """
         estimates = []
         for x in self.X:
-            n_tokens, estimate = self._cost_estimate_single(x)
+            prompt = self._construct_prompt(x)
+            n_tokens = self._n_tokens(prompt)
+            model_type = self._get_model_type(n_tokens, prompt)
+            estimate = self._cost_estimate_single(model_type, n_tokens)
 
             if self._max_token_number is None or n_tokens > self._max_token_number:
                 self._max_token_number = n_tokens
@@ -99,28 +104,26 @@ class BaseGPTClassifier(ABC):
         encoding = tiktoken.encoding_for_model(self._model_type)
         return len(encoding.encode(prompt))
 
-    def _cost_estimate_single(self, x) -> (int, Decimal):
+    def _cost_estimate_single(self, model_type: str, n_tokens: int) -> Decimal:
         """
         Cost for a single sample.
         """
-        n_tokens = self._n_tokens(self._construct_prompt(x))
-
-        if self._model_type == "gpt-3.5-turbo":
-            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.0015)) + (
+        if model_type == "gpt-3.5-turbo":
+            return ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.0015)) + (
                 (Decimal(self.output_n_tokens_estimate) / Decimal(1000))
                 * Decimal(0.002)
             )
-        elif self._model_type == "gpt-3.5-turbo-16k":
-            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.003)) + (
+        elif model_type == "gpt-3.5-turbo-16k":
+            return ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.003)) + (
                 (Decimal(self.output_n_tokens_estimate) / Decimal(1000))
                 * Decimal(0.004)
             )
-        elif self._model_type == "gpt-4":
-            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.03)) + (
+        elif model_type == "gpt-4":
+            return ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.03)) + (
                 (Decimal(self.output_n_tokens_estimate) / Decimal(1000)) * Decimal(0.06)
             )
         else:
-            return n_tokens, ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.06)) + (
+            return ((Decimal(n_tokens) / Decimal(1000)) * Decimal(0.06)) + (
                 (Decimal(self.output_n_tokens_estimate) / Decimal(1000)) * Decimal(0.12)
             )
 
@@ -130,7 +133,25 @@ class BaseGPTClassifier(ABC):
         """
         model_type = self._model_type
 
-        # if model_type == "gpt-3.5-turbo" and n_tokens > self.
+        if (
+            Prompts.cot_prompt_template in prompt
+            or Prompts.treatment_only_cot_prompt_template in prompt
+        ):
+            if model_type == "gpt-3.5-turbo" and n_tokens > self.max_4k_input_cot:
+                model_type = "gpt-3.5-turbo-16k"
+            if model_type == "gpt-4" and n_tokens > self.max_8k_input_cot:
+                model_type = "gpt-4-32k"
+
+        if (
+            Prompts.cot_prompt_template not in prompt
+            and Prompts.treatment_only_cot_prompt_template not in prompt
+        ):
+            if model_type == "gpt-3.5-turbo" and n_tokens > self.max_4k_input:
+                model_type = "gpt-3.5-turbo-16k"
+            if model_type == "gpt-4" and n_tokens > self.max_8k_input:
+                model_type = "gpt-4-32k"
+
+        return model_type
 
     def _predict_single(self, x) -> List[str]:
         """
@@ -143,12 +164,10 @@ class BaseGPTClassifier(ABC):
         else:
             prompt = self._construct_prompt(x)
             n_tokens = self._n_tokens(prompt)
-            model_type = self._model_type
-
-            # if model_type == "gpt-3.5-turbo" and n_tokens > self.
+            model_type = self._get_model_type(n_tokens, prompt)
 
             response = openai.ChatCompletion.create(
-                model=self._model_type,
+                model=model_type,
                 messages=[
                     {
                         "role": "system",

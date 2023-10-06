@@ -57,7 +57,7 @@ What treatments are available for this patient?"""
     _examples_prompt_template = """Examples:
 {examples}"""
 
-    _cot_prompt_template = "Think step by step about which treatment is best and reason about your decision."
+    cot_prompt_template = "Think step by step about which treatment is best and reason about your decision."
 
     _treatment_only_task_prompt_template = """You are tasked with classifying which treatment a journal abstract is about.
 You will have the following information available:
@@ -72,7 +72,7 @@ You will have the following information available:
 {source}
 What treatment is this journal abstract about?"""
 
-    _treatment_only_cot_prompt_template = "Think step by step about which treatment the abstract refers to and reason about your decision."
+    treatment_only_cot_prompt_template = "Think step by step about which treatment the abstract refers to and reason about your decision."
 
     gene_pair_example_prompt_template = f"""```
 {_list_of_treatments_prompt_template}
@@ -130,7 +130,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_cot_prompt_template}
+2. {cot_prompt_template}
 3. {_multi_label_json_task_prompt_template}
 
 {_list_of_treatments_prompt_template}
@@ -143,7 +143,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_cot_prompt_template}
+2. {cot_prompt_template}
 3. {_multi_label_json_task_prompt_template}
 
 {_examples_prompt_template}
@@ -180,7 +180,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_cot_prompt_template}
+2. {cot_prompt_template}
 3. {_multi_label_json_task_prompt_template}
 
 {_list_of_treatments_and_sources_prompt_template}
@@ -192,7 +192,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_cot_prompt_template}
+2. {cot_prompt_template}
 3. {_multi_label_json_task_prompt_template}
 
 {_examples_prompt_template}
@@ -230,7 +230,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_treatment_only_classification_task_prompt_template}
-2. {_treatment_only_cot_prompt_template}
+2. {treatment_only_cot_prompt_template}
 3. {_single_label_json_task_prompt_template}
 
 {_list_of_treatments_only_prompt_template}
@@ -243,7 +243,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_treatment_only_classification_task_prompt_template}
-2. {_treatment_only_cot_prompt_template}
+2. {treatment_only_cot_prompt_template}
 3. {_single_label_json_task_prompt_template}
 
 {_list_of_treatments_only_prompt_template}
