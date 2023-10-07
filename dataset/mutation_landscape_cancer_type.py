@@ -37,7 +37,7 @@ class MutationLandscapeCancerType:
 
         doids = self._df["doids"]
 
-        return doids[doids != ""].unique().tolist()
+        return doids[doids != ""].dropna().unique().tolist()
 
     @property
     def stats(self) -> pd.DataFrame:
@@ -64,7 +64,7 @@ class MutationLandscapeCancerType:
         if self._df is None:
             self.load()
 
-        return self._df[self._df["doids"] == doid]["canonicalName"].unique()[0]
+        return self._df[(self._df["doids"] == doid)]["canonicalName"].unique()[0]
 
     def load(self) -> pd.DataFrame:
         """
