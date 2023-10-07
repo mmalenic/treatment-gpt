@@ -10,7 +10,7 @@ class MutationLandscapeCancerType:
     Loads data and processes from Sinkala et al. (2023)
     """
 
-    processed_file = "mutations_across_cancer_types.xlsx"
+    processed_file = "mutations_across_cancer_types.csv"
 
     def __init__(
         self,
@@ -72,7 +72,7 @@ class MutationLandscapeCancerType:
         """
         if Path(self.processed_file).exists():
             print("loading mutation landscape cancer type data from file")
-            self._df = pd.read_excel(self.processed_file)
+            self._df = pd.read_csv(self.processed_file, dtype=str)
             self._stats = self.df().describe()
 
             print("finished loading mutation landscape cancer type data from file")
@@ -448,7 +448,9 @@ class MutationLandscapeCancerType:
         ] = "A lung carcinoma that is characterized as any type of epithelial lung cancer other than small cell lung carcinoma."
         df.loc[df["tumortype"] == "NSCLC", "doids"] = "3908"
 
-        df.to_excel(self.processed_file)
+        df.astype({"doids": "str"})
+
+        df.to_csv(self.processed_file)
 
         self._df = df
         self._stats = df.describe()

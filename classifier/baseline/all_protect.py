@@ -65,10 +65,10 @@ class AllProtect:
                             Protect(
                                 sample_dir,
                                 primary_tumor_doids=doid,
-                                protect_directory="protect_" + doid + "/",
+                                protect_directory="protect_" + str(doid) + "/",
                             ),
-                            sample_dir + "_" + doid,
-                            os.path.join(sample_dir, "protect_" + doid + "/"),
+                            sample_dir + "_" + str(doid),
+                            os.path.join(sample_dir, "protect_" + str(doid) + "/"),
                         )
                     )
 

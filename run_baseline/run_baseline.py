@@ -15,6 +15,7 @@ class RunBaseline:
         self._cancer_types = MutationLandscapeCancerType()
         self._cancer_types.load()
 
+        print(self._cancer_types.doids())
         self._all_protect = AllProtect(doids=self._cancer_types.doids())
 
     def prepare_samples(self):
