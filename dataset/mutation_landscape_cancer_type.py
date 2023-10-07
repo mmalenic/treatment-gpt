@@ -69,6 +69,8 @@ class MutationLandscapeCancerType:
         """
         load the data.
         """
+        print("loading mutation landscape cancer type data")
+
         df = (
             pd.read_excel(
                 "41598_2023_39608_MOESM3_ESM.xlsx",

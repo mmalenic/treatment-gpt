@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append("..")
 from classifier.baseline.all_protect import AllProtect
 from dataset.mutation_landscape_cancer_type import MutationLandscapeCancerType
 from prepare.all_samples import AllSamples
