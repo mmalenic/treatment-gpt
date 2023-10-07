@@ -70,13 +70,15 @@ class MutationLandscapeCancerType:
         """
         load the data.
         """
-        print("loading mutation landscape cancer type data")
-
         if Path(self.processed_file).exists():
+            print("loading mutation landscape cancer type data from file")
             self._df = pd.read_excel(self.processed_file)
             self._stats = self.df().describe()
 
+            print("finished loading mutation landscape cancer type data from file")
             return self.df()
+
+        print("loading mutation landscape cancer type data")
 
         df = (
             pd.read_excel(
