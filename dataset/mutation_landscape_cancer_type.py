@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional, List
 
 import pandas as pd
@@ -71,12 +72,18 @@ class MutationLandscapeCancerType:
         """
         print("loading mutation landscape cancer type data")
 
+        if Path(self.processed_file).exists():
+            self._df = pd.read_excel(self.processed_file)
+            self._stats = self.df().describe()
+
+            return self.df()
+
         df = (
             pd.read_excel(
                 "41598_2023_39608_MOESM3_ESM.xlsx",
                 sheet_name="Each Gene Pair in Cancer Type",
             )
-            .groupby("tumortype", as_index=False)
+            .groupby("tumortype", as_index=False, group_keys=True)
             .apply(lambda x: x)
             .sort_values(["tumortype", "pval"])
         )
@@ -443,5 +450,7 @@ class MutationLandscapeCancerType:
 
         self._df = df
         self._stats = df.describe()
+
+        print("finished loading mutation landscape cancer type data")
 
         return df
