@@ -7,8 +7,8 @@ from typing import Literal
 
 import pandas as pd
 
-from classifier.chatgpt.base_gpt_classifier import BaseGPTClassifier
-from classifier.chatgpt.prompt_templates import *
+from classifier.gpt.base_gpt_classifier import BaseGPTClassifier
+from classifier.gpt.prompt_templates import *
 from dataset.gene_pair_dataset import GenePairDataset
 from dataset.load_protect import LoadProtect
 from dataset.treatment_source_dataset import TreatmentSourceDataset

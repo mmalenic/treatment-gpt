@@ -11,7 +11,7 @@ from decimal import *
 import openai
 from sklearn import metrics
 
-from classifier.chatgpt.prompt_templates import Prompts
+from classifier.gpt.prompt_templates import Prompts
 
 
 class BaseGPTClassifier(ABC):
