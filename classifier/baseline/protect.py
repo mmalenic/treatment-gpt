@@ -172,7 +172,7 @@ class Protect:
         tsv_table = pd.read_table(tsv, sep="\t")
 
         csv_file_name = Path(tsv)
-        csv_file_name.rename(csv_file_name.with_suffix(".csv"))
+        csv_file_name = os.path.splitext(csv_file_name)[0] + ".csv"
 
         tsv_table.to_csv(csv_file_name, index=False)
 
