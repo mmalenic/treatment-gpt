@@ -44,6 +44,10 @@ class LoadProtect:
 
         self._df = None
         self._stats = None
+        self._after_filtering = []
+        self._total_protect_files = None
+        self._total_samples = None
+        self._total_empty_protect_results = 0
 
     def df(self) -> pd.DataFrame:
         """
@@ -60,6 +64,34 @@ class LoadProtect:
         Get the stats.
         """
         return self._stats
+
+    @property
+    def after_filtering(self) -> List[int]:
+        """
+        Get the number of rows after filtering for each frame.
+        """
+        return self._after_filtering
+
+    @property
+    def total_protect_files(self) -> int:
+        """
+        Total protect files.
+        """
+        return self._total_protect_files
+
+    @property
+    def total_samples(self) -> int:
+        """
+        Total samples.
+        """
+        return self._total_samples
+
+    @property
+    def total_empty_protect_results(self) -> int:
+        """
+        Total empty protect results.
+        """
+        return self._total_empty_protect_results
 
     def sources(self) -> set[str]:
         """
@@ -259,8 +291,8 @@ class LoadProtect:
             sample_dir = os.path.join(self._sample_dir, sample)
             sample_id = os.path.basename(os.path.normpath(sample_dir))
 
-            df = {}
-
+            files = []
+            samples = set()
             for protect_dir in os.listdir(sample_dir):
                 protect_dir = os.path.join(sample_dir, protect_dir)
                 protect_file = find_file(protect_dir, "*" + self.protect_ending)
@@ -273,11 +305,21 @@ class LoadProtect:
                     print("skipping loading protect for:", protect_dir)
                     continue
 
+                files.append((protect_file, protect_dir))
+                samples.add(sample_dir)
+
+            self._total_protect_files = len(files)
+            self._total_samples = len(samples)
+
+            df = {}
+
+            for protect_file, protect_dir in files:
                 print("loading protect for:", protect_dir)
 
                 frame = pd.read_table(protect_file, sep="\t")
 
                 if frame.empty:
+                    self._total_empty_protect_results += 1
                     continue
 
                 doid = protect_dir.split("_", 1)[1]
@@ -291,11 +333,18 @@ class LoadProtect:
                 )
 
                 frame = frame[frame["onLabel"]]
-                frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
+                frame = frame[
+                    (frame["level"] == "A")
+                    | (frame["level"] == "B")
+                    | (frame["level"] == "C")
+                ]
                 frame = frame[frame["direction"] == "RESPONSIVE"]
 
                 if frame.empty:
                     continue
+
+                print("frame length after filtering:", frame.shape[0])
+                self._after_filtering += frame.shape[0]
 
                 frame = frame.groupby(["cancer_type", "gene"]).agg(list).reset_index()
                 frame = (
