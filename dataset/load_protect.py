@@ -279,6 +279,10 @@ class LoadProtect:
                 y[2] for y in pairs if y[0] == x["gene_x"] and y[1] == x["gene_y"]
             )
 
+        def get_cancer_type(directory) -> str:
+            doid = directory.split("_", 1)[1]
+            return self._cancer_types.cancer_type(doid)
+
         if os.path.exists(self._output_to):
             print("loading protect from:", self._output_to)
             self._df = pd.read_csv(self._output_to)
@@ -313,6 +317,7 @@ class LoadProtect:
 
             df = {}
 
+            frames = []
             for protect_file, protect_dir in files:
                 print("loading protect for:", protect_dir)
 
@@ -322,8 +327,7 @@ class LoadProtect:
                     self._total_empty_protect_results += 1
                     continue
 
-                doid = protect_dir.split("_", 1)[1]
-                cancer_type = self._cancer_types.cancer_type(doid)
+                cancer_type = get_cancer_type(protect_dir)
                 frame["cancer_type"] = cancer_type
 
                 frame["sources"] = frame["sources"].map(lambda x: split_urls(x))
@@ -343,12 +347,16 @@ class LoadProtect:
                 self._after_filtering += [frame.shape[0]]
 
                 frame = frame.groupby(["cancer_type", "gene"]).agg(list).reset_index()
-                frame = (
-                    frame.groupby(["cancer_type"])
-                    .apply(gene_combinations)
-                    .reset_index()
+                frames.append(
+                    (
+                        frame.groupby(["cancer_type"])
+                        .apply(gene_combinations)
+                        .reset_index(),
+                        protect_dir,
+                    )
                 )
 
+            for frame, protect_dir in frames:
                 pairs = (
                     self._cancer_types.df()
                     .groupby(["canonicalName"])[["genex", "geney", "pval"]]
@@ -358,6 +366,8 @@ class LoadProtect:
                     )
                     .reset_index()
                 )
+
+                cancer_type = get_cancer_type(protect_dir)
                 pairs = pairs.loc[pairs["canonicalName"] == cancer_type][0].tolist()[0]
                 pairs += [(pair[1], pair[0], pair[2]) for pair in pairs]
 
@@ -374,7 +384,7 @@ class LoadProtect:
                 if frame.empty:
                     continue
 
-                frame["p_val"] = frame.apply(lambda x: p_val(x), axis=1)
+                frame.loc[:, "p_val"] = frame.apply(lambda x: p_val(x), axis=1)
 
                 df[protect_dir] = frame
 
