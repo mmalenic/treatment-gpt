@@ -344,7 +344,7 @@ class LoadProtect:
                     continue
 
                 print("frame length after filtering:", frame.shape[0])
-                self._after_filtering += frame.shape[0]
+                self._after_filtering += [frame.shape[0]]
 
                 frame = frame.groupby(["cancer_type", "gene"]).agg(list).reset_index()
                 frame = (
