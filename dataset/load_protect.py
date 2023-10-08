@@ -333,11 +333,7 @@ class LoadProtect:
                 )
 
                 frame = frame[frame["onLabel"]]
-                frame = frame[
-                    (frame["level"] == "A")
-                    | (frame["level"] == "B")
-                    | (frame["level"] == "C")
-                ]
+                frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
                 frame = frame[frame["direction"] == "RESPONSIVE"]
 
                 if frame.empty:
