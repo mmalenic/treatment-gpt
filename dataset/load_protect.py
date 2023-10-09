@@ -110,6 +110,17 @@ class LoadProtect:
             ]
         )
 
+    def download_sources(self, email: str):
+        """
+        Download all sources.
+        """
+
+        sources = self.sources()
+        pubmed = PubmedDownloader(email)
+
+        for source in sources:
+            pubmed.download(source)
+
     def treatments_and_sources(self) -> set[Tuple[str, str, str]]:
         """
         Get unique sources.

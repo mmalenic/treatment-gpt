@@ -17,7 +17,7 @@ class GenePairDataset:
         self,
         from_protect: LoadProtect,
         remove_empty_sources: bool = False,
-        split_to_n_treatments: Optional[int] = 5,
+        split_to_n_treatments: Optional[int] = 3,
         **kwargs
     ) -> None:
         """
