@@ -26,6 +26,7 @@ class LoadProtect:
         sample_dir: str = "data/samples/",
         output_to: str = "data/load_protect.csv",
         pubmed_dir: str = "data/pubmed/",
+        gene_pairs_per_sample: bool = True,
         **kwargs
     ) -> None:
         """
@@ -40,6 +41,7 @@ class LoadProtect:
         self._cancer_types = cancer_types
         self._sample_dir = sample_dir
         self._output_to = output_to
+        self._gene_pairs_per_sample = gene_pairs_per_sample
         self._pubmed_dir = pubmed_dir
 
         self._df = None
@@ -274,15 +276,6 @@ class LoadProtect:
             ]
             return output
 
-        def p_val(x) -> pd.DataFrame:
-            return next(
-                y[2] for y in pairs if y[0] == x["gene_x"] and y[1] == x["gene_y"]
-            )
-
-        def get_cancer_type(directory) -> str:
-            doid = directory.split("_", 1)[1]
-            return self._cancer_types.cancer_type(doid)
-
         if os.path.exists(self._output_to):
             print("loading protect from:", self._output_to)
             self._df = pd.read_csv(self._output_to)
@@ -327,7 +320,7 @@ class LoadProtect:
                     self._total_empty_protect_results += 1
                     continue
 
-                cancer_type = get_cancer_type(protect_dir)
+                cancer_type = self._cancer_type(protect_dir)
                 frame["cancer_type"] = cancer_type
 
                 frame["sources"] = frame["sources"].map(lambda x: split_urls(x))
@@ -356,37 +349,11 @@ class LoadProtect:
                     )
                 )
 
-            for frame, protect_dir in frames:
-                pairs = (
-                    self._cancer_types.df()
-                    .groupby(["canonicalName"])[["genex", "geney", "pval"]]
-                    .agg(list)
-                    .apply(
-                        lambda x: list(zip(x["genex"], x["geney"], x["pval"])), axis=1
-                    )
-                    .reset_index()
-                )
-
-                cancer_type = get_cancer_type(protect_dir)
-                pairs = pairs.loc[pairs["canonicalName"] == cancer_type][0].tolist()[0]
-                pairs += [(pair[1], pair[0], pair[2]) for pair in pairs]
-
-                if frame.empty:
-                    continue
-
-                frame = frame[
-                    [
-                        pair in [(p[0], p[1]) for p in pairs]
-                        for pair in zip(frame["gene_x"], frame["gene_y"])
-                    ]
-                ]
-
-                if frame.empty:
-                    continue
-
-                frame.loc[:, "p_val"] = frame.apply(lambda x: p_val(x), axis=1)
-
-                df[protect_dir] = frame
+            if self._gene_pairs_per_sample:
+                self._gene_pairs(df, frames)
+            else:
+                for frame, protect_dir in frames:
+                    df[protect_dir] = frame
 
             try:
                 dfs[sample_id] = pd.concat(df)
@@ -413,3 +380,43 @@ class LoadProtect:
         self._df.to_csv(self._output_to)
 
         return output
+
+    def _cancer_type(self, directory) -> str:
+        doid = directory.split("_", 1)[1]
+        return self._cancer_types.cancer_type(doid)
+
+    def _gene_pairs(self, df, frames):
+        def p_val(x) -> pd.DataFrame:
+            return next(
+                y[2] for y in pairs if y[0] == x["gene_x"] and y[1] == x["gene_y"]
+            )
+
+        for frame, protect_dir in frames:
+            pairs = (
+                self._cancer_types.df()
+                .groupby(["canonicalName"])[["genex", "geney", "pval"]]
+                .agg(list)
+                .apply(lambda x: list(zip(x["genex"], x["geney"], x["pval"])), axis=1)
+                .reset_index()
+            )
+
+            cancer_type = self._cancer_type(protect_dir)
+            pairs = pairs.loc[pairs["canonicalName"] == cancer_type][0].tolist()[0]
+            pairs += [(pair[1], pair[0], pair[2]) for pair in pairs]
+
+            if frame.empty:
+                continue
+
+            frame = frame[
+                [
+                    pair in [(p[0], p[1]) for p in pairs]
+                    for pair in zip(frame["gene_x"], frame["gene_y"])
+                ]
+            ]
+
+            if frame.empty:
+                continue
+
+            frame.loc[:, "p_val"] = frame.apply(lambda x: p_val(x), axis=1)
+
+            df[protect_dir] = frame
