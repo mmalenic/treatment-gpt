@@ -171,6 +171,12 @@ class LoadProtect:
 
             return output_urls
 
+        def remove_duplicates(x) -> pd.DataFrame:
+            x["sorted_gene_pairs"] = x.apply(
+                lambda row: ";".join(sorted([row["gene_x"], row["gene_y"]])), axis=1
+            )
+            return x.drop_duplicates(subset=["cancer_type", "sorted_gene_pairs"])
+
         if os.path.exists(self._output_to):
             print("loading protect from:", self._output_to)
             self._df = pd.read_csv(self._output_to)
@@ -256,13 +262,10 @@ class LoadProtect:
             drop=True
         )
 
-        if self._gene_pairs_per_sample:
-            output["sorted_gene_pairs"] = output.apply(
-                lambda row: ";".join(sorted([row["gene_x"], row["gene_y"]])), axis=1
-            )
-            output = output.drop_duplicates(subset=["cancer_type", "sorted_gene_pairs"])
-        else:
-            output = self._gene_pairs([output])
+        if not self._gene_pairs_per_sample:
+            output = pd.concat(self._gene_pairs([output]))
+
+        output = remove_duplicates(output)
 
         self._df = output
         self._stats = self._df.describe()
@@ -396,7 +399,7 @@ class LoadProtect:
             )
 
         def match_with_cancer_types(x) -> pd.DataFrame:
-            cancer_type = x["cancer_type"][0]
+            cancer_type = x["cancer_type"].iloc[0]
             cancer_type_pairs = pairs.loc[pairs["canonicalName"] == cancer_type][
                 0
             ].tolist()[0]
