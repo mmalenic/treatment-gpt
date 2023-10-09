@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from dataset.load_protect import LoadProtect
 import random
@@ -20,6 +21,7 @@ class TreatmentSourceDataset:
         self.__dict__.update(kwargs)
 
         self._dataset = []
+        self._df = pd.DataFrame()
         self._from_protect = from_protect
 
         random.seed(self.random_state)
@@ -51,8 +53,20 @@ class TreatmentSourceDataset:
                         "source": source,
                         "treatments": treatments,
                         "y_true": treatment,
+                        "y_pred": np.nan,
                     }
                 )
+
+        self._df = self.df()
+
+    def df(self) -> pd.DataFrame:
+        """
+        Return the dataframe of the dataset.
+        """
+        return pd.DataFrame(self._dataset)
+
+    def add_prediction(self, prediction, index):
+        self._df.at[index, "y_pred"] = prediction
 
     def dataset(self):
         """

@@ -1,6 +1,7 @@
 from typing import Optional
 
 import numpy as np
+import pandas as pd
 
 from dataset.load_protect import LoadProtect
 import random
@@ -28,6 +29,7 @@ class GenePairDataset:
         self.__dict__.update(kwargs)
 
         self._dataset = []
+        self._df = pd.DataFrame()
         self._from_protect = from_protect
         self._remove_empty_sources = remove_empty_sources
         self._split_to_n_treatments = split_to_n_treatments
@@ -96,8 +98,20 @@ class GenePairDataset:
                             "gene_y": row["gene_y"],
                             "treatments": treatment_sublist,
                             "y_true": y_true,
+                            "y_pred": np.nan,
                         }
                     )
+
+        self._df = self.df()
+
+    def df(self) -> pd.DataFrame:
+        """
+        Return the dataframe of the dataset.
+        """
+        return pd.DataFrame(self._dataset)
+
+    def add_prediction(self, prediction, index):
+        self._df.loc[self._df["index"] == index, "y_pred"] = prediction
 
     def dataset(self):
         """
