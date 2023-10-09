@@ -57,16 +57,17 @@ class TreatmentSourceDataset:
                     }
                 )
 
-        self._df = self.df()
+        self._df = pd.DataFrame(self._dataset)
 
+    @property
     def df(self) -> pd.DataFrame:
         """
         Return the dataframe of the dataset.
         """
-        return pd.DataFrame(self._dataset)
+        return self._df
 
-    def add_prediction(self, prediction, index):
-        self._df.at[index, "y_pred"] = prediction
+    def add_prediction(self, prediction, pos):
+        self._df.iloc[pos, self._df.columns.get_loc("y_pred")] = prediction
 
     def dataset(self):
         """
