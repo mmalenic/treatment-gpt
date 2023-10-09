@@ -203,8 +203,7 @@ class LoadProtect:
             self._total_protect_files = len(files)
             self._total_samples = len(samples)
 
-            df = {}
-
+            df = []
             frames = []
             for protect_file, protect_dir in files:
                 print("loading protect for:", protect_dir)
@@ -234,13 +233,15 @@ class LoadProtect:
                 print("frame length after filtering:", frame.shape[0])
                 self._after_filtering += [frame.shape[0]]
 
-                frames.append((frame, protect_dir))
+                frame["protect_dir"] = protect_dir
+
+                frames.append(frame)
 
             if self._gene_pairs_per_sample:
-                self._gene_pairs(df, frames)
-            else:
-                for frame, protect_dir in frames:
-                    df[protect_dir] = frame
+                frames = self._gene_pairs(frames)
+
+            for frame in frames:
+                df.append(frame)
 
             try:
                 dfs[sample_id] = pd.concat(df)
@@ -255,10 +256,13 @@ class LoadProtect:
             drop=True
         )
 
-        output["sorted_gene_pairs"] = output.apply(
-            lambda row: ";".join(sorted([row["gene_x"], row["gene_y"]])), axis=1
-        )
-        output = output.drop_duplicates(subset=["cancer_type", "sorted_gene_pairs"])
+        if self._gene_pairs_per_sample:
+            output["sorted_gene_pairs"] = output.apply(
+                lambda row: ";".join(sorted([row["gene_x"], row["gene_y"]])), axis=1
+            )
+            output = output.drop_duplicates(subset=["cancer_type", "sorted_gene_pairs"])
+        else:
+            output = self._gene_pairs([output])
 
         self._df = output
         self._stats = self._df.describe()
@@ -272,7 +276,7 @@ class LoadProtect:
         doid = directory.split("_", 1)[1]
         return self._cancer_types.cancer_type(doid)
 
-    def _gene_pairs(self, df, frames):
+    def _gene_pairs(self, frames) -> List[pd.DataFrame]:
         def gene_combinations(x) -> pd.DataFrame:
             x = x.astype("str")
 
@@ -304,6 +308,8 @@ class LoadProtect:
                 + x["cancer_type"]
                 + ";"
                 + x["treatment_with_source_and_level"]
+                + ";"
+                + x["protect_dir"]
             )
 
             new = pd.DataFrame([y for y in itertools.combinations(x.temp, 2)])
@@ -328,6 +334,7 @@ class LoadProtect:
                 "sources_x",
                 "cancer_type_x",
                 "treatment_with_source_and_level_x",
+                "protect_dir_x",
                 "gene_y",
                 "transcript_y",
                 "isCanonical_y",
@@ -342,6 +349,7 @@ class LoadProtect:
                 "sources_y",
                 "cancer_type_y",
                 "treatment_with_source_and_level_y",
+                "protect_dir_y",
             ]
 
             output = output[
@@ -374,20 +382,51 @@ class LoadProtect:
                     "cancer_type_y",
                     "treatment_with_source_and_level_x",
                     "treatment_with_source_and_level_y",
+                    "protect_dir_x",
+                    "protect_dir_y",
                 ]
             ]
             return output
 
-        def p_val(x) -> pd.DataFrame:
+        def p_val(x, cancer_type_pairs) -> pd.DataFrame:
             return next(
-                y[2] for y in pairs if y[0] == x["gene_x"] and y[1] == x["gene_y"]
+                y[2]
+                for y in cancer_type_pairs
+                if y[0] == x["gene_x"] and y[1] == x["gene_y"]
             )
 
-        for frame, protect_dir in frames:
+        def match_with_cancer_types(x) -> pd.DataFrame:
+            cancer_type = x["cancer_type"][0]
+            cancer_type_pairs = pairs.loc[pairs["canonicalName"] == cancer_type][
+                0
+            ].tolist()[0]
+            cancer_type_pairs += [
+                (pair[1], pair[0], pair[2]) for pair in cancer_type_pairs
+            ]
+
+            x = x[
+                [
+                    pair in [(p[0], p[1]) for p in cancer_type_pairs]
+                    for pair in zip(x["gene_x"], x["gene_y"])
+                ]
+            ]
+
+            if x.empty:
+                return x
+
+            x.loc[:, "p_val"] = x.apply(lambda y: p_val(y, cancer_type_pairs), axis=1)
+
+            return x
+
+        out = []
+        for frame in frames:
             frame = frame.groupby(["cancer_type", "gene"]).agg(list).reset_index()
             frame = (
                 frame.groupby(["cancer_type"]).apply(gene_combinations).reset_index()
             )
+
+            if frame.empty:
+                continue
 
             pairs = (
                 self._cancer_types.df()
@@ -397,23 +436,15 @@ class LoadProtect:
                 .reset_index()
             )
 
-            cancer_type = self._cancer_type(protect_dir)
-            pairs = pairs.loc[pairs["canonicalName"] == cancer_type][0].tolist()[0]
-            pairs += [(pair[1], pair[0], pair[2]) for pair in pairs]
+            frame = (
+                frame.groupby(["cancer_type"])
+                .apply(match_with_cancer_types)
+                .reset_index(drop=True)
+            )
 
             if frame.empty:
                 continue
 
-            frame = frame[
-                [
-                    pair in [(p[0], p[1]) for p in pairs]
-                    for pair in zip(frame["gene_x"], frame["gene_y"])
-                ]
-            ]
+            out.append(frame)
 
-            if frame.empty:
-                continue
-
-            frame.loc[:, "p_val"] = frame.apply(lambda x: p_val(x), axis=1)
-
-            df[protect_dir] = frame
+        return out
