@@ -171,6 +171,108 @@ class LoadProtect:
 
             return output_urls
 
+        if os.path.exists(self._output_to):
+            print("loading protect from:", self._output_to)
+            self._df = pd.read_csv(self._output_to)
+            self._stats = self._df.describe()
+
+            return self._df
+
+        dfs = {}
+        for sample in os.listdir(self._sample_dir):
+            sample_dir = os.path.join(self._sample_dir, sample)
+            sample_id = os.path.basename(os.path.normpath(sample_dir))
+
+            files = []
+            samples = set()
+            for protect_dir in os.listdir(sample_dir):
+                protect_dir = os.path.join(sample_dir, protect_dir)
+                protect_file = find_file(protect_dir, "*" + self.protect_ending)
+
+                if (
+                    protect_file is None
+                    or protect_file == ""
+                    or not os.path.exists(protect_file)
+                ):
+                    print("skipping loading protect for:", protect_dir)
+                    continue
+
+                files.append((protect_file, protect_dir))
+                samples.add(sample_dir)
+
+            self._total_protect_files = len(files)
+            self._total_samples = len(samples)
+
+            df = {}
+
+            frames = []
+            for protect_file, protect_dir in files:
+                print("loading protect for:", protect_dir)
+
+                frame = pd.read_table(protect_file, sep="\t")
+
+                if frame.empty:
+                    self._total_empty_protect_results += 1
+                    continue
+
+                cancer_type = self._cancer_type(protect_dir)
+                frame["cancer_type"] = cancer_type
+
+                frame["sources"] = frame["sources"].map(lambda x: split_urls(x))
+
+                frame["treatment_with_source_and_level"] = list(
+                    zip(frame["treatment"], frame["sources"], frame["level"])
+                )
+
+                frame = frame[frame["onLabel"]]
+                frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
+                frame = frame[frame["direction"] == "RESPONSIVE"]
+
+                if frame.empty:
+                    continue
+
+                print("frame length after filtering:", frame.shape[0])
+                self._after_filtering += [frame.shape[0]]
+
+                frames.append((frame, protect_dir))
+
+            if self._gene_pairs_per_sample:
+                self._gene_pairs(df, frames)
+            else:
+                for frame, protect_dir in frames:
+                    df[protect_dir] = frame
+
+            try:
+                dfs[sample_id] = pd.concat(df)
+            except Exception as e:
+                print("failed to load protect for:", sample_id, "with error:", e)
+                continue
+
+        print("number of samples:", len(dfs))
+
+        output = pd.concat(dfs)
+        output = output.sample(frac=1, random_state=self.random_state).reset_index(
+            drop=True
+        )
+
+        output["sorted_gene_pairs"] = output.apply(
+            lambda row: ";".join(sorted([row["gene_x"], row["gene_y"]])), axis=1
+        )
+        output = output.drop_duplicates(subset=["cancer_type", "sorted_gene_pairs"])
+
+        self._df = output
+        self._stats = self._df.describe()
+
+        print("saving protect to:", self._output_to)
+        self._df.to_csv(self._output_to)
+
+        return output
+
+    def _cancer_type(self, directory) -> str:
+        doid = directory.split("_", 1)[1]
+        return self._cancer_types.cancer_type(doid)
+
+    def _gene_pairs(self, df, frames):
         def gene_combinations(x) -> pd.DataFrame:
             x = x.astype("str")
 
@@ -276,122 +378,17 @@ class LoadProtect:
             ]
             return output
 
-        if os.path.exists(self._output_to):
-            print("loading protect from:", self._output_to)
-            self._df = pd.read_csv(self._output_to)
-            self._stats = self._df.describe()
-
-            return self._df
-
-        dfs = {}
-        for sample in os.listdir(self._sample_dir):
-            sample_dir = os.path.join(self._sample_dir, sample)
-            sample_id = os.path.basename(os.path.normpath(sample_dir))
-
-            files = []
-            samples = set()
-            for protect_dir in os.listdir(sample_dir):
-                protect_dir = os.path.join(sample_dir, protect_dir)
-                protect_file = find_file(protect_dir, "*" + self.protect_ending)
-
-                if (
-                    protect_file is None
-                    or protect_file == ""
-                    or not os.path.exists(protect_file)
-                ):
-                    print("skipping loading protect for:", protect_dir)
-                    continue
-
-                files.append((protect_file, protect_dir))
-                samples.add(sample_dir)
-
-            self._total_protect_files = len(files)
-            self._total_samples = len(samples)
-
-            df = {}
-
-            frames = []
-            for protect_file, protect_dir in files:
-                print("loading protect for:", protect_dir)
-
-                frame = pd.read_table(protect_file, sep="\t")
-
-                if frame.empty:
-                    self._total_empty_protect_results += 1
-                    continue
-
-                cancer_type = self._cancer_type(protect_dir)
-                frame["cancer_type"] = cancer_type
-
-                frame["sources"] = frame["sources"].map(lambda x: split_urls(x))
-
-                frame["treatment_with_source_and_level"] = list(
-                    zip(frame["treatment"], frame["sources"], frame["level"])
-                )
-
-                frame = frame[frame["onLabel"]]
-                frame = frame[(frame["level"] == "A") | (frame["level"] == "B")]
-                frame = frame[frame["direction"] == "RESPONSIVE"]
-
-                if frame.empty:
-                    continue
-
-                print("frame length after filtering:", frame.shape[0])
-                self._after_filtering += [frame.shape[0]]
-
-                frame = frame.groupby(["cancer_type", "gene"]).agg(list).reset_index()
-                frames.append(
-                    (
-                        frame.groupby(["cancer_type"])
-                        .apply(gene_combinations)
-                        .reset_index(),
-                        protect_dir,
-                    )
-                )
-
-            if self._gene_pairs_per_sample:
-                self._gene_pairs(df, frames)
-            else:
-                for frame, protect_dir in frames:
-                    df[protect_dir] = frame
-
-            try:
-                dfs[sample_id] = pd.concat(df)
-            except Exception as e:
-                print("failed to load protect for:", sample_id, "with error:", e)
-                continue
-
-        print("number of samples:", len(dfs))
-
-        output = pd.concat(dfs)
-        output = output.sample(frac=1, random_state=self.random_state).reset_index(
-            drop=True
-        )
-
-        output["sorted_gene_pairs"] = output.apply(
-            lambda row: ";".join(sorted([row["gene_x"], row["gene_y"]])), axis=1
-        )
-        output = output.drop_duplicates(subset=["cancer_type", "sorted_gene_pairs"])
-
-        self._df = output
-        self._stats = self._df.describe()
-
-        print("saving protect to:", self._output_to)
-        self._df.to_csv(self._output_to)
-
-        return output
-
-    def _cancer_type(self, directory) -> str:
-        doid = directory.split("_", 1)[1]
-        return self._cancer_types.cancer_type(doid)
-
-    def _gene_pairs(self, df, frames):
         def p_val(x) -> pd.DataFrame:
             return next(
                 y[2] for y in pairs if y[0] == x["gene_x"] and y[1] == x["gene_y"]
             )
 
         for frame, protect_dir in frames:
+            frame = frame.groupby(["cancer_type", "gene"]).agg(list).reset_index()
+            frame = (
+                frame.groupby(["cancer_type"]).apply(gene_combinations).reset_index()
+            )
+
             pairs = (
                 self._cancer_types.df()
                 .groupby(["canonicalName"])[["genex", "geney", "pval"]]
