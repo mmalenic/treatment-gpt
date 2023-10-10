@@ -45,7 +45,7 @@ You will have the following information available:
 
     _multi_label_task_prompt_template = "Assign this patient to {n_treatments} treatments based on probabilities. Not all treatments are correct."
 
-    _multi_label_task_no_list_prompt_template = "Assign this patient to {n_treatments} treatments based on probabilities. Choose specific drug names or clinical trials and avoid generic terms like chemotherapy."
+    _multi_label_task_no_list_prompt_template = "Assign this patient to {n_treatments} treatments based on probabilities. Choose specific drug names or clinical trials and avoid generic terms like `chemotherapy`. Use a `+` to denote combination therapy if applicable."
 
     _list_of_treatments_prompt_template = "List of possible treatments: {treatments}"
 
