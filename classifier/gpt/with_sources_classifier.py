@@ -44,12 +44,9 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
                 f"Invalid prompt template for this classifier: {prompt_template}"
             )
 
-        y_true = [x["y_true"] for x in base_dataset.dataset()]
-
         self.__dict__.update(kwargs)
         super().__init__(
-            base_dataset.dataset(),
-            y_true,
+            base_dataset.df,
             os.path.join(
                 base_save_dir,
                 (prompt_template + "_" + model_type)

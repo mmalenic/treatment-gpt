@@ -57,8 +57,8 @@ class BaseGPTClassifier(ABC):
         """
         Estimate costs
         """
-        estimates = []
-        for x in self.X:
+
+        def apply_estimates(x):
             prompt = self._construct_prompt(x)
             n_tokens = self._n_tokens(prompt)
             model_type = self._get_model_type(n_tokens, prompt)
@@ -68,6 +68,9 @@ class BaseGPTClassifier(ABC):
                 self._max_token_number = n_tokens
 
             estimates.append(estimate)
+
+        estimates = []
+        self.X.apply(apply_estimates, axis=1)
 
         self._cost_estimate = sum(estimates)
 

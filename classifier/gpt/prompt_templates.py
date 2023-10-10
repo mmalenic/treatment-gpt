@@ -30,7 +30,7 @@ class Prompts:
 
     _patient_treatment_task_prompt_template = """You are tasked with classifying a cancer patient into treatments.
 You will have the following information available:
-1. The list of possible treatments, delimited with square brackets. Not all treatments are correct.
+1. The list of possible treatments, delimited with square brackets.
 2. The patient's cancer type.
 3. A pair of the patient's actionable genes."""
 
