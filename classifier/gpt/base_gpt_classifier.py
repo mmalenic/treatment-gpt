@@ -17,6 +17,7 @@ from sklearn.metrics import hamming_loss
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from classifier.gpt.prompt_templates import Prompts
+from classifier.util import accuracy_score
 
 
 class BaseGPTClassifier(ABC):
@@ -213,6 +214,9 @@ class BaseGPTClassifier(ABC):
 
         print("responses:", responses)
 
+        if x["index"] == 12:
+            print("HERE")
+
         responses = [[y.lower() for y in x] for x in responses]
         x["y_pred"] = responses
         y_true = [x["y_true"]] * len(responses)
@@ -220,7 +224,8 @@ class BaseGPTClassifier(ABC):
         y_true = self._binarizer.transform(y_true)
         y_pred = self._binarizer.transform(responses)
 
-        x["loss"] = hamming_loss(y_true, y_pred)
+        x["hamming_loss"] = hamming_loss(y_true, y_pred)
+        x["accuracy_score"] = accuracy_score(y_true, y_pred)
 
         if not Path(os.path.join(self.save_dir, index)).exists():
             dump_response(os.path.join(self.save_dir, index), x, response)

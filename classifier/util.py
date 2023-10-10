@@ -23,3 +23,13 @@ def check_prerequisite(path: str, message: str) -> None:
     """
     if path is None or not Path(path).exists():
         raise Exception("{0} does not exist: {1}".format(message, path))
+
+
+def accuracy_score(y_true, y_pred) -> float:
+    """
+    Calculate accuracy score, i.e. hamming score.
+    """
+    try:
+        return ((y_true & y_pred).sum(axis=1) / (y_true | y_pred).sum(axis=1)).mean()
+    except ZeroDivisionError:
+        return 0
