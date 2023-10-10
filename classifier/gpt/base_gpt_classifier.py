@@ -5,11 +5,15 @@ from json import JSONDecoder
 from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
+
+import pandas as pd
 import tiktoken
 from decimal import *
 
 import openai
 from sklearn import metrics
+from sklearn.metrics import hamming_loss
+from sklearn.preprocessing import MultiLabelBinarizer
 
 from classifier.gpt.prompt_templates import Prompts
 
@@ -24,8 +28,7 @@ class BaseGPTClassifier(ABC):
 
     def __init__(
         self,
-        X,
-        y,
+        X: pd.DataFrame,
         save_dir: str,
         model_type: Literal["gpt-3.5-turbo"]
         | Literal["gpt-3.5-turbo-16k"]
@@ -41,26 +44,13 @@ class BaseGPTClassifier(ABC):
 
         self._model_type = model_type
         self.X = X
-        self.y = y
         Path(save_dir).mkdir(parents=True, exist_ok=True)
         self.save_dir = save_dir
-        self._predictions = None
         self._cost_estimate = None
         self._max_token_number = None
 
     def n_samples(self) -> int:
         return len(self.X)
-
-    def loss(self) -> float | int:
-        return metrics.hamming_loss(self.y, self._predictions)
-
-    def confusion_matrix(self):
-        return metrics.multilabel_confusion_matrix(
-            self.y, self._predictions, samplewise=True
-        )
-
-    def f1_score(self):
-        return metrics.f1_score(self.y, self._predictions, average="samples")
 
     @property
     def cost_estimate(self):
@@ -94,8 +84,7 @@ class BaseGPTClassifier(ABC):
         """
         Predict the labels.
         """
-        self._predictions = [y for x in self.X for y in self._predict_single(x)]
-        return self._predictions
+        self.X.apply(lambda x: self._predict_single(x), axis=1)
 
     def _n_tokens(self, prompt) -> int:
         """
@@ -173,7 +162,7 @@ class BaseGPTClassifier(ABC):
                         "role": "system",
                         "content": "You are a text classification model.",
                     },
-                    {"role": "user", "content": self._construct_prompt(x)},
+                    {"role": "user", "content": prompt},
                 ],
                 n=1,
             )
@@ -183,12 +172,22 @@ class BaseGPTClassifier(ABC):
                     raise ValueError("Model returned a truncated response.")
 
             with open(os.path.join(self.save_dir, index), "w", encoding="utf-8") as f:
-                json.dump({"x": x, "response": response}, f)
+                json.dump({"x": x.to_json(), "response": response}, f)
 
         responses = []
         for choice in response["choices"]:
             content = choice["message"]["content"]
             responses.append(self._extract_response(content))
+
+        y_true = [x["y_true"]] * len(responses)
+
+        binarizer = MultiLabelBinarizer()
+        binarizer.fit(y_true)
+
+        y_true = binarizer.transform(y_true)
+        y_pred = binarizer.transform(responses)
+
+        x["loss"] = hamming_loss(y_true, y_pred)
 
         return responses
 

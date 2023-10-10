@@ -54,6 +54,7 @@ class TreatmentSourceDataset:
                         "treatments": treatments,
                         "y_true": treatment,
                         "y_pred": np.nan,
+                        "loss": np.nan,
                     }
                 )
 

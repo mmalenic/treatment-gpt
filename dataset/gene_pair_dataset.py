@@ -99,6 +99,7 @@ class GenePairDataset:
                             "treatments": treatment_sublist,
                             "y_true": y_true,
                             "y_pred": np.nan,
+                            "loss": np.nan,
                         }
                     )
 
