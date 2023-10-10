@@ -46,7 +46,7 @@ class BaseGPTClassifier(ABC):
         self.__dict__.update(kwargs)
 
         self._model_type = model_type
-        self.X = df
+        self.df = df
         Path(save_dir).mkdir(parents=True, exist_ok=True)
         self.save_dir = save_dir
         self._cost_estimate = None
@@ -57,7 +57,7 @@ class BaseGPTClassifier(ABC):
         self._binarizer.fit([[x.lower() for x in labels]])
 
     def n_samples(self) -> int:
-        return len(self.X)
+        return len(self.df)
 
     @property
     def cost_estimate(self):
@@ -77,7 +77,7 @@ class BaseGPTClassifier(ABC):
             estimates.append(estimate * self._repeat_n_times)
 
         estimates = []
-        self.X.apply(apply_estimates, axis=1)
+        self.df.apply(apply_estimates, axis=1)
 
         self._cost_estimate = sum(estimates)
 
@@ -94,7 +94,8 @@ class BaseGPTClassifier(ABC):
         """
         Predict the labels.
         """
-        self.X.apply(lambda x: self._predict_single(x), axis=1)
+        self.df = self.df.apply(lambda x: self._predict_single(x), axis=1)
+        self.df = self.df.explode(column="y_pred", ignore_index=True)
 
     def _n_tokens(self, prompt) -> int:
         """
@@ -193,7 +194,7 @@ class BaseGPTClassifier(ABC):
                 if max_retries == 0:
                     raise e
 
-                print("Service unavailable. Retrying in 10 seconds")
+                print("Service unavailable. Retrying in 10 seconds.")
                 time.sleep(10)
                 return self._predict_single(x, max_retries - 1)
 
