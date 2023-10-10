@@ -1,9 +1,9 @@
 import copy
 import json
-import os
+import os.path
 import random
 from hashlib import md5
-from typing import Literal
+from typing import Literal, get_args
 
 import pandas as pd
 
@@ -13,16 +13,16 @@ from dataset.gene_pair_dataset import GenePairDataset
 from dataset.load_protect import LoadProtect
 
 
-class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
+class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
     random_state = 42
 
     def __init__(
         self,
         base_dataset: GenePairDataset,
-        prompt_template: Prompts.zero_shot_with_sources_literal
-        | Prompts.few_shot_with_sources_literal
-        | Prompts.zero_shot_with_sources_cot_literal
-        | Prompts.few_shot_with_sources_cot_literal,
+        prompt_template: Prompts.zero_shot_no_sources_no_list_literal
+        | Prompts.few_shot_no_sources_no_list_literal
+        | Prompts.zero_shot_no_sources_no_list_cot_literal
+        | Prompts.few_shot_no_sources_no_list_cot_literal,
         model_type: Literal["gpt-3.5-turbo"]
         | Literal["gpt-3.5-turbo-16k"]
         | Literal["gpt-4"]
@@ -35,10 +35,10 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
         Initialize this class.
         """
         if (
-            prompt_template != Prompts.zero_shot_with_sources_name
-            and prompt_template != Prompts.few_shot_with_sources_name
-            and prompt_template != Prompts.zero_shot_with_sources_cot_name
-            and prompt_template != Prompts.few_shot_with_sources_cot_name
+            prompt_template != Prompts.zero_shot_no_sources_no_list_name
+            and prompt_template != Prompts.few_shot_no_sources_no_list_name
+            and prompt_template != Prompts.zero_shot_no_sources_no_list_cot_name
+            and prompt_template != Prompts.few_shot_no_sources_no_list_cot_name
         ):
             raise TypeError(
                 f"Invalid prompt template for this classifier: {prompt_template}"
@@ -64,37 +64,21 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
         random.seed(self.random_state)
 
     def _construct_prompt(self, x) -> str:
-        treatments = self._construct_treatments_and_source(x)
+        treatments = [y["treatment"] for y in x["treatments"]]
 
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
-                treatments_and_sources=treatments,
                 cancer_type=x["cancer_type"],
                 genes=x["gene_x"] + " and " + x["gene_y"],
-                examples=self._construct_examples(x),
                 n_treatments=len(x["y_true"]),
+                examples=self._construct_examples(x),
             )
         else:
             return self.prompt_template.format(
-                treatments_and_sources=treatments,
-                n_treatments=len(x["y_true"]),
                 cancer_type=x["cancer_type"],
                 genes=x["gene_x"] + " and " + x["gene_y"],
+                n_treatments=len(x["y_true"]),
             )
-
-    @staticmethod
-    def _construct_treatments_and_source(x) -> str:
-        treatments_and_sources = ""
-
-        for treatment in x["treatments"]:
-            treatments_and_sources += (
-                Prompts.treatment_and_source_prompt_template.format(
-                    treatment=treatment["treatment"],
-                    source=treatment["source"],
-                )
-            )
-
-        return treatments_and_sources
 
     def _construct_examples(self, x) -> str:
         dataset = copy.deepcopy(self.base_dataset.dataset())
@@ -114,8 +98,7 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
             if i == self.n_examples:
                 break
 
-            template = Prompts.gene_pair_sources_example_prompt_template.format(
-                treatments_and_sources=self._construct_treatments_and_source(treatment),
+            template = Prompts.gene_pair_no_list_example_prompt_template.format(
                 cancer_type=treatment["cancer_type"],
                 genes=treatment["gene_x"] + " and " + treatment["gene_y"],
                 answer=json.dumps({"treatments": treatment["y_true"]}),
@@ -124,7 +107,7 @@ class WithSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
         return examples
 
-    def _index(self, x) -> str:
+    def _index(self, x) -> (str, str):
         return md5(
-            f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}_{json.dumps(x['treatments'])}"
+            f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}"
         ).hexdigest()

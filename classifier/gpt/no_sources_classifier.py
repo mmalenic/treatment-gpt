@@ -114,5 +114,5 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
     def _index(self, x) -> (str, str):
         return md5(
-            f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}"
+            f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}_{json.dumps(x['treatments'])}"
         ).hexdigest()

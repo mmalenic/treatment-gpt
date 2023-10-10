@@ -30,9 +30,12 @@ class Prompts:
 
     _patient_treatment_task_prompt_template = """You are tasked with classifying a cancer patient into treatments.
 You will have the following information available:
-1. The list of possible treatments, delimited with square brackets.
-2. The patient's cancer type.
-3. A pair of the patient's actionable genes."""
+1. The patient's cancer type.
+2. A pair of the patient's actionable genes."""
+
+    _patient_treatment_task_treatments_prompt_template = (
+        "The list of possible treatments, delimited with square brackets."
+    )
 
     _patient_treatment_source_task_prompt_template = """You are tasked with classifying a cancer patient into treatments.
 You will have the following information available:
@@ -74,6 +77,12 @@ What treatment is this journal abstract about?"""
 
     treatment_only_cot_prompt_template = "Think step by step about which treatment the abstract refers to and reason about your decision."
 
+    gene_pair_no_list_example_prompt_template = f"""```
+{_patient_cancer_type_prompt_template}
+{{answer}}
+```
+"""
+
     gene_pair_example_prompt_template = f"""```
 {_list_of_treatments_prompt_template}
 
@@ -100,7 +109,54 @@ Treatment: {treatment}
 Source: {source}'''
 """
 
+    zero_shot_no_sources_no_list = f"""{_patient_treatment_task_prompt_template}
+
+Perform the following tasks:
+1. {_multi_label_task_prompt_template}
+2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+
+{_patient_cancer_type_prompt_template}
+{_json_response_prompt_template}
+"""
+
+    few_shot_no_sources_no_list = f"""{_patient_treatment_task_prompt_template}
+3. {_few_shot_examples_prompt_template}
+
+Perform the following tasks:
+1. {_multi_label_task_prompt_template}
+2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+
+{_examples_prompt_template}
+
+{_patient_cancer_type_prompt_template}
+{_json_response_prompt_template}
+"""
+
+    zero_shot_no_sources_no_list_cot = f"""{_patient_treatment_task_prompt_template}
+
+Perform the following tasks:
+1. {_multi_label_task_prompt_template}
+2. {cot_prompt_template}
+3. {_multi_label_json_task_prompt_template}
+
+{_patient_cancer_type_prompt_template}
+"""
+
+    few_shot_no_sources_no_list_cot = f"""{_patient_treatment_task_prompt_template}
+3. {_few_shot_examples_prompt_template}
+
+Perform the following tasks:
+1. {_multi_label_task_prompt_template}
+2. {cot_prompt_template}
+3. {_multi_label_json_task_prompt_template}
+
+{_examples_prompt_template}
+
+{_patient_cancer_type_prompt_template}
+"""
+
     zero_shot_no_sources = f"""{_patient_treatment_task_prompt_template}
+3. {_patient_treatment_task_treatments_prompt_template}
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
@@ -113,6 +169,7 @@ Perform the following tasks:
 """
 
     few_shot_no_sources = f"""{_patient_treatment_task_prompt_template}
+3. {_patient_treatment_task_treatments_prompt_template}
 4. {_few_shot_examples_prompt_template}
 
 Perform the following tasks:
@@ -127,6 +184,7 @@ Perform the following tasks:
 """
 
     zero_shot_no_sources_cot = f"""{_patient_treatment_task_prompt_template}
+3. {_patient_treatment_task_treatments_prompt_template}
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
@@ -139,6 +197,7 @@ Perform the following tasks:
 """
 
     few_shot_no_sources_cot = f"""{_patient_treatment_task_prompt_template}
+3. {_patient_treatment_task_treatments_prompt_template}
 4. {_few_shot_examples_prompt_template}
 
 Perform the following tasks:
