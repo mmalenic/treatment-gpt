@@ -178,13 +178,17 @@ class BaseGPTClassifier(ABC):
                 if choice["finish_reason"] == "length":
                     raise ValueError("Model returned a truncated response.")
 
-            with open(os.path.join(self.save_dir, index), "w", encoding="utf-8") as f:
-                json.dump({"x": x.to_json(), "response": response}, f)
-
         responses = []
         for choice in response["choices"]:
             content = choice["message"]["content"]
-            responses.append(self._extract_response(content))
+            try:
+                responses.append(self._extract_response(content))
+            except ValueError as e:
+                print("Skipping this response:", e)
+                with open(
+                    os.path.join(self.save_dir, index, "_error"), "w", encoding="utf-8"
+                ) as f:
+                    json.dump({"x": x.to_dict(), "response": response}, f, indent=2)
 
         y_true = [x["y_true"]] * len(responses)
 
@@ -196,7 +200,11 @@ class BaseGPTClassifier(ABC):
 
         x["loss"] = hamming_loss(y_true, y_pred)
 
-        return responses
+        if Path(os.path.join(self.save_dir, index)).exists():
+            with open(os.path.join(self.save_dir, index), "w", encoding="utf-8") as f:
+                json.dump({"x": x.to_dict(), "response": response}, f, indent=2)
+
+        return x
 
     def _extract_response(self, content: str):
         """
