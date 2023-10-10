@@ -13,6 +13,7 @@ class RunConfiguration:
     def __init__(
         self,
         gene_pair_dataset: GenePairDataset,
+        gene_pair_dataset_no_list: GenePairDataset,
         treatment_source_dataset: TreatmentSourceDataset,
     ):
         """
@@ -25,7 +26,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.zero_shot_no_sources_no_list_name,
                         "gpt-3.5-turbo",
                     ),
@@ -36,7 +37,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.few_shot_no_sources_no_list_name,
                         "gpt-3.5-turbo",
                     ),
@@ -47,7 +48,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.zero_shot_no_sources_no_list_cot_name,
                         "gpt-3.5-turbo",
                     ),
@@ -58,7 +59,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.few_shot_no_sources_no_list_cot_name,
                         "gpt-3.5-turbo",
                     ),
@@ -201,7 +202,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.zero_shot_no_sources_no_list_name,
                         "gpt-4",
                     ),
@@ -212,7 +213,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.few_shot_no_sources_no_list_name,
                         "gpt-4",
                     ),
@@ -223,7 +224,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.zero_shot_no_sources_no_list_cot_name,
                         "gpt-4",
                     ),
@@ -234,7 +235,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset,
+                        gene_pair_dataset_no_list,
                         Prompts.few_shot_no_sources_no_list_cot_name,
                         "gpt-4",
                     ),
