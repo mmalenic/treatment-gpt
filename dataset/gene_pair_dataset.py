@@ -12,8 +12,6 @@ class GenePairDataset:
     Loads all protect data.
     """
 
-    random_state = 42
-
     def __init__(
         self,
         from_protect: LoadProtect,
@@ -33,8 +31,6 @@ class GenePairDataset:
         self._from_protect = from_protect
         self._remove_empty_sources = remove_empty_sources
         self._split_to_n_treatments = split_to_n_treatments
-
-        random.seed(self.random_state)
 
     def load(self):
         """

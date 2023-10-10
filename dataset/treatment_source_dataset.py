@@ -10,8 +10,6 @@ class TreatmentSourceDataset:
     Treatment source dataset
     """
 
-    random_state = 42
-
     def __init__(self, from_protect: LoadProtect, **kwargs) -> None:
         """
         Initialize this class.
@@ -23,8 +21,6 @@ class TreatmentSourceDataset:
         self._dataset = []
         self._df = pd.DataFrame()
         self._from_protect = from_protect
-
-        random.seed(self.random_state)
 
     def load(self):
         """

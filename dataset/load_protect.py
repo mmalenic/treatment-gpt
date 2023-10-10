@@ -18,7 +18,6 @@ class LoadProtect:
     """
 
     protect_ending = ".protect.tsv"
-    random_state = 42
 
     def __init__(
         self,
@@ -269,9 +268,7 @@ class LoadProtect:
         print("number of samples:", len(dfs))
 
         output = pd.concat(dfs)
-        output = output.sample(frac=1, random_state=self.random_state).reset_index(
-            drop=True
-        )
+        output = output.sample(frac=1).reset_index(drop=True)
 
         if not self._gene_pairs_per_sample:
             output = pd.concat(self._gene_pairs([output]))

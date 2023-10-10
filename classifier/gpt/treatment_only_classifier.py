@@ -15,8 +15,6 @@ from dataset.treatment_source_dataset import TreatmentSourceDataset
 
 
 class TreatmentSourceGPTClassifier(BaseGPTClassifier):
-    random_state = 42
-
     def __init__(
         self,
         base_dataset: TreatmentSourceDataset,
@@ -62,8 +60,6 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
         self.base_dataset = base_dataset
         self.prompt_template = Prompts.from_name(prompt_template)
         self.n_examples = n_examples
-
-        random.seed(self.random_state)
 
     def _construct_prompt(self, x) -> str:
         if "{examples}" in self.prompt_template:

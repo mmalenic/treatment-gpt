@@ -14,8 +14,6 @@ from dataset.load_protect import LoadProtect
 
 
 class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
-    random_state = 42
-
     def __init__(
         self,
         base_dataset: GenePairDataset,
@@ -60,8 +58,6 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         self.base_dataset = base_dataset
         self.prompt_template = Prompts.from_name(prompt_template)
         self.n_examples = n_examples
-
-        random.seed(self.random_state)
 
     def _construct_prompt(self, x) -> str:
         treatments = [y["treatment"] for y in x["treatments"]]
