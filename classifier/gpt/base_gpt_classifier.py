@@ -35,6 +35,7 @@ class BaseGPTClassifier(ABC):
         | Literal["gpt-3.5-turbo-16k"]
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
+        repeat_n_times: int = 1,
         **kwargs,
     ):
         """
@@ -49,6 +50,7 @@ class BaseGPTClassifier(ABC):
         self.save_dir = save_dir
         self._cost_estimate = None
         self._max_token_number = None
+        self._repeat_n_times = repeat_n_times
 
         self._binarizer = MultiLabelBinarizer()
         self._binarizer.fit([[x.lower() for x in labels]])
@@ -71,7 +73,7 @@ class BaseGPTClassifier(ABC):
             if self._max_token_number is None or n_tokens > self._max_token_number:
                 self._max_token_number = n_tokens
 
-            estimates.append(estimate)
+            estimates.append(estimate * self._repeat_n_times)
 
         estimates = []
         self.X.apply(apply_estimates, axis=1)
@@ -182,7 +184,7 @@ class BaseGPTClassifier(ABC):
                     },
                     {"role": "user", "content": prompt},
                 ],
-                n=1,
+                n=self._repeat_n_times,
             )
 
             for choice in response["choices"]:

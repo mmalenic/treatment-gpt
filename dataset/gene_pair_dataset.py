@@ -39,7 +39,7 @@ class GenePairDataset:
         Load the dataset.
         """
 
-        for index, row in itertools.islice(self._from_protect.df().iterrows(), 1):
+        for index, row in self._from_protect.df().iterrows():
             treatments = (
                 row["treatment_with_text_sources_x"]
                 + row["treatment_with_text_sources_y"]
