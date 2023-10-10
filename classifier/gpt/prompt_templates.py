@@ -28,6 +28,14 @@ class Prompts:
         "Do no provide any additional information."
     )
 
+    _only_from_list_prompt_template = (
+        "Only choose treatments from the list of possible treatments."
+    )
+
+    _only_from_possible_prompt_template = (
+        "Only choose treatments from the possible treatments and sources."
+    )
+
     _patient_treatment_task_prompt_template = """You are tasked with classifying a cancer patient into treatments.
 You will have the following information available:
 1. The patient's cancer type.
@@ -51,7 +59,7 @@ You will have the following information available:
 
     _list_of_treatments_only_prompt_template = "List of all treatments: {treatments}"
 
-    _list_of_treatments_and_sources_prompt_template = """List of possible treatments and sources:
+    _list_of_treatments_and_sources_prompt_template = """Possible treatments and sources:
 {treatments_and_sources}"""
 
     _patient_cancer_type_prompt_template = """A patient has {cancer_type} with the following actionable genes: {genes}.
@@ -162,7 +170,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template} {_only_from_list_prompt_template}
 
 {_list_of_treatments_prompt_template}
 
@@ -176,7 +184,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template} {_only_from_list_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_prompt_template}
@@ -185,13 +193,13 @@ Perform the following tasks:
 {_json_response_prompt_template}
 """
 
-    zero_shot_no_sources_cot = f"""{_patient_treatment_task_prompt_template}
+    zero_shot_no_sources_cot = f"""{_patient_treatment_task_prompt_template} 
 3. {_patient_treatment_task_treatments_prompt_template}
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_list_prompt_template}
 
 {_list_of_treatments_prompt_template}
 
@@ -205,7 +213,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_list_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_prompt_template}
@@ -217,7 +225,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template} {_only_from_possible_prompt_template}
 
 {_list_of_treatments_and_sources_prompt_template}
 {_patient_cancer_type_prompt_template}
@@ -229,7 +237,7 @@ Perform the following tasks:
 
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
-2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+2. {_multi_label_json_task_prompt_template} {_no_additional_information_prompt_template} {_only_from_possible_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_and_sources_prompt_template}
@@ -242,7 +250,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_possible_prompt_template}
 
 {_list_of_treatments_and_sources_prompt_template}
 {_patient_cancer_type_prompt_template}
@@ -254,7 +262,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_possible_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_and_sources_prompt_template}
