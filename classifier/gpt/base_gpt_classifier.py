@@ -1,6 +1,7 @@
 import ast
 import json
 import os
+import time
 from json import JSONDecoder
 from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
@@ -151,7 +152,7 @@ class BaseGPTClassifier(ABC):
 
         return model_type
 
-    def _predict_single(self, x) -> List[str]:
+    def _predict_single(self, x, max_retries: int = 3) -> List[str]:
         """
         Predict a single sample.
         """
@@ -163,29 +164,38 @@ class BaseGPTClassifier(ABC):
                 )
 
         index = self._index(x)
-        print(index)
 
-        if Path(os.path.join(self.save_dir, index)).exists():
+        load_from = os.path.join(self.save_dir, index)
+        if Path(load_from).exists():
+            print("Loading from file:", load_from)
             with open(os.path.join(self.save_dir, index), "r", encoding="utf-8") as f:
                 response = json.load(f)["response"]
         else:
             prompt = self._construct_prompt(x)
-            print(prompt)
+            print("prompt:", prompt)
 
             n_tokens = self._n_tokens(prompt)
             model_type = self._get_model_type(n_tokens, prompt)
 
-            response = openai.ChatCompletion.create(
-                model=model_type,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a text classification model.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                n=self._repeat_n_times,
-            )
+            try:
+                response = openai.ChatCompletion.create(
+                    model=model_type,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a text classification model.",
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    n=self._repeat_n_times,
+                )
+            except openai.error.ServiceUnavailableError as e:
+                if max_retries == 0:
+                    raise e
+
+                print("Service unavailable. Retrying in 10 seconds")
+                time.sleep(10)
+                return self._predict_single(x, max_retries - 1)
 
             for choice in response["choices"]:
                 if choice["finish_reason"] == "length":
@@ -199,6 +209,8 @@ class BaseGPTClassifier(ABC):
             except ValueError as e:
                 print("Skipping this response:", e)
                 dump_response(os.path.join(self.save_dir, index, "_error"), x, response)
+
+        print("responses:", responses)
 
         responses = [[y.lower() for y in x] for x in responses]
         x["y_pred"] = responses
