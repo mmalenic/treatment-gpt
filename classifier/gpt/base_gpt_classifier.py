@@ -28,7 +28,8 @@ class BaseGPTClassifier(ABC):
 
     def __init__(
         self,
-        X: pd.DataFrame,
+        df: pd.DataFrame,
+        labels: List[str],
         save_dir: str,
         model_type: Literal["gpt-3.5-turbo"]
         | Literal["gpt-3.5-turbo-16k"]
@@ -43,11 +44,14 @@ class BaseGPTClassifier(ABC):
         self.__dict__.update(kwargs)
 
         self._model_type = model_type
-        self.X = X
+        self.X = df
         Path(save_dir).mkdir(parents=True, exist_ok=True)
         self.save_dir = save_dir
         self._cost_estimate = None
         self._max_token_number = None
+
+        self._binarizer = MultiLabelBinarizer()
+        self._binarizer.fit([[x.lower() for x in labels]])
 
     def n_samples(self) -> int:
         return len(self.X)
@@ -149,6 +153,13 @@ class BaseGPTClassifier(ABC):
         """
         Predict a single sample.
         """
+
+        def dump_response(file, _x, _response):
+            with open(file, "w", encoding="utf-8") as location:
+                json.dump(
+                    {"x": _x.to_dict(), "response": _response}, location, indent=2
+                )
+
         index = self._index(x)
         print(index)
 
@@ -185,24 +196,19 @@ class BaseGPTClassifier(ABC):
                 responses.append(self._extract_response(content))
             except ValueError as e:
                 print("Skipping this response:", e)
-                with open(
-                    os.path.join(self.save_dir, index, "_error"), "w", encoding="utf-8"
-                ) as f:
-                    json.dump({"x": x.to_dict(), "response": response}, f, indent=2)
+                dump_response(os.path.join(self.save_dir, index, "_error"), x, response)
 
+        responses = [[y.lower() for y in x] for x in responses]
+        x["y_pred"] = responses
         y_true = [x["y_true"]] * len(responses)
 
-        binarizer = MultiLabelBinarizer()
-        binarizer.fit(y_true)
-
-        y_true = binarizer.transform(y_true)
-        y_pred = binarizer.transform(responses)
+        y_true = self._binarizer.transform(y_true)
+        y_pred = self._binarizer.transform(responses)
 
         x["loss"] = hamming_loss(y_true, y_pred)
 
-        if Path(os.path.join(self.save_dir, index)).exists():
-            with open(os.path.join(self.save_dir, index), "w", encoding="utf-8") as f:
-                json.dump({"x": x.to_dict(), "response": response}, f, indent=2)
+        if not Path(os.path.join(self.save_dir, index)).exists():
+            dump_response(os.path.join(self.save_dir, index), x, response)
 
         return x
 

@@ -1,5 +1,5 @@
 import itertools
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 import pandas as pd
@@ -32,6 +32,7 @@ class GenePairDataset:
         self._from_protect = from_protect
         self._remove_empty_sources = remove_empty_sources
         self._split_to_n_treatments = split_to_n_treatments
+        self._all_treatments = {}
 
     def load(self):
         """
@@ -86,6 +87,11 @@ class GenePairDataset:
                 ]
 
                 random.shuffle(treatment_sublist)
+
+                self._all_treatments.update(
+                    {x["treatment"]: None for x in treatment_sublist}
+                )
+
                 if treatment_sublist and y_true:
                     self._dataset.append(
                         {
@@ -94,13 +100,20 @@ class GenePairDataset:
                             "gene_x": row["gene_x"],
                             "gene_y": row["gene_y"],
                             "treatments": treatment_sublist,
-                            "y_true": y_true,
+                            "y_true": [y.lower() for y in y_true],
                             "y_pred": np.nan,
                             "loss": np.nan,
                         }
                     )
 
         self._df = pd.DataFrame(self._dataset)
+
+    @property
+    def all_treatments(self) -> List[str]:
+        """
+        Return the dataframe of the dataset.
+        """
+        return list([x.lower() for x in self._all_treatments.keys()])
 
     @property
     def df(self) -> pd.DataFrame:
