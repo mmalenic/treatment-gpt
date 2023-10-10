@@ -1,4 +1,7 @@
 from classifier.gpt.no_sources_classifier import NoSourcesGenePairGPTClassifier
+from classifier.gpt.no_sources_no_list_classifier import (
+    NoSourcesNoListGenePairGPTClassifier,
+)
 from classifier.gpt.prompt_templates import *
 from classifier.gpt.treatment_only_classifier import TreatmentSourceGPTClassifier
 from classifier.gpt.with_sources_classifier import WithSourcesGenePairGPTClassifier
@@ -18,6 +21,50 @@ class RunConfiguration:
 
         self._run_configuration = {
             "runs": [
+                {
+                    "run_name": Prompts.zero_shot_no_sources_no_list_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.zero_shot_no_sources_no_list_name,
+                        "gpt-3.5-turbo",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_no_sources_no_list_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.few_shot_no_sources_no_list_name,
+                        "gpt-3.5-turbo",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.zero_shot_no_sources_no_list_cot_name,
+                        "gpt-3.5-turbo",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.few_shot_no_sources_no_list_cot_name,
+                        "gpt-3.5-turbo",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
                 {
                     "run_name": Prompts.zero_shot_no_sources_name,
                     "model_type": "gpt-3.5-turbo",
@@ -146,6 +193,50 @@ class RunConfiguration:
                         treatment_source_dataset,
                         Prompts.few_shot_treatment_source_cot_name,
                         "gpt-3.5-turbo",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.zero_shot_no_sources_no_list_name,
+                    "model_type": "gpt-4",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.zero_shot_no_sources_no_list_name,
+                        "gpt-4",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_no_sources_no_list_name,
+                    "model_type": "gpt-4",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.few_shot_no_sources_no_list_name,
+                        "gpt-4",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
+                    "model_type": "gpt-4",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.zero_shot_no_sources_no_list_cot_name,
+                        "gpt-4",
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
+                    "model_type": "gpt-4",
+                    "classifier": NoSourcesNoListGenePairGPTClassifier(
+                        gene_pair_dataset,
+                        Prompts.few_shot_no_sources_no_list_cot_name,
+                        "gpt-4",
                     ),
                     "cost_estimate": None,
                     "max_tokens": None,
