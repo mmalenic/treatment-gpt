@@ -150,11 +150,15 @@ class BaseGPTClassifier(ABC):
         Predict a single sample.
         """
         index = self._index(x)
+        print(index)
+
         if Path(os.path.join(self.save_dir, index)).exists():
             with open(os.path.join(self.save_dir, index), "r", encoding="utf-8") as f:
                 response = json.load(f)["response"]
         else:
             prompt = self._construct_prompt(x)
+            print(prompt)
+
             n_tokens = self._n_tokens(prompt)
             model_type = self._get_model_type(n_tokens, prompt)
 

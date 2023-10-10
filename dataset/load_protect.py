@@ -94,19 +94,21 @@ class LoadProtect:
         """
         return self._total_empty_protect_results
 
-    def sources(self) -> set[str]:
+    def sources(self) -> list[str]:
         """
         Get unique sources.
         """
         sources = list(self.df()["sources_x"]) + list(self.df()["sources_y"])
-        return set(
-            [
-                x[0]
-                for x in itertools.chain.from_iterable(
-                    [literal_eval(x) for x in sources]
-                )
-                if x
-            ]
+        return list(
+            dict.fromkeys(
+                [
+                    x[0]
+                    for x in itertools.chain.from_iterable(
+                        [literal_eval(x) for x in sources]
+                    )
+                    if x
+                ]
+            )
         )
 
     def download_sources(self, email: str):
@@ -120,14 +122,14 @@ class LoadProtect:
         for source in sources:
             pubmed.download(source)
 
-    def treatments_and_sources(self) -> set[Tuple[str, str, str]]:
+    def treatments_and_sources(self) -> list[Tuple[str, str, str]]:
         """
         Get unique sources.
         """
         sources = list(self.df()["treatment_with_text_sources_x"]) + list(
             self.df()["treatment_with_text_sources_y"]
         )
-        return set([(y[0], y[1], y[2]) for x in sources for y in x])
+        return list(dict.fromkeys([(y[0], y[1], y[2]) for x in sources for y in x]))
 
     def load_pubmed(self) -> pd.DataFrame:
         def get_text_source(x, column):
@@ -200,7 +202,7 @@ class LoadProtect:
             sample_id = os.path.basename(os.path.normpath(sample_dir))
 
             files = []
-            samples = set()
+            samples = {}
             for protect_dir in os.listdir(sample_dir):
                 protect_dir = os.path.join(sample_dir, protect_dir)
                 protect_file = find_file(protect_dir, "*" + self.protect_ending)
@@ -214,7 +216,7 @@ class LoadProtect:
                     continue
 
                 files.append((protect_file, protect_dir))
-                samples.add(sample_dir)
+                samples[sample_dir] = None
 
             self._total_protect_files = len(files)
             self._total_samples = len(samples)

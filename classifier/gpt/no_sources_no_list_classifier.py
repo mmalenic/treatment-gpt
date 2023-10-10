@@ -60,8 +60,6 @@ class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
         self.n_examples = n_examples
 
     def _construct_prompt(self, x) -> str:
-        treatments = [y["treatment"] for y in x["treatments"]]
-
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
                 cancer_type=x["cancer_type"],
@@ -105,5 +103,7 @@ class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
 
     def _index(self, x) -> (str, str):
         return md5(
-            f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}"
+            f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}".encode(
+                "utf-8"
+            )
         ).hexdigest()

@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 import pandas as pd
 
@@ -27,21 +29,21 @@ class TreatmentSourceDataset:
         Load the dataset.
         """
 
-        all_treatments = set()
-        for index, row in self._from_protect.df().iterrows():
+        all_treatments = {}
+        for index, row in itertools.islice(self._from_protect.df().iterrows(), 1):
             treatments = (
                 row["treatment_with_text_sources_x"]
                 + row["treatment_with_text_sources_y"]
             )
             for treatment in treatments:
                 if treatment[1] is not None and treatment[1] != "":
-                    all_treatments.add((treatment[0], treatment[1]))
+                    all_treatments[(treatment[0], treatment[1])] = None
 
-        for index, (treatment, source) in enumerate(all_treatments):
+        for index, (treatment, source) in enumerate(all_treatments.keys()):
             if treatment is None or len(treatment) == 0:
                 continue
 
-            treatments = list(set([x[0] for x in all_treatments]))
+            treatments = list(dict.fromkeys([x[0] for x in all_treatments]))
             if treatments and source is not None and source != "":
                 self._dataset.append(
                     {

@@ -92,4 +92,4 @@ class TreatmentSourceGPTClassifier(BaseGPTClassifier):
         return examples
 
     def _index(self, x) -> str:
-        return md5(f"{x['source']}_{x['y_true']}").hexdigest()
+        return md5(f"{x['source']}_{x['y_true']}".encode("utf-8")).hexdigest()
