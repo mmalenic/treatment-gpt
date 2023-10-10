@@ -99,6 +99,7 @@ class GenePairDataset:
                             "cancer_type": row["cancer_type"],
                             "gene_x": row["gene_x"],
                             "gene_y": row["gene_y"],
+                            "p_val": row["p_val"],
                             "treatments": treatment_sublist,
                             "y_true": [y.lower() for y in y_true],
                             "y_pred": np.nan,
