@@ -93,6 +93,7 @@ class BaseGPTClassifier(ABC):
         """
         self.df = self.df.apply(lambda x: self._predict_single(x), axis=1)
         self.df = self.df.explode(column="y_pred", ignore_index=True)
+        self.df = self.df.apply(lambda x: self._results(x), axis=1)
 
     def _n_tokens(self, prompt) -> int:
         """
@@ -215,8 +216,6 @@ class BaseGPTClassifier(ABC):
 
         if not Path(os.path.join(self.save_dir, index)).exists():
             dump_response(os.path.join(self.save_dir, index), x, response)
-
-        x = self._results(x)
 
         return x
 

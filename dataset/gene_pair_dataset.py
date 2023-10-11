@@ -120,13 +120,37 @@ class GenePairDataset:
         """
         Compute the results
         """
-        y_true = [x["y_true"]] * len(x["y_pred"])
-        y_true = self._binarizer.transform(y_true)
 
-        y_pred = self._binarizer.transform(x["y_pred"])
+        def treatment_for_level(y, level):
+            treatments = [
+                treatment["level"]
+                for treatment in x["treatments"]
+                if treatment["treatment"].lower() == y
+            ]
+            if len(treatments) == 0:
+                return False
+            else:
+                return treatments[0] == level
 
-        x["hamming_loss"] = hamming_loss(y_true, y_pred)
-        x["accuracy_score"] = accuracy_score(y_true, y_pred)
+        def score(y_true, y_pred, suffix):
+            y_true = self._binarizer.transform([y_true])
+            y_pred = self._binarizer.transform([y_pred])
+
+            x["hamming_loss" + suffix] = hamming_loss(y_true, y_pred)
+            x["accuracy_score" + suffix] = accuracy_score(y_true, y_pred)
+
+        x["y_true_a_level"] = [y for y in x["y_true"] if treatment_for_level(y, "A")]
+        x["y_true_b_level"] = [y for y in x["y_true"] if treatment_for_level(y, "B")]
+        x["y_pred_a_level"] = [y for y in x["y_pred"] if treatment_for_level(y, "A")]
+        x["y_pred_b_level"] = [y for y in x["y_pred"] if treatment_for_level(y, "B")]
+
+        score(x["y_true"], x["y_pred"], "")
+
+        if len(x["y_true_a_level"]) != 0:
+            score(x["y_true_a_level"], x["y_pred_a_level"], "_a_level")
+
+        if len(x["y_true_b_level"]) != 0:
+            score(x["y_true_b_level"], x["y_pred_b_level"], "_b_level")
 
         return x
 
