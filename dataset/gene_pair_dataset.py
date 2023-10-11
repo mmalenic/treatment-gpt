@@ -3,7 +3,10 @@ from typing import Optional, List
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import hamming_loss
+from sklearn.preprocessing import MultiLabelBinarizer
 
+from classifier.util import accuracy_score
 from dataset.load_protect import LoadProtect
 import random
 
@@ -33,6 +36,8 @@ class GenePairDataset:
         self._remove_empty_sources = remove_empty_sources
         self._split_to_n_treatments = split_to_n_treatments
         self._all_treatments = {}
+
+        self._binarizer = MultiLabelBinarizer()
 
     def load(self):
         """
@@ -100,14 +105,29 @@ class GenePairDataset:
                             "gene_x": row["gene_x"],
                             "gene_y": row["gene_y"],
                             "p_val": row["p_val"],
+                            "correlation_type": row["correlation_type"],
                             "treatments": treatment_sublist,
                             "y_true": [y.lower() for y in y_true],
                             "y_pred": np.nan,
-                            "loss": np.nan,
                         }
                     )
 
         self._df = pd.DataFrame(self._dataset)
+        self._binarizer.fit([[x.lower() for x in self.all_treatments]])
+
+    def results(self, x) -> pd.DataFrame:
+        """
+        Compute the results
+        """
+        y_true = [x["y_true"]] * len(x["y_pred"])
+        y_true = self._binarizer.transform(y_true)
+
+        y_pred = self._binarizer.transform(x["y_pred"])
+
+        x["hamming_loss"] = hamming_loss(y_true, y_pred)
+        x["accuracy_score"] = accuracy_score(y_true, y_pred)
+
+        return x
 
     @property
     def all_treatments(self) -> List[str]:

@@ -31,7 +31,6 @@ class BaseGPTClassifier(ABC):
     def __init__(
         self,
         df: pd.DataFrame,
-        labels: List[str],
         save_dir: str,
         model_type: Literal["gpt-3.5-turbo"]
         | Literal["gpt-3.5-turbo-16k"]
@@ -53,9 +52,6 @@ class BaseGPTClassifier(ABC):
         self._cost_estimate = None
         self._max_token_number = None
         self._repeat_n_times = repeat_n_times
-
-        self._binarizer = MultiLabelBinarizer()
-        self._binarizer.fit([[x.lower() for x in labels]])
 
     def n_samples(self) -> int:
         return len(self.df)
@@ -154,7 +150,7 @@ class BaseGPTClassifier(ABC):
 
         return model_type
 
-    def _predict_single(self, x, max_retries: int = 3) -> List[str]:
+    def _predict_single(self, x, max_retries: int = 3) -> pd.DataFrame:
         """
         Predict a single sample.
         """
@@ -214,21 +210,13 @@ class BaseGPTClassifier(ABC):
 
         print("responses:", responses)
 
-        if x["index"] == 12:
-            print("HERE")
-
         responses = [[y.lower() for y in x] for x in responses]
         x["y_pred"] = responses
-        y_true = [x["y_true"]] * len(responses)
-
-        y_true = self._binarizer.transform(y_true)
-        y_pred = self._binarizer.transform(responses)
-
-        x["hamming_loss"] = hamming_loss(y_true, y_pred)
-        x["accuracy_score"] = accuracy_score(y_true, y_pred)
 
         if not Path(os.path.join(self.save_dir, index)).exists():
             dump_response(os.path.join(self.save_dir, index), x, response)
+
+        x = self._results(x)
 
         return x
 
@@ -292,4 +280,8 @@ class BaseGPTClassifier(ABC):
 
     @abstractmethod
     def _index(self, x) -> str:
+        raise NotImplementedError
+
+    @abstractmethod
+    def _results(self, x) -> pd.DataFrame:
         raise NotImplementedError

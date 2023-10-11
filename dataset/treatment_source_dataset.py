@@ -56,11 +56,16 @@ class TreatmentSourceDataset:
                         "treatments": treatments,
                         "y_true": treatment.lower(),
                         "y_pred": np.nan,
-                        "loss": np.nan,
                     }
                 )
 
         self._df = pd.DataFrame(self._dataset)
+
+    def results(self, x) -> pd.DataFrame:
+        """
+        Compute the results
+        """
+        raise NotImplemented
 
     @property
     def all_treatments(self) -> List[str]:

@@ -6,6 +6,7 @@ from hashlib import md5
 from typing import Literal, get_args
 
 import pandas as pd
+from typing_extensions import override
 
 from classifier.gpt.base_gpt_classifier import BaseGPTClassifier
 from classifier.gpt.prompt_templates import *
@@ -45,7 +46,6 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         self.__dict__.update(kwargs)
         super().__init__(
             base_dataset.df,
-            base_dataset.all_treatments,
             os.path.join(
                 base_save_dir,
                 (prompt_template + "_" + model_type)
@@ -60,6 +60,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         self.prompt_template = Prompts.from_name(prompt_template)
         self.n_examples = n_examples
 
+    @override
     def _construct_prompt(self, x) -> str:
         treatments = self.base_dataset.all_treatments
 
@@ -107,9 +108,14 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
 
         return examples
 
+    @override
     def _index(self, x) -> (str, str):
         return md5(
             f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}_{json.dumps(x['treatments'])}".encode(
                 "utf-8"
             )
         ).hexdigest()
+
+    @override
+    def _results(self, x) -> pd.DataFrame:
+        return self.base_dataset.results(x)
