@@ -106,6 +106,7 @@ class GenePairDataset:
                             "gene_y": row["gene_y"],
                             "p_val": row["p_val"],
                             "correlation_type": row["correlation_type"],
+                            "odds": row["odds"],
                             "treatments": treatment_sublist,
                             "y_true": [y.lower() for y in y_true],
                             "y_pred": np.nan,
