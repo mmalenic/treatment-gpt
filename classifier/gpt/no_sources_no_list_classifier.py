@@ -6,7 +6,6 @@ from hashlib import md5
 from typing import Literal, get_args
 
 import pandas as pd
-from typing_extensions import override
 
 from classifier.gpt.base_gpt_classifier import BaseGPTClassifier
 from classifier.gpt.prompt_templates import *
@@ -27,6 +26,7 @@ class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         n_examples: int = 2,
+        repeat_n_times: int = 1,
         base_save_dir: str = "data/results",
         **kwargs,
     ):
@@ -53,6 +53,7 @@ class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
                 .replace("-", "_"),
             ),
             model_type,
+            repeat_n_times=repeat_n_times,
             **kwargs,
         )
 
@@ -60,7 +61,6 @@ class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
         self.prompt_template = Prompts.from_name(prompt_template)
         self.n_examples = n_examples
 
-    @override
     def _construct_prompt(self, x) -> str:
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
@@ -103,7 +103,6 @@ class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
 
         return examples
 
-    @override
     def _index(self, x) -> (str, str):
         return md5(
             f"{x['cancer_type']}_{x['gene_x']}_{x['gene_y']}_{x['y_true']}".encode(
@@ -111,6 +110,5 @@ class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):
             )
         ).hexdigest()
 
-    @override
     def _results(self, x) -> pd.DataFrame:
         return self.base_dataset.results(x)
