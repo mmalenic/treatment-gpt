@@ -402,11 +402,30 @@ class LoadProtect:
             return output
 
         def p_val(x, cancer_type_pairs) -> pd.DataFrame:
-            return next(
+            types = [
                 y[2]
                 for y in cancer_type_pairs
-                if y[0] == x["gene_x"] and y[1] == x["gene_y"]
-            )
+                if (y[0] == x["gene_x"] and y[1] == x["gene_y"])
+                or (y[1] == x["gene_x"] and y[0] == x["gene_y"])
+            ]
+
+            if len(types) != 2:
+                raise Exception("incorrect p_vals found")
+
+            return types[0]
+
+        def correlation_type(x, cancer_type_pairs) -> pd.DataFrame:
+            types = [
+                y[3]
+                for y in cancer_type_pairs
+                if (y[0] == x["gene_x"] and y[1] == x["gene_y"])
+                or (y[1] == x["gene_x"] and y[0] == x["gene_y"])
+            ]
+
+            if len(types) != 2:
+                raise Exception("incorrect p_vals found")
+
+            return types[0]
 
         def match_with_cancer_types(x) -> pd.DataFrame:
             cancer_type = x["cancer_type"].iloc[0]
@@ -414,7 +433,7 @@ class LoadProtect:
                 0
             ].tolist()[0]
             cancer_type_pairs += [
-                (pair[1], pair[0], pair[2]) for pair in cancer_type_pairs
+                (pair[1], pair[0], pair[2], pair[3]) for pair in cancer_type_pairs
             ]
 
             x = x[
@@ -428,6 +447,9 @@ class LoadProtect:
                 return x
 
             x.loc[:, "p_val"] = x.apply(lambda y: p_val(y, cancer_type_pairs), axis=1)
+            x.loc[:, "correlation_type"] = x.apply(
+                lambda y: correlation_type(y, cancer_type_pairs), axis=1
+            )
 
             return x
 
@@ -443,9 +465,14 @@ class LoadProtect:
 
             pairs = (
                 self._cancer_types.df()
-                .groupby(["canonicalName"])[["genex", "geney", "pval"]]
+                .groupby(["canonicalName"])[["genex", "geney", "pval", "corType"]]
                 .agg(list)
-                .apply(lambda x: list(zip(x["genex"], x["geney"], x["pval"])), axis=1)
+                .apply(
+                    lambda x: list(
+                        zip(x["genex"], x["geney"], x["pval"], x["corType"])
+                    ),
+                    axis=1,
+                )
                 .reset_index()
             )
 
