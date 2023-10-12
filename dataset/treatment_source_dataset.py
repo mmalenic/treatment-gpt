@@ -47,7 +47,9 @@ class TreatmentSourceDataset:
             if treatment is None or len(treatment) == 0:
                 continue
 
-            treatments = list(dict.fromkeys([x[0] for x in self._all_treatments]))
+            treatments = list(
+                dict.fromkeys([x[0].lower() for x in self._all_treatments])
+            )
             if treatments and source is not None and source != "":
                 self._dataset.append(
                     {

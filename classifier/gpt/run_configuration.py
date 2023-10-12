@@ -339,3 +339,10 @@ class RunConfiguration:
         Calculate the total cost
         """
         return sum([x["cost_estimate"] for x in self.run_configuration["runs"]])
+
+    def save_example_prompts(self):
+        """
+        Save example prompts.
+        """
+        for run in self.run_configuration["runs"]:
+            run["classifier"].save_example_prompt()

@@ -87,6 +87,14 @@ class BaseGPTClassifier(ABC):
         """
         return self._max_token_number
 
+    def save_example_prompt(self):
+        """
+        Save an example prompt.
+        """
+        path = Path(os.path.join(self.save_dir, "example_prompt"))
+        if not path.exists():
+            path.write_text(self._construct_prompt(self.df.iloc[0]), encoding="utf-8")
+
     def predict(self):
         """
         Predict the labels.
