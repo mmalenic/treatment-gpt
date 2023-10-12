@@ -444,3 +444,10 @@ class RunConfiguration:
         """
         for run in self.run_configuration["runs"]:
             run["classifier"].save_example_prompt()
+
+    def save_diagrams(self):
+        """
+        Save diagrams.
+        """
+        for run in self.run_configuration["runs"]:
+            run["classifier"].base_dataset.diagrams(run["classifier"].save_dir)

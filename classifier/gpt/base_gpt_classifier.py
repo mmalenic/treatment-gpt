@@ -31,6 +31,7 @@ class BaseGPTClassifier(ABC):
     def __init__(
         self,
         df: pd.DataFrame,
+        base_dataset,
         save_dir: str,
         model_type: Literal["gpt-3.5-turbo"]
         | Literal["gpt-3.5-turbo-16k"]
@@ -46,6 +47,7 @@ class BaseGPTClassifier(ABC):
         self.__dict__.update(kwargs)
 
         self._model_type = model_type
+        self.base_dataset = base_dataset
         self.df = df
         Path(save_dir).mkdir(parents=True, exist_ok=True)
         self.save_dir = save_dir
@@ -101,6 +103,7 @@ class BaseGPTClassifier(ABC):
         self.df = self.df.apply(lambda x: self._predict_single(x), axis=1)
         self.df = self.df.explode(column="y_pred", ignore_index=True)
         self.df = self.df.apply(lambda x: self._results(x), axis=1)
+        self.base_dataset.df = self.df
 
     def _n_tokens(self, prompt) -> int:
         """

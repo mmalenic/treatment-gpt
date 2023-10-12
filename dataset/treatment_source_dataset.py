@@ -63,6 +63,12 @@ class TreatmentSourceDataset:
 
         self._df = pd.DataFrame(self._dataset)
 
+    def diagrams(self, save_to: str):
+        """
+        Save all diagrams
+        """
+        raise NotImplemented
+
     def results(self, x) -> pd.DataFrame:
         """
         Compute the results
@@ -82,6 +88,13 @@ class TreatmentSourceDataset:
         Return the dataframe of the dataset.
         """
         return self._df
+
+    @df.setter
+    def df(self, df):
+        """
+        Set the df.
+        """
+        self._df = df
 
     def add_prediction(self, prediction, pos):
         self._df.iloc[pos, self._df.columns.get_loc("y_pred")] = prediction

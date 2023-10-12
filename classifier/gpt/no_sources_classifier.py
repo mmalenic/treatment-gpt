@@ -46,6 +46,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         self.__dict__.update(kwargs)
         super().__init__(
             base_dataset.df,
+            base_dataset,
             os.path.join(
                 base_save_dir,
                 (prompt_template + "_" + model_type)
