@@ -175,9 +175,10 @@ class GenePairDataset:
         Save all diagrams.
         """
 
-        def save_fig(save_to, plt=plt):
-            plt.tight_layout()
-            plt.savefig(save_to, format="svg", dpi=600)
+        def save_fig(save_to, plt=plt, tight=True):
+            if tight:
+                plt.tight_layout()
+            plt.savefig(save_to, format="svg", dpi=300)
             try:
                 plt.close()
             except AttributeError:
@@ -201,8 +202,8 @@ class GenePairDataset:
             x = x.set_index("Treatment")
 
             fig, ax = plt.subplots()
-            fig.set_figheight(25)
-            fig.set_figwidth(15)
+            fig.set_figheight(15)
+            fig.set_figwidth(10)
 
             ax.set_xlabel("Treatment")
             ax.set_ylabel("Score")
@@ -244,6 +245,13 @@ class GenePairDataset:
             id_vars=["correlation_type"],
             value_vars=["accuracy_score_a_level", "accuracy_score_b_level"],
         )
+        melt = melt.rename(columns={"variable": "Evidence level"})
+        melt.loc[
+            melt["Evidence level"] == "accuracy_score_a_level", "Evidence level"
+        ] = "A"
+        melt.loc[
+            melt["Evidence level"] == "accuracy_score_b_level", "Evidence level"
+        ] = "B"
 
         group_by_cancer_type = (
             df.groupby(["cancer_type"]).apply(cls_report).reset_index()
@@ -286,72 +294,99 @@ class GenePairDataset:
             )
         )
 
+        plt.clf()
         plt.figure()
-        plot = sns.barplot(df, x="correlation_type", y="accuracy_score").set_title(
-            "Accuracy for correlation type"
-        )
-        plot.label(x="Correlation type", y="Accuracy score")
+        plot = sns.barplot(df, x="correlation_type", y="accuracy_score")
+        plot.set_title("Accuracy for correlation type")
+        plot.set(xlabel="Correlation type", ylabel="Accuracy score")
         save_fig(f"{save_to}/accuracy_score.svg")
 
+        plt.clf()
         plt.figure()
         plot = sns.lmplot(
-            data=has_cor, x="accuracy_score", y="p_val", hue="correlation_type"
-        ).set_title("Accuracy and p-value for correlations")
-        plot.label(x="Accuracy score", y="p-value", color="Correlation type")
-        save_fig(f"{save_to}/accuracy_p_val_for_correlation.svg")
+            data=has_cor, y="accuracy_score", x="p_val", hue="correlation_type"
+        )
+        plt.title("Accuracy and p-value for correlations")
+        plt.ylabel("Accuracy score")
+        plt.xlabel("p-value")
+        plt.subplots_adjust(top=0.9)
+        plot._legend.set_title("Correlation type")
+        save_fig(f"{save_to}/accuracy_p_val_for_correlation.svg", tight=False)
 
+        plt.clf()
         plt.figure()
         plot = sns.lmplot(
-            data=has_cor, x="accuracy_score", y="odds", hue="correlation_type"
-        ).set_title("Accuracy and odds for correlations")
-        plot.label(x="Accuracy score", y="Odds", color="Correlation type")
-        save_fig(f"{save_to}/accuracy_odds_for_correlation.svg")
+            data=has_cor, y="accuracy_score", x="odds", hue="correlation_type"
+        )
+        plt.title("Accuracy and odds for correlations")
+        plt.ylabel("Accuracy score")
+        plt.xlabel("Odds")
+        plt.subplots_adjust(top=0.9)
+        plot._legend.set_title("Correlation type")
+        save_fig(f"{save_to}/accuracy_odds_for_correlation.svg", tight=False)
 
+        plt.clf()
         plt.figure()
         plot = sns.lmplot(
             data=mutually_exclusive,
-            x="accuracy_score",
-            y="p_val",
+            y="accuracy_score",
+            x="p_val",
             hue="correlation_type",
-        ).set_title("Accuracy and p-value for mutually exclusive correlations")
-        plot.label(x="Accuracy score", y="p-value", color="Correlation type")
-        save_fig(f"{save_to}/accuracy_p_value_mutually_exclusive.svg")
+        )
+        plt.title("Accuracy and p-value for mutually exclusive correlations")
+        plt.ylabel("Accuracy score")
+        plt.xlabel("p-value")
+        plt.subplots_adjust(top=0.9)
+        plot._legend.set_title("Correlation type")
+        save_fig(f"{save_to}/accuracy_p_value_mutually_exclusive.svg", tight=False)
 
+        plt.clf()
         plt.figure()
         plot = sns.lmplot(
             data=mutually_exclusive,
-            x="accuracy_score",
-            y="odds",
+            y="accuracy_score",
+            x="odds",
             hue="correlation_type",
-        ).set_title("Accuracy and odds for mutually exclusive correlations")
-        plot.label(x="Accuracy score", y="Odds", color="Correlation type")
-        save_fig(f"{save_to}/accuracy_odds_mutually_exclusive.svg")
+        )
+        plt.title("Accuracy and odds for mutually exclusive correlations")
+        plt.ylabel("Accuracy score")
+        plt.xlabel("Odds")
+        plt.subplots_adjust(top=0.9)
+        plot._legend.set_title("Correlation type")
+        save_fig(f"{save_to}/accuracy_odds_mutually_exclusive.svg", tight=False)
 
+        plt.clf()
         plt.figure()
         plot = sns.lmplot(
-            data=cooccuring, x="accuracy_score", y="p_val", hue="correlation_type"
-        ).set_title("Accuracy and p-value for co-occurring correlations")
-        plot.label(x="Accuracy score", y="p-value", color="Correlation type")
-        save_fig(f"{save_to}/accuracy_p_value_co_occurring.svg")
+            data=cooccuring, y="accuracy_score", x="p_val", hue="correlation_type"
+        )
+        plt.title("Accuracy and p-value for co-occurring correlations")
+        plt.ylabel("Accuracy score")
+        plt.xlabel("p-value")
+        plt.subplots_adjust(top=0.9)
+        plot._legend.set_title("Correlation type")
+        save_fig(f"{save_to}/accuracy_p_value_co_occurring.svg", tight=False)
 
+        plt.clf()
         plt.figure()
         plot = sns.lmplot(
-            data=cooccuring, x="accuracy_score", y="odds", hue="correlation_type"
-        ).set_title("Accuracy and odds for co-occurring correlations")
-        plot.label(x="Accuracy score", y="Odds", color="Correlation type")
-        save_fig(f"{save_to}/accuracy_odds_co_occurring.svg")
+            data=cooccuring, y="accuracy_score", x="odds", hue="correlation_type"
+        )
+        plt.title("Accuracy and odds for co-occurring correlations")
+        plt.ylabel("Accuracy score")
+        plt.xlabel("Odds")
+        plt.subplots_adjust(top=0.9)
+        plot._legend.set_title("Correlation type")
+        save_fig(f"{save_to}/accuracy_odds_co_occurring.svg", tight=False)
 
+        plt.clf()
         plt.figure()
-        plot = sns.barplot(
-            melt, x="correlation_type", y="value", hue="variable"
-        ).set_title("Accuracy for evidence levels and correlation type")
-        plot.label(x="Accuracy score", y="Correlation type", color="Evidence level")
-
-        labels = ["A", "B"]
-        for text, label in zip(plot._legend.texts, labels):
-            text.set_text(label)
-
+        plot = sns.barplot(melt, x="correlation_type", y="value", hue="Evidence level")
+        plot.set_title("Accuracy for evidence levels and correlation type")
+        plot.set(ylabel="Accuracy score", xlabel="Correlation type")
         save_fig(f"{save_to}/accuracy_level_correlation_type.svg")
+
+        plt.clf()
 
     @property
     def all_treatments(self) -> List[str]:
