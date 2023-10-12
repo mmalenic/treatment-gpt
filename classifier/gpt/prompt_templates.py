@@ -81,6 +81,8 @@ You will have the following information available:
         "Classify the journal abstract into a treatment. Only one treatment is correct."
     )
 
+    _treatment_only_no_list_classification_task_prompt_template = "Classify the journal abstract into a treatment. Choose the specific drug name from the journal abstract and avoid generic terms like `chemotherapy`. Use a `+` to denote combination therapy if applicable."
+
     _treatment_only_response_prompt_template = """Journal abstract:
 {source}
 What treatment is this journal abstract about?"""
@@ -267,6 +269,50 @@ Perform the following tasks:
 {_examples_prompt_template}
 {_list_of_treatments_and_sources_prompt_template}
 {_patient_cancer_type_prompt_template}
+"""
+
+    zero_shot_treatment_source_no_list = f"""{_treatment_only_task_prompt_template}
+
+Perform the following tasks:
+1. {_treatment_only_no_list_classification_task_prompt_template}
+2. {_single_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+
+{_treatment_only_response_prompt_template}
+{_json_response_prompt_template}
+"""
+
+    few_shot_treatment_source_no_list = f"""{_treatment_only_task_prompt_template}
+3. {_few_shot_examples_prompt_template}
+
+Perform the following tasks:
+1. {_treatment_only_no_list_classification_task_prompt_template}
+2. {_single_label_json_task_prompt_template} {_no_additional_information_prompt_template}
+
+{_examples_prompt_template}
+{_treatment_only_response_prompt_template}
+{_json_response_prompt_template}
+"""
+
+    zero_shot_treatment_source_no_list_cot = f"""{_treatment_only_task_prompt_template}
+
+Perform the following tasks:
+1. {_treatment_only_no_list_classification_task_prompt_template}
+2. {treatment_only_cot_prompt_template}
+3. {_single_label_json_task_prompt_template}
+
+{_treatment_only_response_prompt_template}
+"""
+
+    few_shot_treatment_source_no_list_cot = f"""{_treatment_only_task_prompt_template}
+3. {_few_shot_examples_prompt_template}
+
+Perform the following tasks:
+1. {_treatment_only_no_list_classification_task_prompt_template}
+2. {treatment_only_cot_prompt_template}
+3. {_single_label_json_task_prompt_template}
+
+{_examples_prompt_template}
+{_treatment_only_response_prompt_template}
 """
 
     zero_shot_treatment_source = f"""{_treatment_only_task_prompt_template}

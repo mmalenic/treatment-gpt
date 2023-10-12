@@ -4,7 +4,9 @@ from classifier.gpt.no_sources_no_list_classifier import (
 )
 from classifier.gpt.prompt_templates import *
 from classifier.gpt.treatment_only_classifier import TreatmentSourceGPTClassifier
-from classifier.gpt.with_sources_classifier import WithSourcesGenePairGPTClassifier
+from classifier.gpt.treatment_only_no_list_classifier import (
+    TreatmentSourceNoListGPTClassifier,
+)
 from dataset.treatment_source_dataset import TreatmentSourceDataset
 from dataset.gene_pair_dataset import GenePairDataset
 
@@ -112,6 +114,54 @@ class RunConfiguration:
                     "classifier": NoSourcesGenePairGPTClassifier(
                         gene_pair_dataset,
                         Prompts.few_shot_no_sources_cot_name,
+                        "gpt-3.5-turbo",
+                        repeat_n_times=3,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.zero_shot_treatment_source_no_list_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.zero_shot_treatment_source_no_list_name,
+                        "gpt-3.5-turbo",
+                        repeat_n_times=3,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_treatment_source_no_list_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.few_shot_treatment_source_no_list_name,
+                        "gpt-3.5-turbo",
+                        repeat_n_times=3,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.zero_shot_treatment_source_no_list_cot_name,
+                        "gpt-3.5-turbo",
+                        repeat_n_times=3,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.few_shot_treatment_source_no_list_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
                     ),
@@ -256,6 +306,54 @@ class RunConfiguration:
                     "classifier": NoSourcesGenePairGPTClassifier(
                         gene_pair_dataset,
                         Prompts.few_shot_no_sources_cot_name,
+                        "gpt-4",
+                        repeat_n_times=2,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.zero_shot_treatment_source_no_list_name,
+                    "model_type": "gpt-4",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.zero_shot_treatment_source_no_list_name,
+                        "gpt-4",
+                        repeat_n_times=2,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_treatment_source_no_list_name,
+                    "model_type": "gpt-4",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.few_shot_treatment_source_no_list_name,
+                        "gpt-4",
+                        repeat_n_times=2,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
+                    "model_type": "gpt-4",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.zero_shot_treatment_source_no_list_cot_name,
+                        "gpt-4",
+                        repeat_n_times=2,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
+                {
+                    "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
+                    "model_type": "gpt-4",
+                    "classifier": TreatmentSourceNoListGPTClassifier(
+                        treatment_source_dataset,
+                        Prompts.few_shot_treatment_source_no_list_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
                     ),

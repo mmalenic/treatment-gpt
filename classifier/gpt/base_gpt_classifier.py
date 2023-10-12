@@ -92,8 +92,7 @@ class BaseGPTClassifier(ABC):
         Save an example prompt.
         """
         path = Path(os.path.join(self.save_dir, "example_prompt"))
-        if not path.exists():
-            path.write_text(self._construct_prompt(self.df.iloc[0]), encoding="utf-8")
+        path.write_text(self._construct_prompt(self.df.iloc[0]), encoding="utf-8")
 
     def predict(self):
         """
