@@ -16,8 +16,7 @@ import random
 
 from dataset.diagram_utils import (
     save_fig,
-    heatmaps_per_cancer_type,
-    plot_heatmaps,
+    heatmap_for_cls_report,
 )
 
 
@@ -199,6 +198,57 @@ class GenePairDataset:
                 x["cancer_type"]
             )
             return x
+
+        def heat_map(x, colour, save_to):
+            x["cancer_type"] = f"Scores for {x['cancer_type'].iloc[0]}"
+            x = x.set_index("Treatment")
+
+            return heatmap_for_cls_report(
+                x,
+                colour,
+                save_to,
+                x_label="Treatment",
+                y_label="Score",
+                title=f"Scores for {x['cancer_type'].iloc[0]}",
+            )
+
+        def plot_heatmaps(df, save_to):
+            """
+            Plot all heatmaps.
+            """
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x,
+                    "Blues",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_blue.svg",
+                )
+            )
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x, "Reds", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_red.svg"
+                )
+            )
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x,
+                    "Greens",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_green.svg",
+                )
+            )
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x,
+                    "Oranges",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_orange.svg",
+                )
+            )
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x,
+                    "Purples",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_purple.svg",
+                )
+            )
 
         Path(save_to).mkdir(exist_ok=True, parents=True)
         Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)

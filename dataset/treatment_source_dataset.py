@@ -14,8 +14,7 @@ import random
 
 from dataset.diagram_utils import (
     save_fig,
-    heatmaps_per_cancer_type,
-    plot_heatmaps,
+    heatmap_for_cls_report,
 )
 
 
@@ -103,6 +102,18 @@ class TreatmentSourceDataset:
 
             return ", ".join(levels)
 
+        def heat_map(x, colour, save_to):
+            return heatmap_for_cls_report(
+                x,
+                colour,
+                save_to,
+                x_label="Treatment",
+                y_label="",
+                title=f"Scores for treatment source dataset",
+                width=30,
+                height=5,
+            )
+
         Path(save_to).mkdir(exist_ok=True, parents=True)
 
         df = self.df.copy()
@@ -134,6 +145,20 @@ class TreatmentSourceDataset:
         melt_cancer_type["Evidence level"] = melt_cancer_type.apply(
             level_for_cancer_type, axis=1
         )
+
+        cls_report = pd.DataFrame(
+            classification_report(
+                self._df["y_true"].tolist(),
+                self._df["y_pred"].tolist(),
+                output_dict=True,
+            )
+        ).transpose()
+
+        heat_map(cls_report, "Blues", f"{save_to}/heatmaps/heatmap_blue.svg")
+        heat_map(cls_report, "Reds", f"{save_to}/heatmaps/heatmap_blue.svg")
+        heat_map(cls_report, "Greens", f"{save_to}/heatmaps/heatmap_blue.svg")
+        heat_map(cls_report, "Oranges", f"{save_to}/heatmaps/heatmap_blue.svg")
+        heat_map(cls_report, "Purples", f"{save_to}/heatmaps/heatmap_blue.svg")
 
         plt.clf()
         plt.figure()

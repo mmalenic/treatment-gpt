@@ -18,21 +18,20 @@ def save_fig(save_to, plt=plt, tight=True):
         pass
 
 
-def heatmaps_per_cancer_type(x, colour, save_to):
+def heatmap_for_cls_report(
+    x, colour, save_to, x_label, y_label, title, height=15, width=10
+):
     """
     Create heatmaps per cancer type.
     """
-    x["cancer_type"] = f"Scores for {x['cancer_type'].iloc[0]}"
-
     cmap = sns.color_palette(colour, as_cmap=True)
-    x = x.set_index("Treatment")
 
     fig, ax = plt.subplots()
-    fig.set_figheight(15)
-    fig.set_figwidth(10)
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
 
-    ax.set_xlabel("Treatment")
-    ax.set_ylabel("Score")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
 
     divider = make_axes_locatable(ax)
     cbar_ax = divider.new_horizontal(size="5%", pad=0.5, pack_start=False)
@@ -52,41 +51,6 @@ def heatmaps_per_cancer_type(x, colour, save_to):
     )
     ax.set_aspect("equal")
 
-    ax.set_title(x["cancer_type"].iloc[0])
+    ax.set_title(title)
 
     save_fig(save_to, fig)
-
-
-def plot_heatmaps(df, save_to):
-    """
-    Plot all heatmaps.
-    """
-    df.groupby(["cancer_type"]).apply(
-        lambda x: heatmaps_per_cancer_type(
-            x, "Blues", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_blue.svg"
-        )
-    )
-    df.groupby(["cancer_type"]).apply(
-        lambda x: heatmaps_per_cancer_type(
-            x, "Reds", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_red.svg"
-        )
-    )
-    df.groupby(["cancer_type"]).apply(
-        lambda x: heatmaps_per_cancer_type(
-            x, "Greens", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_green.svg"
-        )
-    )
-    df.groupby(["cancer_type"]).apply(
-        lambda x: heatmaps_per_cancer_type(
-            x,
-            "Oranges",
-            f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_orange.svg",
-        )
-    )
-    df.groupby(["cancer_type"]).apply(
-        lambda x: heatmaps_per_cancer_type(
-            x,
-            "Purples",
-            f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_purple.svg",
-        )
-    )
