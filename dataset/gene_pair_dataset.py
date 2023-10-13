@@ -194,6 +194,12 @@ class GenePairDataset:
                 )
             ).transpose()
 
+        def add_cancer_types_code(x):
+            x["cancer_type_code"] = self._from_protect.cancer_types.cancer_type_code(
+                x["cancer_type"]
+            )
+            return x
+
         def heatmaps_per_cancer_type(x, colour, save_to):
             x = x.rename(columns={"treatment": "Treatment"})
             x["cancer_type"] = f"Scores for {x['cancer_type'].iloc[0]}"
@@ -233,24 +239,30 @@ class GenePairDataset:
             save_fig(save_to, fig)
 
         Path(save_to).mkdir(exist_ok=True, parents=True)
+        Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)
 
         df = self.df.copy()
         df.loc[df["correlation_type"] == "none", "correlation_type"] = "no correlation"
 
+        df_cancer_types = df.apply(add_cancer_types_code, axis=1)
         has_cor = df.loc[df["correlation_type"] != "no correlation"]
         mutually_exclusive = df.loc[df["correlation_type"] == "mutual exclusivity"]
         cooccuring = df.loc[df["correlation_type"] == "co-occurrence"]
 
-        melt = df.melt(
+        melt_correlation_type = df.melt(
             id_vars=["correlation_type"],
             value_vars=["accuracy_score_a_level", "accuracy_score_b_level"],
         )
-        melt = melt.rename(columns={"variable": "Evidence level"})
-        melt.loc[
-            melt["Evidence level"] == "accuracy_score_a_level", "Evidence level"
+        melt_correlation_type = melt_correlation_type.rename(
+            columns={"variable": "Evidence level"}
+        )
+        melt_correlation_type.loc[
+            melt_correlation_type["Evidence level"] == "accuracy_score_a_level",
+            "Evidence level",
         ] = "A"
-        melt.loc[
-            melt["Evidence level"] == "accuracy_score_b_level", "Evidence level"
+        melt_correlation_type.loc[
+            melt_correlation_type["Evidence level"] == "accuracy_score_b_level",
+            "Evidence level",
         ] = "B"
 
         group_by_cancer_type = (
@@ -270,27 +282,31 @@ class GenePairDataset:
 
         group_by_cancer_type.groupby(["cancer_type"]).apply(
             lambda x: heatmaps_per_cancer_type(
-                x, "Blues", f"{save_to}/{x['cancer_type'].iloc[0]}_blue.svg"
+                x, "Blues", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_blue.svg"
             )
         )
         group_by_cancer_type.groupby(["cancer_type"]).apply(
             lambda x: heatmaps_per_cancer_type(
-                x, "Reds", f"{save_to}/{x['cancer_type'].iloc[0]}_red.svg"
+                x, "Reds", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_red.svg"
             )
         )
         group_by_cancer_type.groupby(["cancer_type"]).apply(
             lambda x: heatmaps_per_cancer_type(
-                x, "Greens", f"{save_to}/{x['cancer_type'].iloc[0]}_green.svg"
+                x, "Greens", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_green.svg"
             )
         )
         group_by_cancer_type.groupby(["cancer_type"]).apply(
             lambda x: heatmaps_per_cancer_type(
-                x, "Oranges", f"{save_to}/{x['cancer_type'].iloc[0]}_orange.svg"
+                x,
+                "Oranges",
+                f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_orange.svg",
             )
         )
         group_by_cancer_type.groupby(["cancer_type"]).apply(
             lambda x: heatmaps_per_cancer_type(
-                x, "Purples", f"{save_to}/{x['cancer_type'].iloc[0]}_purple.svg"
+                x,
+                "Purples",
+                f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_purple.svg",
             )
         )
 
@@ -381,10 +397,21 @@ class GenePairDataset:
 
         plt.clf()
         plt.figure()
-        plot = sns.barplot(melt, x="correlation_type", y="value", hue="Evidence level")
+        plot = sns.barplot(
+            melt_correlation_type, x="correlation_type", y="value", hue="Evidence level"
+        )
         plot.set_title("Accuracy for evidence levels and correlation type")
         plot.set(ylabel="Accuracy score", xlabel="Correlation type")
         save_fig(f"{save_to}/accuracy_level_correlation_type.svg")
+
+        plt.clf()
+        plt.figure()
+        plot = sns.barplot(df_cancer_types, x="cancer_type_code", y="accuracy_score")
+        plot.set_title("Accuracy for cancer types")
+        plot.set(ylabel="Accuracy score", xlabel="Cancer type")
+        plt.subplots_adjust(bottom=0.3)
+        plt.xticks(rotation=90)
+        save_fig(f"{save_to}/accuracy_cancer_type.svg", tight=False)
 
         plt.clf()
 

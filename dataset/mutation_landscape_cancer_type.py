@@ -66,6 +66,17 @@ class MutationLandscapeCancerType:
 
         return self._df[(self._df["doids"] == doid)]["canonicalName"].unique()[0]
 
+    def cancer_type_code(self, canonical_name: str) -> str:
+        """
+        Get the abbreviated cancer type from the canonical name.
+        """
+        if self._df is None:
+            self.load()
+
+        return self._df[(self._df["canonicalName"] == canonical_name)][
+            "tumortype"
+        ].unique()[0]
+
     def load(self) -> pd.DataFrame:
         """
         load the data.

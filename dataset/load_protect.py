@@ -50,6 +50,13 @@ class LoadProtect:
         self._total_samples = None
         self._total_empty_protect_results = 0
 
+    @property
+    def cancer_types(self) -> MutationLandscapeCancerType:
+        """
+        Get the data.
+        """
+        return self._cancer_types
+
     def df(self) -> pd.DataFrame:
         """
         Get the data.
