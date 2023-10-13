@@ -16,7 +16,6 @@ import random
 
 from dataset.diagram_utils import (
     save_fig,
-    add_cancer_types_code,
     heatmaps_per_cancer_type,
     plot_heatmaps,
 )
@@ -191,6 +190,15 @@ class GenePairDataset:
                     target_names=self._binarizer.classes_,
                 )
             ).transpose()
+
+        def add_cancer_types_code(x, from_protect: LoadProtect):
+            """
+            Add cancer type code to dataframe.
+            """
+            x["cancer_type_code"] = from_protect.cancer_types.cancer_type_code(
+                x["cancer_type"]
+            )
+            return x
 
         Path(save_to).mkdir(exist_ok=True, parents=True)
         Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)

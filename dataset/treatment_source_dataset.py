@@ -2,7 +2,7 @@ import itertools
 from pathlib import Path
 from typing import List
 
-import matplotlib as plt
+from matplotlib import pyplot as plt
 import seaborn as sns
 import numpy as np
 import pandas as pd
@@ -14,7 +14,6 @@ import random
 
 from dataset.diagram_utils import (
     save_fig,
-    add_cancer_types_code,
     heatmaps_per_cancer_type,
     plot_heatmaps,
 )
@@ -76,8 +75,7 @@ class TreatmentSourceDataset:
                     {
                         "index": index,
                         "source": source,
-                        "level": level,
-                        "cancer_type": cancer_type,
+                        "cancer_type_and_level": (cancer_type, level),
                         "treatments": treatments,
                         "y_true": treatment.lower(),
                         "y_pred": np.nan,
@@ -85,54 +83,73 @@ class TreatmentSourceDataset:
                 )
 
         self._df = pd.DataFrame(self._dataset)
+        self._df = self._df.groupby(["source", "y_true"]).agg(list).reset_index()
+        self._df["treatments"] = self._df["treatments"].apply(lambda x: x[0])
+        self._df["y_pred"] = np.nan
 
     def diagrams(self, save_to: str):
         """
         Save all diagrams
         """
 
-        def cls_report(x):
-            return pd.DataFrame(
-                classification_report(
-                    x["y_true"].tolist(),
-                    x["y_pred"].tolist(),
-                    output_dict=True,
-                )
-            ).transpose()
+        def level_for_cancer_type(x):
+            levels = []
+
+            if not np.isnan(x["accuracy_a_level"]):
+                levels.append("A")
+
+            if not np.isnan(x["accuracy_b_level"]):
+                levels.append("B")
+
+            return ", ".join(levels)
 
         Path(save_to).mkdir(exist_ok=True, parents=True)
-        Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)
 
         df = self.df.copy()
 
-        df_cancer_types = df.apply(
-            lambda x: add_cancer_types_code(x, self._from_protect), axis=1
+        melt_level = df.melt(
+            value_vars=["accuracy_a_level", "accuracy_b_level"],
         )
+        melt_level = melt_level.rename(columns={"variable": "Evidence level"})
+        melt_level.loc[
+            melt_level["Evidence level"] == "accuracy_a_level",
+            "Evidence level",
+        ] = "A"
+        melt_level.loc[
+            melt_level["Evidence level"] == "accuracy_b_level",
+            "Evidence level",
+        ] = "B"
 
-        group_by_cancer_type = (
-            df.groupby(["cancer_type"]).apply(cls_report).reset_index()
+        melt_cancer_type = df.melt(
+            id_vars=["accuracy_a_level", "accuracy_b_level"],
+            value_vars=[f"accuracy_{cancer}" for cancer in self.all_cancer_types],
         )
-        group_by_cancer_type = group_by_cancer_type.rename(
-            columns={"level_1": "Treatment"}
-        )
+        melt_cancer_type = melt_cancer_type.rename(columns={"variable": "Cancer type"})
+        for cancer in self.all_cancer_types:
+            melt_cancer_type.loc[
+                melt_cancer_type["Cancer type"] == f"accuracy_{cancer}",
+                "Cancer type",
+            ] = self._from_protect.cancer_types.cancer_type_code(cancer)
 
-        plot_heatmaps(group_by_cancer_type, save_to)
+        melt_cancer_type["Evidence level"] = melt_cancer_type.apply(
+            level_for_cancer_type, axis=1
+        )
 
         plt.clf()
         plt.figure()
-        plot = sns.barplot(df_cancer_types, x="cancer_type_code", y="accuracy_score")
-        plot.set_title("Accuracy for cancer types")
-        plot.set(ylabel="Accuracy score", xlabel="Cancer type")
-        plt.xticks(rotation=90)
-        plt.subplots_adjust(bottom=0.3)
-        save_fig(f"{save_to}/accuracy_cancer_type.svg", tight=False)
-
-        plt.clf()
-        plt.figure()
-        plot = sns.barplot(df_cancer_types, x="level", y="accuracy_score")
-        plot.set_title("Accuracy for cancer types")
+        plot = sns.barplot(melt_level, x="Evidence level", y="value")
+        plot.set_title("Accuracy for evidence levels")
         plot.set(ylabel="Accuracy score", xlabel="Evidence level")
-        save_fig(f"{save_to}/accuracy_cancer_type.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_level.svg")
+
+        plt.clf()
+        plt.figure()
+        plot = sns.barplot(melt_cancer_type, x="Cancer type", y="value")
+        plot.set_title("Accuracy for cancer types")
+        plot.set(ylabel="Accuracy score", xlabel="Cancer types")
+        plt.subplots_adjust(bottom=0.3)
+        plt.xticks(rotation=90)
+        save_fig(f"{save_to}/accuracy_cancer_type_level.svg")
 
         plt.clf()
 
@@ -140,8 +157,28 @@ class TreatmentSourceDataset:
         """
         Compute the results
         """
-        x["accuracy_score"] = accuracy_score(x["y_true"], x["y_pred"])
+        x["accuracy_score"] = accuracy_score([x["y_true"]], [x["y_pred"]])
+
+        levels = [y[1] for y in x["cancer_type_and_level"]]
+        cancer_types = [y[0] for y in x["cancer_type_and_level"]]
+
+        if "A" in levels:
+            x["accuracy_a_level"] = x["accuracy_score"]
+        if "B" in levels:
+            x["accuracy_b_level"] = x["accuracy_score"]
+
+        for cancer in self.all_cancer_types:
+            if cancer in cancer_types:
+                x[f"accuracy_{cancer}"] = x["accuracy_score"]
+
         return x
+
+    @property
+    def all_cancer_types(self) -> List[str]:
+        """
+        Get all the cancer types for this dataset.
+        """
+        return list(dict.fromkeys([x[3] for x in self._all_treatments]))
 
     @property
     def all_treatments(self) -> List[str]:

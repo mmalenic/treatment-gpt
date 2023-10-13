@@ -221,7 +221,10 @@ class BaseGPTClassifier(ABC):
 
         print("responses:", responses)
 
-        responses = [[y.lower() for y in x] for x in responses]
+        responses = [
+            [y.lower() for y in x] if isinstance(x, list) else x.lower()
+            for x in responses
+        ]
         x["y_pred"] = responses
 
         if not Path(os.path.join(self.save_dir, index)).exists():

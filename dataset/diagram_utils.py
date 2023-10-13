@@ -1,4 +1,4 @@
-import matplotlib as plt
+from matplotlib import pyplot as plt
 import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -16,14 +16,6 @@ def save_fig(save_to, plt=plt, tight=True):
         plt.close()
     except AttributeError:
         pass
-
-
-def add_cancer_types_code(x, from_protect: LoadProtect):
-    """
-    Add cancer type code to dataframe.
-    """
-    x["cancer_type_code"] = from_protect.cancer_types.cancer_type_code(x["cancer_type"])
-    return x
 
 
 def heatmaps_per_cancer_type(x, colour, save_to):
