@@ -111,7 +111,7 @@ class TreatmentSourceDataset:
                 y_label="",
                 title=f"Scores for treatment source dataset",
                 width=30,
-                height=5,
+                height=10,
             )
 
         Path(save_to).mkdir(exist_ok=True, parents=True)

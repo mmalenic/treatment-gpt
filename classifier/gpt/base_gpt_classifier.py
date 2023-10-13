@@ -172,6 +172,17 @@ class BaseGPTClassifier(ABC):
                     {"x": _x.to_dict(), "response": _response}, location, indent=2
                 )
 
+        def process_plus(x: str):
+            test_x = x.replace(" ", "").lower().split("+")
+
+            for treatment in self.base_dataset.all_treatments:
+                if dict.fromkeys(test_x) == dict.fromkeys(
+                    treatment.replace(" ", "").lower().split("+")
+                ):
+                    return treatment.strip()
+
+            return x.strip()
+
         index = self._index(x)
 
         load_from = os.path.join(self.save_dir, index)
@@ -222,7 +233,7 @@ class BaseGPTClassifier(ABC):
         print("responses:", responses)
 
         responses = [
-            [y.lower() for y in x] if isinstance(x, list) else x.lower()
+            [process_plus(y) for y in x] if isinstance(x, list) else process_plus(x)
             for x in responses
         ]
         x["y_pred"] = responses
