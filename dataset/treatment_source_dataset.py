@@ -1,11 +1,23 @@
 import itertools
+from pathlib import Path
 from typing import List
 
+import matplotlib as plt
+import seaborn as sns
 import numpy as np
 import pandas as pd
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from sklearn.metrics import accuracy_score, classification_report
 
 from dataset.load_protect import LoadProtect
 import random
+
+from dataset.diagram_utils import (
+    save_fig,
+    add_cancer_types_code,
+    heatmaps_per_cancer_type,
+    plot_heatmaps,
+)
 
 
 class TreatmentSourceDataset:
@@ -39,11 +51,20 @@ class TreatmentSourceDataset:
                 )
                 for treatment in treatments:
                     if treatment[1] is not None and treatment[1] != "":
-                        all_treatments[(treatment[0], treatment[1])] = None
+                        all_treatments[
+                            (
+                                treatment[0],
+                                treatment[1],
+                                treatment[2],
+                                row["cancer_type"],
+                            )
+                        ] = None
 
             self._all_treatments = list(all_treatments.keys())
 
-        for index, (treatment, source) in enumerate(self._all_treatments):
+        for index, (treatment, source, level, cancer_type) in enumerate(
+            self._all_treatments
+        ):
             if treatment is None or len(treatment) == 0:
                 continue
 
@@ -55,6 +76,8 @@ class TreatmentSourceDataset:
                     {
                         "index": index,
                         "source": source,
+                        "level": level,
+                        "cancer_type": cancer_type,
                         "treatments": treatments,
                         "y_true": treatment.lower(),
                         "y_pred": np.nan,
@@ -67,13 +90,58 @@ class TreatmentSourceDataset:
         """
         Save all diagrams
         """
-        raise NotImplemented
+
+        def cls_report(x):
+            return pd.DataFrame(
+                classification_report(
+                    x["y_true"].tolist(),
+                    x["y_pred"].tolist(),
+                    output_dict=True,
+                )
+            ).transpose()
+
+        Path(save_to).mkdir(exist_ok=True, parents=True)
+        Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)
+
+        df = self.df.copy()
+
+        df_cancer_types = df.apply(
+            lambda x: add_cancer_types_code(x, self._from_protect), axis=1
+        )
+
+        group_by_cancer_type = (
+            df.groupby(["cancer_type"]).apply(cls_report).reset_index()
+        )
+        group_by_cancer_type = group_by_cancer_type.rename(
+            columns={"level_1": "Treatment"}
+        )
+
+        plot_heatmaps(group_by_cancer_type, save_to)
+
+        plt.clf()
+        plt.figure()
+        plot = sns.barplot(df_cancer_types, x="cancer_type_code", y="accuracy_score")
+        plot.set_title("Accuracy for cancer types")
+        plot.set(ylabel="Accuracy score", xlabel="Cancer type")
+        plt.xticks(rotation=90)
+        plt.subplots_adjust(bottom=0.3)
+        save_fig(f"{save_to}/accuracy_cancer_type.svg", tight=False)
+
+        plt.clf()
+        plt.figure()
+        plot = sns.barplot(df_cancer_types, x="level", y="accuracy_score")
+        plot.set_title("Accuracy for cancer types")
+        plot.set(ylabel="Accuracy score", xlabel="Evidence level")
+        save_fig(f"{save_to}/accuracy_cancer_type.svg", tight=False)
+
+        plt.clf()
 
     def results(self, x) -> pd.DataFrame:
         """
         Compute the results
         """
-        raise NotImplemented
+        x["accuracy_score"] = accuracy_score(x["y_true"], x["y_pred"])
+        return x
 
     @property
     def all_treatments(self) -> List[str]:
