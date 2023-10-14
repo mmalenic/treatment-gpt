@@ -166,10 +166,12 @@ class BaseGPTClassifier(ABC):
         Predict a single sample.
         """
 
-        def dump_response(file, _x, _response):
+        def dump_response(file, _x, _response, _prompt):
             with open(file, "w", encoding="utf-8") as location:
                 json.dump(
-                    {"x": _x.to_dict(), "response": _response}, location, indent=2
+                    {"x": _x.to_dict(), "response": _response, "prompt": _prompt},
+                    location,
+                    indent=2,
                 )
 
         def split_treatment(x: str):
@@ -233,7 +235,10 @@ class BaseGPTClassifier(ABC):
             except ValueError as e:
                 print("Skipping this response:", e)
                 dump_response(
-                    os.path.join(self.save_dir, f"{index}_error"), x, response
+                    os.path.join(self.save_dir, f"{index}_error"),
+                    x,
+                    response,
+                    self._construct_prompt(x),
                 )
 
         print("responses:", responses)
@@ -245,7 +250,12 @@ class BaseGPTClassifier(ABC):
         x["y_pred"] = responses
 
         if not Path(os.path.join(self.save_dir, index)).exists():
-            dump_response(os.path.join(self.save_dir, index), x, response)
+            dump_response(
+                os.path.join(self.save_dir, index),
+                x,
+                response,
+                self._construct_prompt(x),
+            )
 
         return x
 

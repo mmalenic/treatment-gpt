@@ -1,5 +1,9 @@
 import pandas as pd
+from sklearn import metrics
+from sklearn.metrics import f1_score, precision_score, recall_score
 
+import classifier
+from classifier import util
 from classifier.gpt.no_sources_classifier import NoSourcesGenePairGPTClassifier
 from classifier.gpt.no_sources_no_list_classifier import (
     NoSourcesNoListGenePairGPTClassifier,
@@ -12,17 +16,21 @@ from classifier.gpt.treatment_only_no_list_classifier import (
 from dataset.treatment_source_dataset import TreatmentSourceDataset
 from dataset.gene_pair_dataset import GenePairDataset
 
+from sklearn.dummy import DummyClassifier
+
 
 class RunConfiguration:
     def __init__(
         self,
         gene_pair_dataset: GenePairDataset,
-        gene_pair_dataset_no_list: GenePairDataset,
         treatment_source_dataset: TreatmentSourceDataset,
     ):
         """
         Initialize this class.
         """
+
+        self._gene_pair_dataset = gene_pair_dataset
+        self._treatment_source_dataset = treatment_source_dataset
 
         self._treatment_source_results = pd.DataFrame()
         self._gene_pair_results = pd.DataFrame()
@@ -33,7 +41,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.zero_shot_no_sources_no_list_name,
                 #     "model_type": "gpt-3.5-turbo",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.zero_shot_no_sources_no_list_name,
                 #         "gpt-3.5-turbo",
                 #         repeat_n_times=3,
@@ -45,7 +53,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.few_shot_no_sources_no_list_name,
                 #     "model_type": "gpt-3.5-turbo",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.few_shot_no_sources_no_list_name,
                 #         "gpt-3.5-turbo",
                 #         repeat_n_times=3,
@@ -57,7 +65,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
                 #     "model_type": "gpt-3.5-turbo",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.zero_shot_no_sources_no_list_cot_name,
                 #         "gpt-3.5-turbo",
                 #         repeat_n_times=3,
@@ -69,7 +77,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
                 #     "model_type": "gpt-3.5-turbo",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.few_shot_no_sources_no_list_cot_name,
                 #         "gpt-3.5-turbo",
                 #         repeat_n_times=3,
@@ -225,7 +233,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.zero_shot_no_sources_no_list_name,
                 #     "model_type": "gpt-4",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.zero_shot_no_sources_no_list_name,
                 #         "gpt-4",
                 #         repeat_n_times=2,
@@ -237,7 +245,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.few_shot_no_sources_no_list_name,
                 #     "model_type": "gpt-4",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.few_shot_no_sources_no_list_name,
                 #         "gpt-4",
                 #         repeat_n_times=2,
@@ -249,7 +257,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
                 #     "model_type": "gpt-4",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.zero_shot_no_sources_no_list_cot_name,
                 #         "gpt-4",
                 #         repeat_n_times=2,
@@ -261,7 +269,7 @@ class RunConfiguration:
                 #     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
                 #     "model_type": "gpt-4",
                 #     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                #         gene_pair_dataset_no_list,
+                #         gene_pair_dataset,
                 #         Prompts.few_shot_no_sources_no_list_cot_name,
                 #         "gpt-4",
                 #         repeat_n_times=2,
@@ -469,6 +477,42 @@ class RunConfiguration:
         Calculate results.
         """
 
+        def process_dummy_classifier(df, dataset, accuracy_score):
+            cls = DummyClassifier().fit(dataset.df["index"], dataset.df["y_pred"])
+            y_pred = cls.predict(dataset.df["y_pred"])
+            y_true = dataset.df["y_true"]
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        {
+                            "accuracy": accuracy_score(y_true, y_pred),
+                            "f1_samples": f1_score(y_true, y_pred, average="samples"),
+                            "f1_macro": f1_score(y_true, y_pred, average="macro"),
+                            "f1_micro": f1_score(y_true, y_pred, average="micro"),
+                            "precision_samples": precision_score(
+                                y_true, y_pred, average="samples"
+                            ),
+                            "precision_macro": precision_score(
+                                y_true, y_pred, average="macro"
+                            ),
+                            "precision_micro": precision_score(
+                                y_true, y_pred, average="micro"
+                            ),
+                            "recall_samples": recall_score(
+                                y_true, y_pred, average="samples"
+                            ),
+                            "recall_macro": recall_score(
+                                y_true, y_pred, average="macro"
+                            ),
+                            "recall_micro": recall_score(
+                                y_true, y_pred, average="micro"
+                            ),
+                        }
+                    ),
+                ]
+            )
+
         def process_results(df):
             df = pd.concat([df, run["classifier"].base_dataset.aggregate_results()])
             df["model_name"] = run["model_type"]
@@ -482,6 +526,15 @@ class RunConfiguration:
                 process_results(self._gene_pair_results)
             else:
                 process_results(self._treatment_source_results)
+
+        process_dummy_classifier(
+            self._treatment_source_results,
+            self._treatment_source_dataset,
+            metrics.accuracy_score,
+        )
+        process_dummy_classifier(
+            self._gene_pair_results, self._gene_pair_dataset, util.accuracy_score
+        )
 
     def run_all(self):
         """

@@ -84,10 +84,12 @@ class PubmedDownloader:
             output_abstract = ""
             for part in abstract:
                 try:
-                    output_abstract += part.attributes["Label"].lower().title()
-                    output_abstract += ": "
-                    output_abstract += part
-                    output_abstract += "\n"
+                    label = part.attributes["Label"].lower().title()
+                    if label != "Unlabelled":
+                        output_abstract += label
+                        output_abstract += ": "
+                        output_abstract += part
+                        output_abstract += "\n"
                 except (AttributeError, KeyError) as _:
                     output_abstract += part
                     output_abstract += "\n"
