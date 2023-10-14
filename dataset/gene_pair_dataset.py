@@ -465,6 +465,12 @@ class GenePairDataset:
         """
         return list([x.lower() for x in self._all_treatments.keys()])
 
+    def get_all_treatments(self) -> List[str]:
+        """
+        Return the dataframe of the dataset.
+        """
+        return list([x for x in self._all_treatments.keys()])
+
     @property
     def df(self) -> pd.DataFrame:
         """

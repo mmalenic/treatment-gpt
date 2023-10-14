@@ -63,7 +63,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
         self.n_examples = n_examples
 
     def _construct_prompt(self, x) -> str:
-        treatments = self.base_dataset.all_treatments
+        treatments = self.base_dataset.get_all_treatments()
 
         if "{examples}" in self.prompt_template:
             return self.prompt_template.format(
@@ -100,7 +100,7 @@ class NoSourcesGenePairGPTClassifier(BaseGPTClassifier):
                 break
 
             template = Prompts.gene_pair_example_prompt_template.format(
-                treatments=json.dumps(self.base_dataset.all_treatments),
+                treatments=json.dumps(self.base_dataset.get_all_treatments()),
                 cancer_type=treatment["cancer_type"],
                 genes=treatment["gene_x"] + " and " + treatment["gene_y"],
                 answer=json.dumps({"treatments": treatment["y_true"]}),
