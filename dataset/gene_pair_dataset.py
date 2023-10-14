@@ -152,7 +152,7 @@ class GenePairDataset:
                             "correlation_type": row["correlation_type"],
                             "odds": row["odds"],
                             "treatments": treatment_sublist,
-                            "y_true": [y.lower() for y in y_true],
+                            "y_true": y_true,
                             "y_pred": np.nan,
                         }
                     )

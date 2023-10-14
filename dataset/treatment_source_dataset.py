@@ -82,7 +82,7 @@ class TreatmentSourceDataset:
                         "source": source,
                         "cancer_type_and_level": (cancer_type, level),
                         "treatments": treatments,
-                        "y_true": treatment.lower(),
+                        "y_true": treatment,
                         "y_pred": np.nan,
                     }
                 )
