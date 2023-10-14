@@ -172,13 +172,17 @@ class BaseGPTClassifier(ABC):
                     {"x": _x.to_dict(), "response": _response}, location, indent=2
                 )
 
+        def split_treatment(x: str):
+            return [
+                self.base_dataset.alternative_name(y.lower().strip())
+                for y in x.split("+")
+            ]
+
         def process_plus(x: str):
-            test_x = x.replace(" ", "").lower().split("+")
+            test_x = split_treatment(x)
 
             for treatment in self.base_dataset.all_treatments:
-                if dict.fromkeys(test_x) == dict.fromkeys(
-                    treatment.replace(" ", "").lower().split("+")
-                ):
+                if dict.fromkeys(test_x) == dict.fromkeys(split_treatment(treatment)):
                     return treatment.strip()
 
             return x.strip()

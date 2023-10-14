@@ -8,6 +8,7 @@ import pandas as pd
 import itertools
 
 from classifier.util import find_file
+from dataset.alternative_treatment_names import AlternativeTreatmentNames
 from dataset.mutation_landscape_cancer_type import MutationLandscapeCancerType
 from prepare.pubmed_downloader import PubmedDownloader
 
@@ -22,6 +23,7 @@ class LoadProtect:
     def __init__(
         self,
         cancer_types: MutationLandscapeCancerType,
+        alternative_names: AlternativeTreatmentNames,
         sample_dir: str = "data/samples/",
         output_to: str = "data/load_protect.csv",
         pubmed_dir: str = "data/pubmed/",
@@ -38,6 +40,7 @@ class LoadProtect:
         self.__dict__.update(kwargs)
 
         self._cancer_types = cancer_types
+        self._alternative_names = alternative_names
         self._sample_dir = sample_dir
         self._output_to = output_to
         self._gene_pairs_per_sample = gene_pairs_per_sample
@@ -56,6 +59,13 @@ class LoadProtect:
         Get the data.
         """
         return self._cancer_types
+
+    @property
+    def alternative_names(self) -> AlternativeTreatmentNames:
+        """
+        Get the data.
+        """
+        return self._alternative_names
 
     def df(self) -> pd.DataFrame:
         """

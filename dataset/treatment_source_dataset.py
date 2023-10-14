@@ -226,6 +226,16 @@ class TreatmentSourceDataset:
         """
         self._df = df
 
+    def alternative_name(self, name: str) -> str:
+        """
+        Find the canonical name.
+        """
+        out_name = self._from_protect.alternative_names.find_name(name)
+
+        if out_name is None:
+            return name
+        return out_name
+
     def add_prediction(self, prediction, pos):
         self._df.iloc[pos, self._df.columns.get_loc("y_pred")] = prediction
 

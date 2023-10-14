@@ -1,12 +1,12 @@
 import pandas as pd
 
 
-class CancerAlternativeNames:
+class AlternativeTreatmentNames:
     """
     Loads alternative names
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self) -> None:
         """
         Initialize this class.
         """
@@ -28,13 +28,23 @@ class CancerAlternativeNames:
         """
         Get the stats
         """
-        return pd.DataFrame({"total_alternative_names": self._total_alternative_names})
+        return pd.DataFrame(
+            {"total_alternative_names": [self._total_alternative_names]}
+        )
 
     def find_name(self, name: str) -> str | None:
         """
         Find the canonical name.
         """
-        return self._df.loc[self._df["alternative_names"] == name, "canonical_name"]
+        canonical_name = self._df.loc[
+            self._df["alternative_name"] == name, "canonical_name"
+        ]
+
+        if len(canonical_name) == 0:
+            return None
+
+        self._total_alternative_names += 1
+        return canonical_name.iloc[0]
 
     def load(self) -> pd.DataFrame:
         """
@@ -82,9 +92,11 @@ class CancerAlternativeNames:
             ("crizotinib", ["xalkori"]),
         ]
 
-        return pd.DataFrame(
+        self._df = pd.DataFrame(
             {
                 "canonical_name": [x[0] for x in names],
-                "alternative_names": [x[1] for x in names],
+                "alternative_name": [x[1] for x in names],
             }
-        ).explode(column="alternative_names")
+        ).explode(column="alternative_name")
+
+        return self._df
