@@ -14,15 +14,17 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
+from dataset.utils import process_plus
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from classifier.util import accuracy_score
 from dataset.load_protect import LoadProtect
 import random
 
-from dataset.diagram_utils import (
+from dataset.utils import (
     save_fig,
     heatmap_for_cls_report,
+    results,
 )
 
 
@@ -152,7 +154,7 @@ class GenePairDataset:
                             "correlation_type": row["correlation_type"],
                             "odds": row["odds"],
                             "treatments": treatment_sublist,
-                            "y_true": y_true,
+                            "y_true": [process_plus(y, self) for y in y_true],
                             "y_pred": np.nan,
                         }
                     )
@@ -217,20 +219,7 @@ class GenePairDataset:
         y_true = self._binarizer.transform(self._df["y_true"].tolist())
         y_pred = self._binarizer.transform(self._df["y_pred"].tolist())
 
-        return pd.DataFrame(
-            {
-                "accuracy": accuracy_score(y_true, y_pred),
-                "f1_samples": f1_score(y_true, y_pred, average="samples"),
-                "f1_macro": f1_score(y_true, y_pred, average="macro"),
-                "f1_micro": f1_score(y_true, y_pred, average="micro"),
-                "precision_samples": precision_score(y_true, y_pred, average="samples"),
-                "precision_macro": precision_score(y_true, y_pred, average="macro"),
-                "precision_micro": precision_score(y_true, y_pred, average="micro"),
-                "recall_samples": recall_score(y_true, y_pred, average="samples"),
-                "recall_macro": recall_score(y_true, y_pred, average="macro"),
-                "recall_micro": recall_score(y_true, y_pred, average="micro"),
-            }
-        )
+        return results(y_true, y_pred, accuracy_score)
 
     def diagrams(self, save_to: str):
         """

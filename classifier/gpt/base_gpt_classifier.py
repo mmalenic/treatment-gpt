@@ -11,6 +11,7 @@ import pandas as pd
 import tiktoken
 from decimal import *
 
+from dataset.utils import process_plus
 import openai
 from sklearn import metrics
 from sklearn.metrics import hamming_loss
@@ -174,21 +175,6 @@ class BaseGPTClassifier(ABC):
                     indent=2,
                 )
 
-        def split_treatment(x: str):
-            return [
-                self.base_dataset.alternative_name(y.lower().strip())
-                for y in x.split("+")
-            ]
-
-        def process_plus(x: str):
-            test_x = split_treatment(x)
-
-            for treatment in self.base_dataset.all_treatments:
-                if dict.fromkeys(test_x) == dict.fromkeys(split_treatment(treatment)):
-                    return treatment.strip()
-
-            return x.strip()
-
         index = self._index(x)
 
         load_from = os.path.join(self.save_dir, index)
@@ -244,7 +230,9 @@ class BaseGPTClassifier(ABC):
         print("responses:", responses)
 
         responses = [
-            [process_plus(y) for y in x] if isinstance(x, list) else process_plus(x)
+            [process_plus(y, self.base_dataset) for y in x]
+            if isinstance(x, list)
+            else process_plus(x, self.base_dataset)
             for x in responses
         ]
         x["y_pred"] = responses

@@ -88,8 +88,9 @@ class PubmedDownloader:
                     if label != "Unlabelled":
                         output_abstract += label
                         output_abstract += ": "
-                        output_abstract += part
-                        output_abstract += "\n"
+
+                    output_abstract += part
+                    output_abstract += "\n"
                 except (AttributeError, KeyError) as _:
                     output_abstract += part
                     output_abstract += "\n"
