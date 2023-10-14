@@ -30,6 +30,7 @@ class GenePairDataset:
         from_protect: LoadProtect,
         remove_empty_sources: bool = False,
         split_to_n_treatments: Optional[int] = 3,
+        remove_generic_cancer_types: bool = True,
         **kwargs,
     ) -> None:
         """
@@ -43,6 +44,7 @@ class GenePairDataset:
         self._df = pd.DataFrame()
         self._from_protect = from_protect
         self._remove_empty_sources = remove_empty_sources
+        self._remove_generic_cancer_types = remove_generic_cancer_types
         self._split_to_n_treatments = split_to_n_treatments
         self._all_treatments = {}
 
@@ -52,7 +54,6 @@ class GenePairDataset:
         """
         Load the dataset.
         """
-
         for index, row in self._from_protect.df().iterrows():
             treatments = (
                 row["treatment_with_text_sources_x"]
@@ -63,6 +64,10 @@ class GenePairDataset:
                 for i, x in enumerate(treatments)
                 if not any((x[0] == y[0] for y in treatments[:i]))
             ]
+
+            if self._remove_generic_cancer_types:
+                if row["cancer_type"] in ["cancer"]:
+                    continue
 
             if self._remove_empty_sources:
                 treatments = [
