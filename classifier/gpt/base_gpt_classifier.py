@@ -232,7 +232,9 @@ class BaseGPTClassifier(ABC):
                 responses.append(self._extract_response(content))
             except ValueError as e:
                 print("Skipping this response:", e)
-                dump_response(os.path.join(self.save_dir, index, "_error"), x, response)
+                dump_response(
+                    os.path.join(self.save_dir, f"{index}_error"), x, response
+                )
 
         print("responses:", responses)
 

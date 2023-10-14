@@ -1,3 +1,5 @@
+import pandas as pd
+
 from classifier.gpt.no_sources_classifier import NoSourcesGenePairGPTClassifier
 from classifier.gpt.no_sources_no_list_classifier import (
     NoSourcesNoListGenePairGPTClassifier,
@@ -22,56 +24,59 @@ class RunConfiguration:
         Initialize this class.
         """
 
+        self._treatment_source_results = pd.DataFrame()
+        self._gene_pair_results = pd.DataFrame()
+
         self._run_configuration = {
             "runs": [
-                {
-                    "run_name": Prompts.zero_shot_no_sources_no_list_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.zero_shot_no_sources_no_list_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_no_sources_no_list_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.few_shot_no_sources_no_list_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.zero_shot_no_sources_no_list_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.few_shot_no_sources_no_list_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_no_list_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.zero_shot_no_sources_no_list_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_no_list_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.few_shot_no_sources_no_list_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.zero_shot_no_sources_no_list_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.few_shot_no_sources_no_list_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
                 {
                     "run_name": Prompts.zero_shot_no_sources_name,
                     "model_type": "gpt-3.5-turbo",
@@ -84,90 +89,90 @@ class RunConfiguration:
                     "cost_estimate": None,
                     "max_tokens": None,
                 },
-                {
-                    "run_name": Prompts.few_shot_no_sources_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.few_shot_no_sources_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_no_sources_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.zero_shot_no_sources_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_no_sources_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.few_shot_no_sources_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_treatment_source_no_list_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.zero_shot_treatment_source_no_list_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_no_list_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_no_list_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.zero_shot_treatment_source_no_list_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_no_list_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.few_shot_no_sources_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.zero_shot_no_sources_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.few_shot_no_sources_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_treatment_source_no_list_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.zero_shot_treatment_source_no_list_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_no_list_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_no_list_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.zero_shot_treatment_source_no_list_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_no_list_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
                 {
                     "run_name": Prompts.zero_shot_treatment_source_name,
                     "model_type": "gpt-3.5-turbo",
@@ -180,234 +185,234 @@ class RunConfiguration:
                     "cost_estimate": None,
                     "max_tokens": None,
                 },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_treatment_source_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.zero_shot_treatment_source_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_cot_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_cot_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_no_sources_no_list_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.zero_shot_no_sources_no_list_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_no_sources_no_list_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.few_shot_no_sources_no_list_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.zero_shot_no_sources_no_list_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        gene_pair_dataset_no_list,
-                        Prompts.few_shot_no_sources_no_list_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_no_sources_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.zero_shot_no_sources_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_no_sources_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.few_shot_no_sources_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_no_sources_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.zero_shot_no_sources_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_no_sources_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.few_shot_no_sources_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_treatment_source_no_list_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.zero_shot_treatment_source_no_list_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_no_list_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_no_list_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.zero_shot_treatment_source_no_list_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceNoListGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_no_list_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_treatment_source_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.zero_shot_treatment_source_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.zero_shot_treatment_source_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.zero_shot_treatment_source_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
-                {
-                    "run_name": Prompts.few_shot_treatment_source_cot_name,
-                    "model_type": "gpt-4",
-                    "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
-                        Prompts.few_shot_treatment_source_cot_name,
-                        "gpt-4",
-                        repeat_n_times=2,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": TreatmentSourceGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_treatment_source_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": TreatmentSourceGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.zero_shot_treatment_source_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_cot_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": TreatmentSourceGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_cot_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_no_list_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.zero_shot_no_sources_no_list_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_no_list_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.few_shot_no_sources_no_list_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.zero_shot_no_sources_no_list_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesNoListGenePairGPTClassifier(
+                #         gene_pair_dataset_no_list,
+                #         Prompts.few_shot_no_sources_no_list_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.zero_shot_no_sources_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.few_shot_no_sources_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.zero_shot_no_sources_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_no_sources_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.few_shot_no_sources_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_treatment_source_no_list_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.zero_shot_treatment_source_no_list_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_no_list_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_no_list_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.zero_shot_treatment_source_no_list_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceNoListGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_no_list_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_treatment_source_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.zero_shot_treatment_source_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.zero_shot_treatment_source_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.zero_shot_treatment_source_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
+                # {
+                #     "run_name": Prompts.few_shot_treatment_source_cot_name,
+                #     "model_type": "gpt-4",
+                #     "classifier": TreatmentSourceGPTClassifier(
+                #         treatment_source_dataset,
+                #         Prompts.few_shot_treatment_source_cot_name,
+                #         "gpt-4",
+                #         repeat_n_times=2,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
             ]
         }
 
@@ -451,3 +456,53 @@ class RunConfiguration:
         """
         for run in self.run_configuration["runs"]:
             run["classifier"].base_dataset.diagrams(run["classifier"].save_dir)
+
+    def predict(self):
+        """
+        Predict for all configs.
+        """
+        for run in self.run_configuration["runs"]:
+            run["classifier"].predict()
+
+    def results(self):
+        """
+        Calculate results.
+        """
+
+        def process_results(df):
+            df = pd.concat([df, run["classifier"].base_dataset.aggregate_results()])
+            df["model_name"] = run["model_type"]
+            df["run_type"] = (
+                "zero_shot" if "zero_shot" in run["run_name"] else "few_shot"
+            )
+            df["run_cot_type"] = "cot" if "cot" in run["run_name"] else "not_cot"
+
+        for run in self.run_configuration["runs"]:
+            if isinstance(run["classifier"].base_dataset, GenePairDataset):
+                process_results(self._gene_pair_results)
+            else:
+                process_results(self._treatment_source_results)
+
+    def run_all(self):
+        """
+        Run all components.
+        """
+        self.calculate_costs()
+        self.save_example_prompts()
+        self.predict()
+        self.save_diagrams()
+        self.results()
+
+    @property
+    def treatment_source_results(self) -> pd.DataFrame:
+        """
+        Get results
+        """
+        return self._treatment_source_results
+
+    @property
+    def gene_pair_results(self) -> pd.DataFrame:
+        """
+        Get results
+        """
+        return self._gene_pair_results

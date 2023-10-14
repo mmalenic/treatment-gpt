@@ -7,7 +7,13 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from sklearn.metrics import hamming_loss, classification_report
+from sklearn.metrics import (
+    hamming_loss,
+    classification_report,
+    f1_score,
+    precision_score,
+    recall_score,
+)
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from classifier.util import accuracy_score
@@ -30,7 +36,8 @@ class GenePairDataset:
         from_protect: LoadProtect,
         remove_empty_sources: bool = False,
         split_to_n_treatments: Optional[int] = 3,
-        remove_generic_cancer_types: bool = True,
+        remove_generic_cancer_types=None,
+        remove_generic_treatments=None,
         **kwargs,
     ) -> None:
         """
@@ -38,6 +45,14 @@ class GenePairDataset:
 
         :param from_protect: load protect data from this class.
         """
+        if remove_generic_cancer_types is None:
+            remove_generic_cancer_types = ["cancer"]
+        if remove_generic_treatments is None:
+            remove_generic_treatments = [
+                "chemotherapy",
+                "chemotherapy + everolimus + trastuzumab",
+            ]
+
         self.__dict__.update(kwargs)
 
         self._dataset = []
@@ -45,6 +60,7 @@ class GenePairDataset:
         self._from_protect = from_protect
         self._remove_empty_sources = remove_empty_sources
         self._remove_generic_cancer_types = remove_generic_cancer_types
+        self._remove_generic_treatments = remove_generic_treatments
         self._split_to_n_treatments = split_to_n_treatments
         self._all_treatments = {}
 
@@ -55,6 +71,10 @@ class GenePairDataset:
         Load the dataset.
         """
         for index, row in self._from_protect.df().iterrows():
+            if self._remove_generic_cancer_types:
+                if row["cancer_type"] in self._remove_generic_cancer_types:
+                    continue
+
             treatments = (
                 row["treatment_with_text_sources_x"]
                 + row["treatment_with_text_sources_y"]
@@ -64,10 +84,6 @@ class GenePairDataset:
                 for i, x in enumerate(treatments)
                 if not any((x[0] == y[0] for y in treatments[:i]))
             ]
-
-            if self._remove_generic_cancer_types:
-                if row["cancer_type"] in ["cancer"]:
-                    continue
 
             if self._remove_empty_sources:
                 treatments = [
@@ -88,6 +104,13 @@ class GenePairDataset:
             for treatment_sublist in treatments:
                 y_true = [x["treatment"] for x in treatment_sublist]
 
+                if self._remove_generic_treatments:
+                    y_true = [
+                        x
+                        for x in y_true
+                        if x.lower() not in self._remove_generic_treatments
+                    ]
+
                 if len(y_true) == 0 or y_true is None:
                     continue
 
@@ -104,6 +127,13 @@ class GenePairDataset:
                     {"treatment": x[0], "source": x[1], "level": x[2]}
                     for x in all_treatments[: len(y_true)]
                 ]
+
+                if self._remove_generic_treatments:
+                    treatment_sublist = [
+                        x
+                        for x in treatment_sublist
+                        if x["treatment"].lower() not in self._remove_generic_treatments
+                    ]
 
                 random.shuffle(treatment_sublist)
 
@@ -179,6 +209,28 @@ class GenePairDataset:
             score(x["y_true_b_level"], x["y_pred_b_level"], "_b_level")
 
         return x
+
+    def aggregate_results(self):
+        """
+        Get aggregate results.
+        """
+        y_true = self._binarizer.transform(self._df["y_true"].tolist())
+        y_pred = self._binarizer.transform(self._df["y_pred"].tolist())
+
+        return pd.DataFrame(
+            {
+                "accuracy": accuracy_score(y_true, y_pred),
+                "f1_samples": f1_score(y_true, y_pred, average="samples"),
+                "f1_macro": f1_score(y_true, y_pred, average="macro"),
+                "f1_micro": f1_score(y_true, y_pred, average="micro"),
+                "precision_samples": precision_score(y_true, y_pred, average="samples"),
+                "precision_macro": precision_score(y_true, y_pred, average="macro"),
+                "precision_micro": precision_score(y_true, y_pred, average="micro"),
+                "recall_samples": recall_score(y_true, y_pred, average="samples"),
+                "recall_macro": recall_score(y_true, y_pred, average="macro"),
+                "recall_micro": recall_score(y_true, y_pred, average="micro"),
+            }
+        )
 
     def diagrams(self, save_to: str):
         """

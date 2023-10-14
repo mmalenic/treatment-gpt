@@ -7,7 +7,13 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    f1_score,
+    precision_score,
+    recall_score,
+)
 
 from dataset.load_protect import LoadProtect
 import random
@@ -235,6 +241,28 @@ class TreatmentSourceDataset:
         if out_name is None:
             return name
         return out_name
+
+    def aggregate_results(self):
+        """
+        Get aggregate results.
+        """
+        y_true = self._df["y_true"].tolist()
+        y_pred = self._df["y_pred"].tolist()
+
+        return pd.DataFrame(
+            {
+                "accuracy": accuracy_score(y_true, y_pred),
+                "f1_samples": f1_score(y_true, y_pred, average="samples"),
+                "f1_macro": f1_score(y_true, y_pred, average="macro"),
+                "f1_micro": f1_score(y_true, y_pred, average="micro"),
+                "precision_samples": precision_score(y_true, y_pred, average="samples"),
+                "precision_macro": precision_score(y_true, y_pred, average="macro"),
+                "precision_micro": precision_score(y_true, y_pred, average="micro"),
+                "recall_samples": recall_score(y_true, y_pred, average="samples"),
+                "recall_macro": recall_score(y_true, y_pred, average="macro"),
+                "recall_micro": recall_score(y_true, y_pred, average="micro"),
+            }
+        )
 
     def add_prediction(self, prediction, pos):
         self._df.iloc[pos, self._df.columns.get_loc("y_pred")] = prediction
