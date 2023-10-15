@@ -225,6 +225,14 @@ class BaseGPTClassifier(ABC):
         responses = []
         for choice in response["choices"]:
             content = choice["message"]["content"]
+            dump_response(
+                os.path.join(self.save_dir, f"{index}_raw_content"),
+                x,
+                response,
+                self._construct_prompt(x),
+                unique=True,
+            )
+
             try:
                 responses.append(self._extract_response(content))
             except ValueError as e:
