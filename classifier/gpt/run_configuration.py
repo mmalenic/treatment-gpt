@@ -509,7 +509,7 @@ class RunConfiguration:
                     ignore_index=True,
                 )
 
-            df["model_name"] = run["dummy"]
+            df["model_name"] = "dummy"
 
             return df
 
