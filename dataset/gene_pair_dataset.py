@@ -160,7 +160,7 @@ class GenePairDataset:
                     )
 
         self._df = pd.DataFrame(self._dataset)
-        self._binarizer.fit([[x.lower() for x in self.all_treatments]])
+        self._binarizer.fit([[process_plus(x, self) for x in self.all_treatments]])
 
     def treatments_for(self, cancer_type) -> List[str]:
         """
