@@ -3,6 +3,7 @@ import json
 import os
 import time
 from json import JSONDecoder
+import uuid
 from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
@@ -224,7 +225,7 @@ class BaseGPTClassifier(ABC):
             except ValueError as e:
                 print("Skipping this response:", e)
                 dump_response(
-                    os.path.join(self.save_dir, f"{index}_error"),
+                    os.path.join(self.save_dir, f"{index}_{uuid.uuid4()}_error"),
                     x,
                     response,
                     self._construct_prompt(x),
@@ -232,12 +233,22 @@ class BaseGPTClassifier(ABC):
 
         print("responses:", responses)
 
-        responses = [
-            [process_plus(y, self.base_dataset) for y in x]
-            if isinstance(x, list)
-            else process_plus(x, self.base_dataset)
-            for x in responses
-        ]
+        try:
+            responses = [
+                [process_plus(y, self.base_dataset) for y in x]
+                if isinstance(x, list)
+                else process_plus(x, self.base_dataset)
+                for x in responses
+            ]
+        except AttributeError as e:
+            print("Skipping this response:", e)
+            dump_response(
+                os.path.join(self.save_dir, f"{index}_{uuid.uuid4()}_error"),
+                x,
+                response,
+                self._construct_prompt(x),
+            )
+
         x["y_pred"] = responses
 
         if not Path(os.path.join(self.save_dir, index)).exists():
