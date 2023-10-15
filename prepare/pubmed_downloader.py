@@ -2,6 +2,7 @@ import os.path
 from pathlib import Path
 from typing import Optional
 from urllib.request import urlretrieve
+from bs4 import BeautifulSoup
 
 from Bio import Entrez
 import metapub
@@ -86,13 +87,13 @@ class PubmedDownloader:
                 try:
                     label = part.attributes["Label"].lower().title()
                     if label != "Unlabelled":
-                        output_abstract += label
+                        output_abstract += BeautifulSoup(label, "lxml").text
                         output_abstract += ": "
 
-                    output_abstract += part
+                    output_abstract += BeautifulSoup(part, "lxml").text
                     output_abstract += "\n"
                 except (AttributeError, KeyError) as _:
-                    output_abstract += part
+                    output_abstract += BeautifulSoup(part, "lxml").text
                     output_abstract += "\n"
 
             Path(save_abstract_to).write_text(output_abstract, encoding="utf-8")
