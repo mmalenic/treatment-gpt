@@ -1,4 +1,5 @@
 import ast
+import asyncio
 import json
 import os
 import time
@@ -7,11 +8,14 @@ from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
 
+import numpy as np
 import pandas as pd
 import tiktoken
+
+from joblib import Parallel, delayed
 from decimal import *
 
-from openai.error import Timeout, ServiceUnavailableError
+from openai.error import Timeout, ServiceUnavailableError, APIError
 from requests import ReadTimeout
 
 from dataset.utils import process_plus
@@ -42,6 +46,7 @@ class BaseGPTClassifier(ABC):
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         repeat_n_times: int = 1,
+        batch_n: int = 1,
         **kwargs,
     ):
         """
@@ -56,6 +61,7 @@ class BaseGPTClassifier(ABC):
         Path(save_dir).mkdir(parents=True, exist_ok=True)
         self.save_dir = save_dir
         self._cost_estimate = None
+        self._batch_n = batch_n
         self._max_token_number = None
         self._repeat_n_times = repeat_n_times
 
@@ -100,11 +106,21 @@ class BaseGPTClassifier(ABC):
         path = Path(os.path.join(self.save_dir, "example_prompt"))
         path.write_text(self._construct_prompt(self.df.iloc[0]), encoding="utf-8")
 
-    def predict(self):
+    async def predict(self):
         """
         Predict the labels.
         """
-        self.df = self.df.apply(lambda x: self._predict_single(x), axis=1)
+        print("batching predict values:", self._batch_n)
+        dfs = []
+        for x in np.split(
+            self.df, np.arange(self._batch_n, len(self.df), self._batch_n)
+        ):
+            batch = await self._predict_batch(x)
+            x = pd.concat(batch, axis=1).reset_index().transpose()
+            x = x.rename(columns=x.iloc[0]).drop(x.index[0])
+            dfs.append(x)
+
+        self.df = pd.concat(dfs)
         self.df = self.df.explode(column="y_pred", ignore_index=True)
         self.df = self.df.apply(lambda x: self._results(x), axis=1)
         self.base_dataset.df = self.df
@@ -165,7 +181,18 @@ class BaseGPTClassifier(ABC):
 
         return model_type
 
-    def _predict_single(self, x, max_retries: int = 3) -> pd.DataFrame:
+    async def _predict_batch(self, x, max_retries: int = 3) -> List[pd.DataFrame]:
+        """
+        Predict some samples.
+        """
+        tasks = []
+        for index, row in x.iterrows():
+            tasks.append(self._predict_single(row, max_retries))
+
+        out = await asyncio.gather(*tasks)
+        return out
+
+    async def _predict_single(self, x, max_retries: int = 3) -> pd.DataFrame:
         """
         Predict a single sample.
         """
@@ -199,7 +226,7 @@ class BaseGPTClassifier(ABC):
             model_type = self._get_model_type(n_tokens, prompt)
 
             try:
-                response = openai.ChatCompletion.create(
+                response = await openai.ChatCompletion.acreate(
                     model=model_type,
                     messages=[
                         {
@@ -210,12 +237,12 @@ class BaseGPTClassifier(ABC):
                     ],
                     n=self._repeat_n_times,
                 )
-            except (ServiceUnavailableError, Timeout) as e:
+            except (Timeout, ServiceUnavailableError, APIError) as e:
                 if max_retries == 0:
                     raise e
 
                 print("Service unavailable. Retrying in 10 seconds.")
-                time.sleep(10)
+                await asyncio.sleep(10)
                 return self._predict_single(x, max_retries - 1)
 
             for choice in response["choices"]:

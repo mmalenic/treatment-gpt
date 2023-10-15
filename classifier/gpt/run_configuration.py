@@ -474,12 +474,12 @@ class RunConfiguration:
                 os.path.join(run["classifier"].save_dir, "diagrams")
             )
 
-    def predict(self):
+    async def predict(self):
         """
         Predict for all configs.
         """
         for run in self.run_configuration["runs"]:
-            run["classifier"].predict()
+            await run["classifier"].predict()
 
     def results(self):
         """
@@ -558,13 +558,13 @@ class RunConfiguration:
             True,
         )
 
-    def run_all(self):
+    async def run_all(self):
         """
         Run all components.
         """
         self.calculate_costs()
         self.save_example_prompts()
-        self.predict()
+        await self.predict()
         self.results()
         self.save_diagrams()
 
