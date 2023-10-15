@@ -503,11 +503,16 @@ class RunConfiguration:
                 for x in y_true
             ]
 
-            if y_pred:
-                df = pd.concat(
-                    [df, results(y_true, y_pred, accuracy_score, sample_wise)],
-                    ignore_index=True,
-                )
+            try:
+                y_true = dataset._binarizer.transform(y_true)
+                y_pred = dataset._binarizer.transform(y_pred)
+            except AttributeError:
+                pass
+
+            df = pd.concat(
+                [df, results(y_true, y_pred, accuracy_score, sample_wise)],
+                ignore_index=True,
+            )
 
             df["model_name"] = "dummy"
 
@@ -528,9 +533,10 @@ class RunConfiguration:
 
         treatment_source_dataset = pd.DataFrame()
         gene_pair_dataset = pd.DataFrame()
+        binarizer = None
         for run in self.run_configuration["runs"]:
             dataset = run["classifier"].base_dataset
-            if isinstance(run["classifier"].base_dataset, GenePairDataset):
+            if isinstance(dataset, GenePairDataset):
                 self._gene_pair_results = process_results(self._gene_pair_results)
                 gene_pair_dataset = dataset
             else:
