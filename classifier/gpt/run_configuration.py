@@ -526,23 +526,28 @@ class RunConfiguration:
 
             return df
 
+        treatment_source_dataset = pd.DataFrame()
+        gene_pair_dataset = pd.DataFrame()
         for run in self.run_configuration["runs"]:
+            dataset = run["classifier"].base_dataset
             if isinstance(run["classifier"].base_dataset, GenePairDataset):
                 self._gene_pair_results = process_results(self._gene_pair_results)
+                gene_pair_dataset = dataset
             else:
                 self._treatment_source_results = process_results(
                     self._treatment_source_results
                 )
+                treatment_source_dataset = dataset
 
         self._treatment_source_results = process_dummy_classifier(
             self._treatment_source_results,
-            self._with_treatment_source_dataset(),
+            treatment_source_dataset,
             metrics.accuracy_score,
             False,
         )
         self._gene_pair_results = process_dummy_classifier(
             self._gene_pair_results,
-            self._with_gene_pair_dataset(),
+            gene_pair_dataset,
             util.accuracy_score,
             True,
         )
