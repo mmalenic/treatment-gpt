@@ -160,6 +160,7 @@ class TreatmentSourceDataset:
             )
         ).transpose()
 
+        Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)
         heat_map(cls_report, "Blues", f"{save_to}/heatmaps/heatmap_blue.svg")
         heat_map(cls_report, "Reds", f"{save_to}/heatmaps/heatmap_blue.svg")
         heat_map(cls_report, "Greens", f"{save_to}/heatmaps/heatmap_blue.svg")
@@ -255,7 +256,7 @@ class TreatmentSourceDataset:
         y_true = self._df["y_true"].tolist()
         y_pred = self._df["y_pred"].tolist()
 
-        return results(y_true, y_pred, accuracy_score)
+        return results(y_true, y_pred, accuracy_score, sample_wise=False)
 
     def add_prediction(self, prediction, pos):
         self._df.iloc[pos, self._df.columns.get_loc("y_pred")] = prediction

@@ -91,18 +91,18 @@ class RunConfiguration:
                 #     "cost_estimate": None,
                 #     "max_tokens": None,
                 # },
-                {
-                    "run_name": Prompts.zero_shot_no_sources_name,
-                    "model_type": "gpt-3.5-turbo",
-                    "classifier": NoSourcesGenePairGPTClassifier(
-                        gene_pair_dataset,
-                        Prompts.zero_shot_no_sources_name,
-                        "gpt-3.5-turbo",
-                        repeat_n_times=3,
-                    ),
-                    "cost_estimate": None,
-                    "max_tokens": None,
-                },
+                # {
+                #     "run_name": Prompts.zero_shot_no_sources_name,
+                #     "model_type": "gpt-3.5-turbo",
+                #     "classifier": NoSourcesGenePairGPTClassifier(
+                #         gene_pair_dataset,
+                #         Prompts.zero_shot_no_sources_name,
+                #         "gpt-3.5-turbo",
+                #         repeat_n_times=3,
+                #     ),
+                #     "cost_estimate": None,
+                #     "max_tokens": None,
+                # },
                 # {
                 #     "run_name": Prompts.few_shot_no_sources_name,
                 #     "model_type": "gpt-3.5-turbo",
@@ -485,7 +485,10 @@ class RunConfiguration:
         Calculate results.
         """
 
-        def process_dummy_classifier(df, dataset, accuracy_score):
+        def process_dummy_classifier(df, dataset, accuracy_score, sample_wise):
+            if dataset.df["y_pred"].isnull().all():
+                return df
+
             y_true_flat = dataset.df["y_true"].tolist()
             if any(isinstance(x, list) for x in y_true_flat):
                 y_true_flat = list(chain(*y_true_flat))
@@ -499,7 +502,15 @@ class RunConfiguration:
                 for x in y_true
             ]
 
-            return results(y_true, y_pred, accuracy_score)
+            if y_pred:
+                df = pd.concat(
+                    [df, results(y_true, y_pred, accuracy_score, sample_wise)],
+                    ignore_index=True,
+                )
+
+            df["model_name"] = run["dummy"]
+
+            return df
 
         def process_results(df):
             df = pd.concat(
@@ -516,19 +527,20 @@ class RunConfiguration:
 
         for run in self.run_configuration["runs"]:
             if isinstance(run["classifier"].base_dataset, GenePairDataset):
-                self._gene_pair_result = process_results(self._gene_pair_results)
+                self._gene_pair_results = process_results(self._gene_pair_results)
             else:
                 self._treatment_source_results = process_results(
                     self._treatment_source_results
                 )
 
-        process_dummy_classifier(
+        self._treatment_source_results = process_dummy_classifier(
             self._treatment_source_results,
             self._treatment_source_dataset,
             metrics.accuracy_score,
+            False,
         )
-        process_dummy_classifier(
-            self._gene_pair_results, self._gene_pair_dataset, util.accuracy_score
+        self._gene_pair_results = process_dummy_classifier(
+            self._gene_pair_results, self._gene_pair_dataset, util.accuracy_score, True
         )
 
     def run_all(self):

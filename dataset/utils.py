@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
@@ -58,17 +59,23 @@ def heatmap_for_cls_report(
     save_fig(save_to, fig)
 
 
-def results(y_true, y_pred, accuracy_score) -> pd.DataFrame:
+def results(y_true, y_pred, accuracy_score, sample_wise=True) -> pd.DataFrame:
     return pd.DataFrame(
         {
             "accuracy": [accuracy_score(y_true, y_pred)],
-            "f1_samples": [f1_score(y_true, y_pred, average="samples")],
+            "f1_samples": [f1_score(y_true, y_pred, average="samples")]
+            if sample_wise
+            else [np.nan],
             "f1_macro": [f1_score(y_true, y_pred, average="macro")],
             "f1_micro": [f1_score(y_true, y_pred, average="micro")],
-            "precision_samples": [precision_score(y_true, y_pred, average="samples")],
+            "precision_samples": [precision_score(y_true, y_pred, average="samples")]
+            if sample_wise
+            else [np.nan],
             "precision_macro": [precision_score(y_true, y_pred, average="macro")],
             "precision_micro": [precision_score(y_true, y_pred, average="micro")],
-            "recall_samples": [recall_score(y_true, y_pred, average="samples")],
+            "recall_samples": [recall_score(y_true, y_pred, average="samples")]
+            if sample_wise
+            else [np.nan],
             "recall_macro": [recall_score(y_true, y_pred, average="macro")],
             "recall_micro": [recall_score(y_true, y_pred, average="micro")],
         }
