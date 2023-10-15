@@ -162,10 +162,10 @@ class TreatmentSourceDataset:
 
         Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)
         heat_map(cls_report, "Blues", f"{save_to}/heatmaps/heatmap_blue.svg")
-        heat_map(cls_report, "Reds", f"{save_to}/heatmaps/heatmap_blue.svg")
-        heat_map(cls_report, "Greens", f"{save_to}/heatmaps/heatmap_blue.svg")
-        heat_map(cls_report, "Oranges", f"{save_to}/heatmaps/heatmap_blue.svg")
-        heat_map(cls_report, "Purples", f"{save_to}/heatmaps/heatmap_blue.svg")
+        heat_map(cls_report, "Reds", f"{save_to}/heatmaps/heatmap_red.svg")
+        heat_map(cls_report, "Greens", f"{save_to}/heatmaps/heatmap_green.svg")
+        heat_map(cls_report, "Oranges", f"{save_to}/heatmaps/heatmap_orange.svg")
+        heat_map(cls_report, "Purples", f"{save_to}/heatmaps/heatmap_purple.svg")
 
         plt.clf()
         plt.figure()

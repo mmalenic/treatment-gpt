@@ -1,5 +1,6 @@
 import os.path
 from collections import Counter
+from typing import Callable
 
 import pandas as pd
 from sklearn import metrics
@@ -28,15 +29,15 @@ from dataset.utils import results
 class RunConfiguration:
     def __init__(
         self,
-        gene_pair_dataset: GenePairDataset,
-        treatment_source_dataset: TreatmentSourceDataset,
+        with_gene_pair_dataset: Callable[[], GenePairDataset],
+        with_treatment_source_dataset: Callable[[], TreatmentSourceDataset],
     ):
         """
         Initialize this class.
         """
 
-        self._gene_pair_dataset = gene_pair_dataset
-        self._treatment_source_dataset = treatment_source_dataset
+        self._with_gene_pair_dataset = with_gene_pair_dataset
+        self._with_treatment_source_dataset = with_treatment_source_dataset
 
         self._treatment_source_results = pd.DataFrame()
         self._gene_pair_results = pd.DataFrame()
@@ -91,18 +92,18 @@ class RunConfiguration:
                 #     "cost_estimate": None,
                 #     "max_tokens": None,
                 # },
-                # {
-                #     "run_name": Prompts.zero_shot_no_sources_name,
-                #     "model_type": "gpt-3.5-turbo",
-                #     "classifier": NoSourcesGenePairGPTClassifier(
-                #         gene_pair_dataset,
-                #         Prompts.zero_shot_no_sources_name,
-                #         "gpt-3.5-turbo",
-                #         repeat_n_times=3,
-                #     ),
-                #     "cost_estimate": None,
-                #     "max_tokens": None,
-                # },
+                {
+                    "run_name": Prompts.zero_shot_no_sources_name,
+                    "model_type": "gpt-3.5-turbo",
+                    "classifier": NoSourcesGenePairGPTClassifier(
+                        with_gene_pair_dataset(),
+                        Prompts.zero_shot_no_sources_name,
+                        "gpt-3.5-turbo",
+                        repeat_n_times=3,
+                    ),
+                    "cost_estimate": None,
+                    "max_tokens": None,
+                },
                 # {
                 #     "run_name": Prompts.few_shot_no_sources_name,
                 #     "model_type": "gpt-3.5-turbo",
@@ -191,7 +192,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceGPTClassifier(
-                        treatment_source_dataset,
+                        with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -535,12 +536,15 @@ class RunConfiguration:
 
         self._treatment_source_results = process_dummy_classifier(
             self._treatment_source_results,
-            self._treatment_source_dataset,
+            self._with_treatment_source_dataset(),
             metrics.accuracy_score,
             False,
         )
         self._gene_pair_results = process_dummy_classifier(
-            self._gene_pair_results, self._gene_pair_dataset, util.accuracy_score, True
+            self._gene_pair_results,
+            self._with_gene_pair_dataset(),
+            util.accuracy_score,
+            True,
         )
 
     def run_all(self):

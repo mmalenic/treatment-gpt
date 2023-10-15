@@ -74,7 +74,7 @@ class LoadProtect:
         if self._df is None:
             self.load()
 
-        return self._df
+        return self._df.copy(deep=True)
 
     @property
     def stats(self) -> pd.DataFrame:
@@ -115,7 +115,7 @@ class LoadProtect:
         """
         Get unique sources.
         """
-        sources = list(self.df()["sources_x"]) + list(self.df()["sources_y"])
+        sources = list(self._df["sources_x"]) + list(self._df["sources_y"])
         return list(
             dict.fromkeys(
                 [
@@ -143,8 +143,8 @@ class LoadProtect:
         """
         Get unique sources.
         """
-        sources = list(self.df()["treatment_with_text_sources_x"]) + list(
-            self.df()["treatment_with_text_sources_y"]
+        sources = list(self._df["treatment_with_text_sources_x"]) + list(
+            self._df["treatment_with_text_sources_y"]
         )
         return list(dict.fromkeys([(y[0], y[1], y[2]) for x in sources for y in x]))
 
@@ -175,14 +175,14 @@ class LoadProtect:
         if self._df is None:
             self.load()
 
-        self.df()["treatment_with_text_sources_x"] = self.df().apply(
+        self._df["treatment_with_text_sources_x"] = self._df.apply(
             lambda x: get_text_source(x, "treatment_with_source_and_level_x"), axis=1
         )
-        self.df()["treatment_with_text_sources_y"] = self.df().apply(
+        self._df["treatment_with_text_sources_y"] = self._df.apply(
             lambda x: get_text_source(x, "treatment_with_source_and_level_y"), axis=1
         )
 
-        return self.df()
+        return self._df
 
     def load(self) -> pd.DataFrame:
         """
