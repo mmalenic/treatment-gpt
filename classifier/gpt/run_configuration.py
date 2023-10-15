@@ -533,7 +533,7 @@ class RunConfiguration:
 
         treatment_source_dataset = pd.DataFrame()
         gene_pair_dataset = pd.DataFrame()
-        binarizer = None
+
         for run in self.run_configuration["runs"]:
             dataset = run["classifier"].base_dataset
             if isinstance(dataset, GenePairDataset):

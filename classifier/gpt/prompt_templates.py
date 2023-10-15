@@ -22,14 +22,16 @@ class Prompts:
 
     _single_label_json_task_prompt_template = "Provide your response in a JSON format containing a single key `treatment` and a value corresponding to the treatment."
 
+    # _multi_label_cot_json_task_prompt_template = "Provide your reasoning steps, and then provide JSON containing a single key `treatments` and a value corresponding to the array of assigned treatments."
+
+    # _single_label_cot_json_task_prompt_template = "Provide your reasoning steps, and then provide JSON containing a single key `treatment` and a value corresponding to the treatment."
+
     _json_response_prompt_template = "Your JSON response:"
+
+    _json_response_cot_prompt_template = "Your reasoning steps and JSON response:"
 
     _no_additional_information_prompt_template = (
         "Do no provide any additional information."
-    )
-
-    _additional_cot_information_prompt_template = (
-        "Provide your reasoning steps as well."
     )
 
     _only_from_list_prompt_template = (
@@ -153,9 +155,10 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_no_list_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
+3. {_multi_label_json_task_prompt_template}
 
 {_patient_cancer_type_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     few_shot_no_sources_no_list_cot = f"""{_patient_treatment_task_prompt_template}
@@ -164,11 +167,12 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_no_list_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
+3. {_multi_label_json_task_prompt_template}
 
 {_examples_prompt_template}
 
 {_patient_cancer_type_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     zero_shot_no_sources = f"""{_patient_treatment_task_prompt_template}
@@ -205,11 +209,12 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_list_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_list_prompt_template}
 
 {_list_of_treatments_prompt_template}
 
 {_patient_cancer_type_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     few_shot_no_sources_cot = f"""{_patient_treatment_task_prompt_template}
@@ -219,12 +224,13 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_list_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_list_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_prompt_template}
 
 {_patient_cancer_type_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     zero_shot_with_sources = f"""{_patient_treatment_source_task_prompt_template}
@@ -256,10 +262,11 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_possible_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_possible_prompt_template}
 
 {_list_of_treatments_and_sources_prompt_template}
 {_patient_cancer_type_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     few_shot_with_sources_cot = f"""{_patient_treatment_source_task_prompt_template}
@@ -268,11 +275,12 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_possible_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_only_from_possible_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_and_sources_prompt_template}
 {_patient_cancer_type_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     zero_shot_treatment_source_no_list = f"""{_treatment_only_task_prompt_template}
@@ -302,9 +310,10 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_no_list_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
+3. {_single_label_json_task_prompt_template}
 
 {_treatment_only_response_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     few_shot_treatment_source_no_list_cot = f"""{_treatment_only_task_prompt_template}
@@ -313,10 +322,11 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_no_list_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
+3. {_single_label_json_task_prompt_template}
 
 {_examples_prompt_template}
 {_treatment_only_response_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     zero_shot_treatment_source = f"""{_treatment_only_task_prompt_template}
@@ -350,11 +360,12 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
+3. {_single_label_json_task_prompt_template}
 
 {_list_of_treatments_only_prompt_template}
 
 {_treatment_only_response_prompt_template}
+{_json_response_cot_prompt_template}
 """
 
     few_shot_treatment_source_cot = f"""{_treatment_only_task_prompt_template}
@@ -363,10 +374,11 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
+3. {_single_label_json_task_prompt_template}
 
 {_list_of_treatments_only_prompt_template}
 
 {_examples_prompt_template}
 {_treatment_only_response_prompt_template}
+{_json_response_cot_prompt_template}
 """
