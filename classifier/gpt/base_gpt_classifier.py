@@ -3,7 +3,6 @@ import json
 import os
 import time
 from json import JSONDecoder
-import uuid
 from pathlib import Path
 from typing import Literal, List, Any, Dict, Optional
 from abc import ABC, abstractmethod
@@ -171,7 +170,13 @@ class BaseGPTClassifier(ABC):
         Predict a single sample.
         """
 
-        def dump_response(file, _x, _response, _prompt):
+        def dump_response(file, _x, _response, _prompt, unique=False):
+            if unique:
+                counter = 1
+                while os.path.exists(file):
+                    file = f"{file}_{counter}"
+                    counter += 1
+
             with open(file, "w", encoding="utf-8") as location:
                 json.dump(
                     {"x": _x.to_dict(), "response": _response, "prompt": _prompt},
@@ -225,10 +230,11 @@ class BaseGPTClassifier(ABC):
             except ValueError as e:
                 print("Skipping this response:", e)
                 dump_response(
-                    os.path.join(self.save_dir, f"{index}_{uuid.uuid4()}_error"),
+                    os.path.join(self.save_dir, f"{index}_error"),
                     x,
                     response,
                     self._construct_prompt(x),
+                    unique=True,
                 )
 
         print("responses:", responses)
@@ -243,10 +249,11 @@ class BaseGPTClassifier(ABC):
         except AttributeError as e:
             print("Skipping this response:", e)
             dump_response(
-                os.path.join(self.save_dir, f"{index}_{uuid.uuid4()}_error"),
+                os.path.join(self.save_dir, f"{index}_error"),
                 x,
                 response,
                 self._construct_prompt(x),
+                unique=True,
             )
 
         x["y_pred"] = responses
