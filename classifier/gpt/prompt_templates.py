@@ -28,6 +28,10 @@ class Prompts:
         "Do no provide any additional information."
     )
 
+    _additional_cot_information_prompt_template = (
+        "Provide your reasoning steps as well."
+    )
+
     _only_from_list_prompt_template = (
         "Only choose treatments from the list of possible treatments."
     )
@@ -149,7 +153,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_no_list_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
 
 {_patient_cancer_type_prompt_template}
 """
@@ -160,7 +164,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_no_list_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
 
 {_examples_prompt_template}
 
@@ -201,7 +205,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_only_from_list_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_list_prompt_template}
 
 {_list_of_treatments_prompt_template}
 
@@ -215,7 +219,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_only_from_list_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_list_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_prompt_template}
@@ -252,7 +256,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_only_from_possible_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_possible_prompt_template}
 
 {_list_of_treatments_and_sources_prompt_template}
 {_patient_cancer_type_prompt_template}
@@ -264,7 +268,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_multi_label_task_prompt_template}
 2. {cot_prompt_template}
-3. {_multi_label_json_task_prompt_template} {_only_from_possible_prompt_template}
+3. {_multi_label_json_task_prompt_template} {_additional_cot_information_prompt_template} {_only_from_possible_prompt_template}
 
 {_examples_prompt_template}
 {_list_of_treatments_and_sources_prompt_template}
@@ -298,7 +302,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_no_list_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template}
+3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
 
 {_treatment_only_response_prompt_template}
 """
@@ -309,7 +313,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_no_list_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template}
+3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
 
 {_examples_prompt_template}
 {_treatment_only_response_prompt_template}
@@ -346,7 +350,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template}
+3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
 
 {_list_of_treatments_only_prompt_template}
 
@@ -359,7 +363,7 @@ Perform the following tasks:
 Perform the following tasks:
 1. {_treatment_only_classification_task_prompt_template}
 2. {treatment_only_cot_prompt_template}
-3. {_single_label_json_task_prompt_template}
+3. {_single_label_json_task_prompt_template} {_additional_cot_information_prompt_template}
 
 {_list_of_treatments_only_prompt_template}
 
