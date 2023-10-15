@@ -11,6 +11,7 @@ import pandas as pd
 import tiktoken
 from decimal import *
 
+from openai.error import Timeout, ServiceUnavailableError
 from requests import ReadTimeout
 
 from dataset.utils import process_plus
@@ -203,7 +204,7 @@ class BaseGPTClassifier(ABC):
                     ],
                     n=self._repeat_n_times,
                 )
-            except (openai.error.ServiceUnavailableError, ReadTimeout) as e:
+            except (ServiceUnavailableError, Timeout) as e:
                 if max_retries == 0:
                     raise e
 
