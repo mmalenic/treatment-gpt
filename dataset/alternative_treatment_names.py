@@ -37,7 +37,9 @@ class AlternativeTreatmentNames:
         Find the canonical name.
         """
         canonical_name = self._df.loc[
-            self._df["alternative_name"] == name, "canonical_name"
+            pd.Series([entry in name for entry in self.df["alternative_name"]])
+            | pd.Series([entry in name for entry in self.df["canonical_name"]]),
+            "canonical_name",
         ]
 
         if len(canonical_name) == 0:
