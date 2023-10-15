@@ -7,6 +7,8 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 
 from dataset.load_protect import LoadProtect
 
+import re
+
 
 def save_fig(save_to, plt=plt, tight=True):
     """
@@ -82,9 +84,19 @@ def results(y_true, y_pred, accuracy_score, sample_wise=True) -> pd.DataFrame:
     )
 
 
+def remove_brackets(x: str):
+    x = re.sub(r"\(.*?\)", "", x)
+    x = re.sub(r"\[.*?\]", "", x)
+    x = re.sub(" +", " ", x)
+    return x.lower().strip()
+
+
 def split_treatment(x: str, base_dataset):
     return sorted(
-        [base_dataset.alternative_name(y.lower().strip()) for y in x.split("+")]
+        [
+            base_dataset.alternative_name(remove_brackets(y.lower().strip()))
+            for y in x.split("+")
+        ]
     )
 
 
