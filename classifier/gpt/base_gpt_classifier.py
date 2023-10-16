@@ -46,7 +46,7 @@ class BaseGPTClassifier(ABC):
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         repeat_n_times: int = 1,
-        batch_n: int = 24,
+        batch_n: int = 12,
         **kwargs,
     ):
         """
@@ -110,6 +110,10 @@ class BaseGPTClassifier(ABC):
         """
         Predict the labels.
         """
+
+        def apply_results(x):
+            return self._results(x)
+
         print("batching predict values:", self._batch_n)
         dfs = []
         for x in np.split(
@@ -122,7 +126,7 @@ class BaseGPTClassifier(ABC):
 
         self.df = pd.concat(dfs)
         self.df = self.df.explode(column="y_pred", ignore_index=True)
-        self.df = self.df.apply(lambda x: self._results(x), axis=1)
+        self.df = self.df.apply(apply_results, axis=1)
         self.base_dataset.df = self.df
 
     def _n_tokens(self, prompt) -> int:
@@ -236,6 +240,7 @@ class BaseGPTClassifier(ABC):
                         {"role": "user", "content": prompt},
                     ],
                     n=self._repeat_n_times,
+                    timeout=60,
                 )
             except (Timeout, ServiceUnavailableError, APIError) as e:
                 if max_retries == 0:
