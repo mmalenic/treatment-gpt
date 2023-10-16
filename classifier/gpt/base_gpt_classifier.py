@@ -46,7 +46,7 @@ class BaseGPTClassifier(ABC):
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         repeat_n_times: int = 1,
-        batch_n: int = 12,
+        batch_n: int = 8,
         **kwargs,
     ):
         """
@@ -241,6 +241,7 @@ class BaseGPTClassifier(ABC):
                     ],
                     n=self._repeat_n_times,
                     timeout=60,
+                    request_timeout=60,
                 )
             except (Timeout, ServiceUnavailableError, APIError) as e:
                 if max_retries == 0:
@@ -248,7 +249,7 @@ class BaseGPTClassifier(ABC):
 
                 print("Service unavailable. Retrying in 10 seconds.")
                 await asyncio.sleep(10)
-                return self._predict_single(x, max_retries - 1)
+                return await self._predict_single(x, max_retries - 1)
 
             for choice in response["choices"]:
                 if choice["finish_reason"] == "length":
