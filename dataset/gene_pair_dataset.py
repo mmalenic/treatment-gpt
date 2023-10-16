@@ -224,7 +224,9 @@ class GenePairDataset:
         Get aggregate results.
         """
         y_true = self._binarizer.transform(self._df["y_true"].tolist())
-        y_pred = self._binarizer.transform(self._df["y_pred"].tolist())
+        y_pred = self._binarizer.transform(
+            [str(y) for x in self._df["y_pred"].tolist() for y in x]
+        )
 
         return results(y_true, y_pred, accuracy_score)
 
@@ -237,7 +239,9 @@ class GenePairDataset:
             return pd.DataFrame(
                 classification_report(
                     self._binarizer.transform(x["y_true"].tolist()),
-                    self._binarizer.transform(x["y_pred"].tolist()),
+                    self._binarizer.transform(
+                        [str(y) for x in self._df["y_pred"].tolist() for y in x]
+                    ),
                     output_dict=True,
                     target_names=self._binarizer.classes_,
                 )

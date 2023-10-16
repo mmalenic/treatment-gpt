@@ -31,7 +31,9 @@ class TreatmentSourceDataset:
     Treatment source dataset
     """
 
-    def __init__(self, from_protect: LoadProtect, **kwargs) -> None:
+    def __init__(
+        self, from_protect: LoadProtect, remove_generic_treatments=None, **kwargs
+    ) -> None:
         """
         Initialize this class.
 
@@ -43,6 +45,14 @@ class TreatmentSourceDataset:
         self._df = pd.DataFrame()
         self._from_protect = from_protect
         self._all_treatments = []
+
+        if remove_generic_treatments is None:
+            remove_generic_treatments = [
+                "chemotherapy",
+                "chemotherapy + everolimus + trastuzumab",
+            ]
+
+        self._remove_generic_treatments = remove_generic_treatments
 
     def load(self):
         """
@@ -57,6 +67,12 @@ class TreatmentSourceDataset:
                 )
                 for treatment in treatments:
                     if treatment[1] is not None and treatment[1] != "":
+                        if (
+                            self._remove_generic_treatments
+                            and treatment[0].lower() in self._remove_generic_treatments
+                        ):
+                            continue
+
                         all_treatments[
                             (
                                 treatment[0],
@@ -155,7 +171,7 @@ class TreatmentSourceDataset:
         cls_report = pd.DataFrame(
             classification_report(
                 self._df["y_true"].tolist(),
-                self._df["y_pred"].tolist(),
+                [str(x) for x in self._df["y_pred"].tolist()],
                 output_dict=True,
             )
         ).transpose()
@@ -258,7 +274,7 @@ class TreatmentSourceDataset:
         Get aggregate results.
         """
         y_true = self._df["y_true"].tolist()
-        y_pred = self._df["y_pred"].tolist()
+        y_pred = [str(x) for x in self._df["y_pred"].tolist()]
 
         return results(y_true, y_pred, accuracy_score, sample_wise=False)
 
