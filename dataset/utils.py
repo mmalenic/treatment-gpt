@@ -18,7 +18,9 @@ def save_fig(save_to, plt=plt, tight=True):
         plt.tight_layout()
     plt.savefig(save_to, format="svg", dpi=300)
     try:
-        plt.close()
+        plt.cla()
+        plt.clf()
+        plt.close("all")
     except AttributeError:
         pass
 
