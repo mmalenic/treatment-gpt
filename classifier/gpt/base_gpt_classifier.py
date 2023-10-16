@@ -15,7 +15,7 @@ import tiktoken
 from joblib import Parallel, delayed
 from decimal import *
 
-from openai.error import Timeout, ServiceUnavailableError, APIError
+from openai.error import Timeout, ServiceUnavailableError, APIError, RateLimitError
 from requests import ReadTimeout
 
 from dataset.utils import process_plus
@@ -63,7 +63,7 @@ class BaseGPTClassifier(ABC):
         self._cost_estimate = None
         if batch_n is None:
             self._batch_n = (
-                2 if model_type == "gpt-4" or model_type == "gpt-4-32k" else 10
+                3 if model_type == "gpt-4" or model_type == "gpt-4-32k" else 10
             )
         self._max_token_number = None
         self._repeat_n_times = repeat_n_times
@@ -199,7 +199,9 @@ class BaseGPTClassifier(ABC):
         out = await asyncio.gather(*tasks)
         return out
 
-    async def _predict_single(self, x, max_retries: int = 3) -> pd.DataFrame:
+    async def _predict_single(
+        self, x, max_retries: int = 3, max_rate_limit_retries: int = 50
+    ) -> pd.DataFrame:
         """
         Predict a single sample.
         """
@@ -250,9 +252,20 @@ class BaseGPTClassifier(ABC):
                 if max_retries == 0:
                     raise e
 
-                print("Service unavailable. Retrying in 10 seconds.")
+                print("Service unavailable, retrying in 10 seconds.")
                 await asyncio.sleep(10)
-                return await self._predict_single(x, max_retries - 1)
+                return await self._predict_single(
+                    x, max_retries - 1, max_rate_limit_retries
+                )
+            except RateLimitError as e:
+                if max_rate_limit_retries == 0:
+                    raise e
+
+                print("Rate limit reached, waiting 60 seconds to try again.")
+                await asyncio.sleep(60)
+                return await self._predict_single(
+                    x, max_retries, max_rate_limit_retries - 1
+                )
 
             for choice in response["choices"]:
                 if choice["finish_reason"] == "length":
