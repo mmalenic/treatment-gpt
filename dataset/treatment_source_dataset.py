@@ -68,12 +68,6 @@ class TreatmentSourceDataset:
                 )
                 for treatment in treatments:
                     if treatment[1] is not None and treatment[1] != "":
-                        # if (
-                        #     self._remove_generic_treatments
-                        #     and treatment[0].lower() in self._remove_generic_treatments
-                        # ):
-                        #     continue
-
                         all_treatments[
                             (
                                 treatment[0],
@@ -89,6 +83,12 @@ class TreatmentSourceDataset:
             self._all_treatments
         ):
             if treatment is None or len(treatment) == 0:
+                continue
+
+            if (
+                self._remove_generic_treatments
+                and treatment.lower() in self._remove_generic_treatments
+            ):
                 continue
 
             treatments = list(dict.fromkeys([x[0] for x in self._all_treatments]))
