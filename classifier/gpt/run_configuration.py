@@ -1,5 +1,6 @@
 import os.path
 from collections import Counter
+from pathlib import Path
 from typing import Callable
 
 import pandas as pd
@@ -481,10 +482,21 @@ class RunConfiguration:
         for run in self.run_configuration["runs"]:
             await run["classifier"].predict()
 
-    def results(self):
+    def results(self, from_path: bool = False):
         """
         Calculate results.
         """
+
+        if from_path and Path("data/gene_pair_results.xlsx").exists():
+            self._gene_pair_results = pd.read_excel("data/gene_pair_results.xlsx")
+
+        if from_path and Path("data/treatment_source_results.xlsx").exists():
+            self._treatment_source_results = pd.read_excel(
+                "data/treatment_source_results.xlsx"
+            )
+
+        if from_path:
+            return
 
         def process_dummy_classifier(df, dataset, accuracy_score, sample_wise):
             if dataset.df["y_pred"].isnull().all():
@@ -509,25 +521,28 @@ class RunConfiguration:
             except AttributeError:
                 pass
 
+            out = results(y_true, y_pred, accuracy_score, sample_wise)
+            out["model_name"] = "dummy"
+
             df = pd.concat(
-                [df, results(y_true, y_pred, accuracy_score, sample_wise)],
+                [df, out],
                 ignore_index=True,
             )
-
-            df["model_name"] = "dummy"
 
             return df
 
-        def process_results(df):
-            df = pd.concat(
-                [df, run["classifier"].base_dataset.aggregate_results()],
-                ignore_index=True,
-            )
-            df["model_name"] = run["model_type"]
-            df["run_type"] = (
+        def process_results(df, run):
+            out = run["classifier"].base_dataset.aggregate_results()
+            out["model_name"] = run["model_type"]
+            out["run_type"] = (
                 "zero_shot" if "zero_shot" in run["run_name"] else "few_shot"
             )
-            df["run_cot_type"] = "cot" if "cot" in run["run_name"] else "not_cot"
+            out["run_cot_type"] = "cot" if "cot" in run["run_name"] else "not_cot"
+
+            df = pd.concat(
+                [df, out],
+                ignore_index=True,
+            )
 
             return df
 
@@ -537,11 +552,11 @@ class RunConfiguration:
         for run in self.run_configuration["runs"]:
             dataset = run["classifier"].base_dataset
             if isinstance(dataset, GenePairDataset):
-                self._gene_pair_results = process_results(self._gene_pair_results)
+                self._gene_pair_results = process_results(self._gene_pair_results, run)
                 gene_pair_dataset = dataset
             else:
                 self._treatment_source_results = process_results(
-                    self._treatment_source_results
+                    self._treatment_source_results, run
                 )
                 treatment_source_dataset = dataset
 
@@ -557,6 +572,14 @@ class RunConfiguration:
             util.accuracy_score,
             True,
         )
+
+        if not Path("data/gene_pair_results.xlsx").exists():
+            self._gene_pair_results.to_excel("data/gene_pair_results.xlsx")
+
+        if not Path("data/treatment_source_results.xlsx").exists():
+            self._treatment_source_results.to_excel(
+                "data/treatment_source_results.xlsx"
+            )
 
     async def run_all(self):
         """
