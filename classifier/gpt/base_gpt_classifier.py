@@ -46,7 +46,7 @@ class BaseGPTClassifier(ABC):
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         repeat_n_times: int = 1,
-        batch_n: int = 8,
+        batch_n: int = 5,
         **kwargs,
     ):
         """
