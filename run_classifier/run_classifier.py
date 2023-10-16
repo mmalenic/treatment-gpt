@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 
 class RunClassifier:
-    def __init__(self):
+    def __init__(self, pubmed_email):
         """
         Initialize this class.
         """
@@ -41,6 +41,7 @@ class RunClassifier:
             alternative_names=self._names,
         )
         self._load.load()
+        self._load.download_sources(pubmed_email)
         self._load.sources()
         self._load.load_pubmed()
 

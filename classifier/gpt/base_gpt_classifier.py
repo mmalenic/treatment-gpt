@@ -63,7 +63,7 @@ class BaseGPTClassifier(ABC):
         self._cost_estimate = None
         if batch_n is None:
             self._batch_n = (
-                3 if model_type == "gpt-4" or model_type == "gpt-4-32k" else 10
+                2 if model_type == "gpt-4" or model_type == "gpt-4-32k" else 10
             )
         self._max_token_number = None
         self._repeat_n_times = repeat_n_times

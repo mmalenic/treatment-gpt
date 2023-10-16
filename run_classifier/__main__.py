@@ -1,4 +1,4 @@
-def main(api_key: str, use_pickled_config, random_seed: int | None):
+def main(api_key: str, pubmed_email: str, use_pickled_config, random_seed: int | None):
     from run_classifier.run_classifier import RunClassifier
     import asyncio
 
@@ -21,7 +21,7 @@ def main(api_key: str, use_pickled_config, random_seed: int | None):
             config = pickle.load(f)
             asyncio.run(config.run_all())
     else:
-        run = RunClassifier()
+        run = RunClassifier(pubmed_email)
         asyncio.run(run.run())
 
 
@@ -37,6 +37,12 @@ if __name__ == "__main__":
         help="open api key",
     )
     parser.add_argument(
+        "--pubmed_email",
+        type=str,
+        required=True,
+        help="email to use for pubmed sources",
+    )
+    parser.add_argument(
         "--use_pickled_config",
         type=Path,
         help="whether to use saved object",
@@ -49,4 +55,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.api_key, args.use_pickled_config, args.random_seed)
+    main(args.api_key, args.pubmed_email, args.use_pickled_config, args.random_seed)
