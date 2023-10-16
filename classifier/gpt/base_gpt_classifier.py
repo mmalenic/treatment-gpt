@@ -46,7 +46,7 @@ class BaseGPTClassifier(ABC):
         | Literal["gpt-4"]
         | Literal["gpt-4-32k"] = "gpt-3.5-turbo",
         repeat_n_times: int = 1,
-        batch_n: int = 5,
+        batch_n: int = None,
         **kwargs,
     ):
         """
@@ -61,7 +61,10 @@ class BaseGPTClassifier(ABC):
         Path(save_dir).mkdir(parents=True, exist_ok=True)
         self.save_dir = save_dir
         self._cost_estimate = None
-        self._batch_n = batch_n
+        if batch_n is None:
+            self._batch_n = (
+                3 if model_type == "gpt-4" or model_type == "gpt-4-32k" else 10
+            )
         self._max_token_number = None
         self._repeat_n_times = repeat_n_times
 
