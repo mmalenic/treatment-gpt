@@ -211,8 +211,9 @@ class BaseGPTClassifier(ABC):
         def dump_response(file, _x, _response, _prompt, unique=False):
             if unique:
                 counter = 1
-                while os.path.exists(file):
-                    file = f"{file}_{counter}"
+                process_file = file
+                while os.path.exists(process_file):
+                    process_file = f"{file}_{counter}"
                     counter += 1
 
             with open(file, "w", encoding="utf-8") as location:
