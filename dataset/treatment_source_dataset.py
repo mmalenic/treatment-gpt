@@ -189,7 +189,11 @@ class TreatmentSourceDataset:
         """
         Compute the results
         """
-        x["accuracy_score"] = accuracy_score([x["y_true"]], [x["y_pred"]])
+        try:
+            x["accuracy_score"] = accuracy_score([x["y_true"]], [x["y_pred"]])
+        except Exception as e:
+            print("error:", e)
+            x["accuracy_score"] = 0
 
         levels = [y[1] for y in x["cancer_type_and_level"]]
         cancer_types = [y[0] for y in x["cancer_type_and_level"]]
