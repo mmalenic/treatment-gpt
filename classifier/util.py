@@ -31,5 +31,6 @@ def accuracy_score(y_true, y_pred) -> float:
     """
     try:
         return ((y_true & y_pred).sum(axis=1) / (y_true | y_pred).sum(axis=1)).mean()
-    except ZeroDivisionError:
+    except ZeroDivisionError as e:
+        print("error from accuracy score:", e)
         return 0

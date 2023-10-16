@@ -15,6 +15,7 @@ from sklearn.metrics import (
     recall_score,
 )
 
+from dataset.gene_pair_dataset import GenePairDataset
 from dataset.utils import process_plus
 from dataset.load_protect import LoadProtect
 import random
@@ -67,11 +68,11 @@ class TreatmentSourceDataset:
                 )
                 for treatment in treatments:
                     if treatment[1] is not None and treatment[1] != "":
-                        if (
-                            self._remove_generic_treatments
-                            and treatment[0].lower() in self._remove_generic_treatments
-                        ):
-                            continue
+                        # if (
+                        #     self._remove_generic_treatments
+                        #     and treatment[0].lower() in self._remove_generic_treatments
+                        # ):
+                        #     continue
 
                         all_treatments[
                             (
@@ -171,7 +172,7 @@ class TreatmentSourceDataset:
         cls_report = pd.DataFrame(
             classification_report(
                 self._df["y_true"].tolist(),
-                [str(x) for x in self._df["y_pred"].tolist()],
+                GenePairDataset.process_predictions(self._df["y_pred"].tolist(), False),
                 output_dict=True,
             )
         ).transpose()
@@ -274,7 +275,7 @@ class TreatmentSourceDataset:
         Get aggregate results.
         """
         y_true = self._df["y_true"].tolist()
-        y_pred = [str(x) for x in self._df["y_pred"].tolist()]
+        y_pred = GenePairDataset.process_predictions(self._df["y_pred"].tolist(), False)
 
         return results(y_true, y_pred, accuracy_score, sample_wise=False)
 

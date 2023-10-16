@@ -225,10 +225,24 @@ class GenePairDataset:
         """
         y_true = self._binarizer.transform(self._df["y_true"].tolist())
         y_pred = self._binarizer.transform(
-            [str(y) for x in self._df["y_pred"].tolist() for y in x]
+            self.process_predictions(self._df["y_pred"].tolist())
         )
 
         return results(y_true, y_pred, accuracy_score)
+
+    @staticmethod
+    def process_predictions(y_pred, should_be_list=True):
+        """
+        Process and wrap predictions.
+        """
+        out = []
+        for x in y_pred:
+            if isinstance(x, list) and should_be_list:
+                out.append([str(y) for y in x])
+            else:
+                out.append(str(x))
+
+        return out
 
     def diagrams(self, save_to: str):
         """
@@ -240,7 +254,7 @@ class GenePairDataset:
                 classification_report(
                     self._binarizer.transform(x["y_true"].tolist()),
                     self._binarizer.transform(
-                        [str(y) for x in self._df["y_pred"].tolist() for y in x]
+                        self.process_predictions(x["y_pred"].tolist())
                     ),
                     output_dict=True,
                     target_names=self._binarizer.classes_,

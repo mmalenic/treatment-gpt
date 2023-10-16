@@ -129,7 +129,9 @@ class BaseGPTClassifier(ABC):
 
         self.df = pd.concat(dfs)
         self.df = self.df.explode(column="y_pred", ignore_index=True)
+        # self.df = self.df.apply(check_type, axis=1)
         self.df = self.df.apply(apply_results, axis=1)
+
         self.base_dataset.df = self.df
 
     def _n_tokens(self, prompt) -> int:
