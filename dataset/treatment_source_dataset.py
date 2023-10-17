@@ -173,14 +173,14 @@ class TreatmentSourceDataset:
             level_for_cancer_type, axis=1
         )
 
+        labels = list(dict.fromkeys(self._df["y_true"].tolist()).keys())
         cls_report = pd.DataFrame(
             classification_report(
                 self._df["y_true"].tolist(),
                 GenePairDataset.process_predictions(self._df["y_pred"].tolist(), False),
                 output_dict=True,
-                target_names=[
-                    self._original_labels[y] for y in self._df["y_true"].tolist()
-                ],
+                labels=labels,
+                target_names=[self._original_labels[y] for y in labels],
             )
         ).transpose()
 

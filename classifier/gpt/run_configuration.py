@@ -609,6 +609,15 @@ class RunConfiguration:
 
             return df
 
+        def label_report(x):
+            y = [x["Run type"]]
+            if x["List of answers"] == "yes":
+                y.append("list hint")
+            if x["COT"] == "COT":
+                y.append("COT")
+
+            return " + ".join(y)
+
         def process_results(df, run):
             out = run["classifier"].base_dataset.aggregate_results()
             out["Model name"] = run["model_type"]
@@ -617,6 +626,7 @@ class RunConfiguration:
             )
             out["List of answers"] = "no" if "no_list" in run["run_name"] else "yes"
             out["COT"] = "COT" if "cot" in run["run_name"] else "no COT"
+            out["Report name"] = out.apply(label_report, axis=1)
 
             df = pd.concat(
                 [df, out],
