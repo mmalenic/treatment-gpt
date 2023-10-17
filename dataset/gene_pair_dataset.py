@@ -67,6 +67,7 @@ class GenePairDataset:
         self._remove_generic_treatments = remove_generic_treatments
         self._split_to_n_treatments = split_to_n_treatments
         self._all_treatments = {}
+        self._original_labels = {}
 
         self._binarizer = MultiLabelBinarizer()
 
@@ -145,6 +146,12 @@ class GenePairDataset:
                     {x["treatment"]: None for x in treatment_sublist}
                 )
 
+                y_true_processed = []
+                for y in y_true:
+                    process = process_plus(y, self)
+                    self._original_labels[process] = y
+                    y_true_processed.append(process)
+
                 if treatment_sublist and y_true:
                     self._dataset.append(
                         {
@@ -156,7 +163,7 @@ class GenePairDataset:
                             "correlation_type": row["correlation_type"],
                             "odds": row["odds"],
                             "treatments": treatment_sublist,
-                            "y_true": [process_plus(y, self) for y in y_true],
+                            "y_true": y_true_processed,
                             "y_pred": np.nan,
                         }
                     )
@@ -257,7 +264,9 @@ class GenePairDataset:
                         self.process_predictions(x["y_pred"].tolist())
                     ),
                     output_dict=True,
-                    target_names=self._binarizer.classes_,
+                    target_names=[
+                        self._original_labels[y] for y in self._binarizer.classes_
+                    ],
                 )
             ).transpose()
 

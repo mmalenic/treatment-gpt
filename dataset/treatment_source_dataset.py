@@ -46,6 +46,7 @@ class TreatmentSourceDataset:
         self._df = pd.DataFrame()
         self._from_protect = from_protect
         self._all_treatments = []
+        self._original_labels = {}
 
         if remove_generic_treatments is None:
             remove_generic_treatments = [
@@ -91,6 +92,9 @@ class TreatmentSourceDataset:
             ):
                 continue
 
+            process = process_plus(treatment, self)
+            self._original_labels[process] = treatment
+
             treatments = list(dict.fromkeys([x[0] for x in self._all_treatments]))
             if treatments and source is not None and source != "":
                 self._dataset.append(
@@ -99,7 +103,8 @@ class TreatmentSourceDataset:
                         "source": source,
                         "cancer_type_and_level": (cancer_type, level),
                         "treatments": treatments,
-                        "y_true": process_plus(treatment, self),
+                        "y_true": process,
+                        "y_true_original": treatment,
                         "y_pred": np.nan,
                     }
                 )
@@ -173,6 +178,9 @@ class TreatmentSourceDataset:
                 self._df["y_true"].tolist(),
                 GenePairDataset.process_predictions(self._df["y_pred"].tolist(), False),
                 output_dict=True,
+                target_names=[
+                    self._original_labels[y] for y in self._df["y_true"].tolist()
+                ],
             )
         ).transpose()
 
