@@ -18,6 +18,7 @@ from classifier.gpt.treatment_only_classifier import TreatmentSourceGPTClassifie
 from classifier.gpt.treatment_only_no_list_classifier import (
     TreatmentSourceNoListGPTClassifier,
 )
+from dataset.load_protect import LoadProtect
 from dataset.treatment_source_dataset import TreatmentSourceDataset
 from dataset.gene_pair_dataset import GenePairDataset
 
@@ -33,15 +34,24 @@ from dataset.utils import results, save_fig
 class RunConfiguration:
     def __init__(
         self,
-        with_gene_pair_dataset: Callable[[], GenePairDataset],
-        with_treatment_source_dataset: Callable[[], TreatmentSourceDataset],
+        load: LoadProtect,
     ):
         """
         Initialize this class.
         """
 
-        self._with_gene_pair_dataset = with_gene_pair_dataset
-        self._with_treatment_source_dataset = with_treatment_source_dataset
+        def load_dataset(dataset):
+            dataset.load()
+            return dataset
+
+        self._load = load
+
+        self._with_gene_pair_dataset = lambda: load_dataset(
+            GenePairDataset(load, split_to_n_treatments=None)
+        )
+        self._with_treatment_source_dataset = lambda: load_dataset(
+            TreatmentSourceDataset(load)
+        )
 
         self._treatment_source_results = pd.DataFrame()
         self._gene_pair_results = pd.DataFrame()
@@ -52,7 +62,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_no_list_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -64,7 +74,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_no_list_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -76,7 +86,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_no_list_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -88,7 +98,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_no_list_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -100,7 +110,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -112,7 +122,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -124,7 +134,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -136,7 +146,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -148,7 +158,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_no_list_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_no_list_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -160,7 +170,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_no_list_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_no_list_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -172,7 +182,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_no_list_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -184,7 +194,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_no_list_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -196,7 +206,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -208,7 +218,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -220,7 +230,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -232,7 +242,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_cot_name,
                     "model_type": "gpt-3.5-turbo",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_cot_name,
                         "gpt-3.5-turbo",
                         repeat_n_times=3,
@@ -244,7 +254,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_no_list_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -256,7 +266,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_no_list_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -268,7 +278,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_no_list_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -280,7 +290,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_no_list_cot_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesNoListGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_no_list_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -292,7 +302,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -304,7 +314,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -316,7 +326,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_no_sources_cot_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.zero_shot_no_sources_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -328,7 +338,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_no_sources_cot_name,
                     "model_type": "gpt-4",
                     "classifier": NoSourcesGenePairGPTClassifier(
-                        with_gene_pair_dataset(),
+                        self._with_gene_pair_dataset(),
                         Prompts.few_shot_no_sources_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -340,7 +350,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_no_list_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_no_list_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -352,7 +362,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_no_list_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_no_list_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -364,7 +374,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_no_list_cot_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_no_list_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -376,7 +386,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_no_list_cot_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceNoListGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_no_list_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -388,7 +398,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -400,7 +410,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -412,7 +422,7 @@ class RunConfiguration:
                     "run_name": Prompts.zero_shot_treatment_source_cot_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.zero_shot_treatment_source_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -424,7 +434,7 @@ class RunConfiguration:
                     "run_name": Prompts.few_shot_treatment_source_cot_name,
                     "model_type": "gpt-4",
                     "classifier": TreatmentSourceGPTClassifier(
-                        with_treatment_source_dataset(),
+                        self._with_treatment_source_dataset(),
                         Prompts.few_shot_treatment_source_cot_name,
                         "gpt-4",
                         repeat_n_times=2,
@@ -473,10 +483,71 @@ class RunConfiguration:
         """
         Save diagrams.
         """
+
+        def aggregate_dataset(instance_type, model_type):
+            return pd.concat(
+                [
+                    x["classifier"].base_dataset.df
+                    for x in self.run_configuration["runs"]
+                    if x["model_type"] == model_type
+                    and isinstance(x["classifier"].base_dataset, instance_type)
+                ]
+            )
+
+        def with_dataset(create_dataset, new_data, save_dir):
+            dataset = create_dataset()
+            dataset.df = new_data
+            dataset.diagrams("data/results/" + save_dir)
+            return dataset
+
         for run in self.run_configuration["runs"]:
             run["classifier"].base_dataset.diagrams(
                 os.path.join(run["classifier"].save_dir, "diagrams")
             )
+
+        gene_pair_datasets_3_5 = with_dataset(
+            self._with_gene_pair_dataset,
+            aggregate_dataset(GenePairDataset, "gpt-3.5-turbo"),
+            "gene_pair_gpt_3_5",
+        )
+        gene_pair_datasets_4 = with_dataset(
+            self._with_gene_pair_dataset,
+            aggregate_dataset(GenePairDataset, "gpt-4"),
+            "gene_pair_gpt_4",
+        )
+
+        treatment_source_datasets_3_5 = with_dataset(
+            self._with_treatment_source_dataset,
+            aggregate_dataset(TreatmentSourceDataset, "gpt-3.5-turbo"),
+            "treatment_gpt_3_5",
+        )
+        treatment_source_datasets_4 = with_dataset(
+            self._with_treatment_source_dataset,
+            aggregate_dataset(TreatmentSourceDataset, "gpt-4"),
+            "treatment_gpt_4",
+        )
+
+        gene_pair_datasets_all = with_dataset(
+            self._with_gene_pair_dataset,
+            pd.concat([gene_pair_datasets_3_5.df, gene_pair_datasets_4.df]),
+            "gene_pair_all",
+        )
+        treatment_source_datasets_all = with_dataset(
+            self._with_treatment_source_dataset,
+            pd.concat(
+                [treatment_source_datasets_3_5.df, treatment_source_datasets_4.df]
+            ),
+            "treatment_all",
+        )
+
+        self.run_configuration["all"] = [
+            gene_pair_datasets_3_5,
+            gene_pair_datasets_4,
+            gene_pair_datasets_all,
+            treatment_source_datasets_3_5,
+            treatment_source_datasets_4,
+            treatment_source_datasets_all,
+        ]
 
     async def predict(self):
         """
@@ -492,14 +563,14 @@ class RunConfiguration:
 
         if from_path and Path("data/gene_pair_results.xlsx").exists():
             self._gene_pair_results = pd.read_excel("data/gene_pair_results.xlsx")
-            self.results_diagram(self._gene_pair_results, "data/gene_pair_results.png")
+            self.results_diagram(self._gene_pair_results, "data/gene_pair_results_")
 
         if from_path and Path("data/treatment_source_results.xlsx").exists():
             self._treatment_source_results = pd.read_excel(
                 "data/treatment_source_results.xlsx"
             )
             self.results_diagram(
-                self._treatment_source_results, "data/treatment_source_results.png"
+                self._treatment_source_results, "data/treatment_source_results_"
             )
 
         if from_path:
