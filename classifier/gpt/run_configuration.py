@@ -21,10 +21,13 @@ from classifier.gpt.treatment_only_no_list_classifier import (
 from dataset.treatment_source_dataset import TreatmentSourceDataset
 from dataset.gene_pair_dataset import GenePairDataset
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from sklearn.dummy import DummyClassifier
 from itertools import chain
 
-from dataset.utils import results
+from dataset.utils import results, save_fig
 
 
 class RunConfiguration:
@@ -489,10 +492,14 @@ class RunConfiguration:
 
         if from_path and Path("data/gene_pair_results.xlsx").exists():
             self._gene_pair_results = pd.read_excel("data/gene_pair_results.xlsx")
+            self.results_diagram(self._gene_pair_results, "data/gene_pair_results.png")
 
         if from_path and Path("data/treatment_source_results.xlsx").exists():
             self._treatment_source_results = pd.read_excel(
                 "data/treatment_source_results.xlsx"
+            )
+            self.results_diagram(
+                self._treatment_source_results, "data/treatment_source_results.png"
             )
 
         if from_path:
@@ -522,7 +529,7 @@ class RunConfiguration:
                 pass
 
             out = results(y_true, y_pred, accuracy_score, sample_wise)
-            out["model_name"] = "dummy"
+            out["Model name"] = "dummy"
 
             df = pd.concat(
                 [df, out],
@@ -533,11 +540,12 @@ class RunConfiguration:
 
         def process_results(df, run):
             out = run["classifier"].base_dataset.aggregate_results()
-            out["model_name"] = run["model_type"]
-            out["run_type"] = (
-                "zero_shot" if "zero_shot" in run["run_name"] else "few_shot"
+            out["Model name"] = run["model_type"]
+            out["Run type"] = (
+                "zero shot" if "zero_shot" in run["run_name"] else "few shot"
             )
-            out["run_cot_type"] = "cot" if "cot" in run["run_name"] else "not_cot"
+            out["List of answers"] = "no" if "no_list" in run["run_name"] else "yes"
+            out["COT"] = "COT" if "cot" in run["run_name"] else "no COT"
 
             df = pd.concat(
                 [df, out],
@@ -575,21 +583,87 @@ class RunConfiguration:
 
         if not Path("data/gene_pair_results.xlsx").exists():
             self._gene_pair_results.to_excel("data/gene_pair_results.xlsx")
+            self.results_diagram(self._gene_pair_results, "data/gene_pair_results.png")
 
         if not Path("data/treatment_source_results.xlsx").exists():
             self._treatment_source_results.to_excel(
                 "data/treatment_source_results.xlsx"
             )
+            self.results_diagram(
+                self._treatment_source_results, "data/treatment_source_results"
+            )
 
-    async def run_all(self):
+    @staticmethod
+    def results_diagram(results, save_to):
+        results = results[results["Model name"] != "dummy"]
+        g = sns.catplot(
+            data=results,
+            col="Model name",
+            y="accuracy",
+            x="COT",
+            hue="Run type",
+            capsize=0.1,
+            palette="YlGnBu_d",
+            errorbar="se",
+            kind="point",
+            height=6,
+            aspect=0.75,
+        )
+        g.despine(left=True)
+        g.fig.subplots_adjust(top=0.9)
+        g.fig.suptitle("COT comparison")
+        save_fig(save_to + "cot_comparison.png")
+
+        g = sns.catplot(
+            data=results,
+            x="Model name",
+            y="accuracy",
+            hue="COT",
+            col="Run type",
+            capsize=0.1,
+            palette="YlGnBu_d",
+            errorbar="se",
+            kind="point",
+            height=6,
+            aspect=0.75,
+        )
+        g.despine(left=True)
+        g.fig.subplots_adjust(top=0.9)
+        g.fig.suptitle("Model comparison")
+        save_fig(save_to + "model_comparison.png")
+
+        g = sns.catplot(
+            data=results,
+            x="List of answers",
+            y="accuracy",
+            hue="COT",
+            col="Run type",
+            capsize=0.1,
+            palette="YlGnBu_d",
+            errorbar="se",
+            kind="point",
+            height=6,
+            aspect=0.75,
+        )
+        g.despine(left=True)
+        g.fig.subplots_adjust(top=0.9)
+        g.fig.suptitle("Model comparison")
+        save_fig(save_to + "list_of_answers.png")
+
+    async def run_all(self, from_path: bool = False, save_diagrams: bool = True):
         """
         Run all components.
         """
         self.calculate_costs()
         self.save_example_prompts()
-        await self.predict()
-        self.results()
-        self.save_diagrams()
+
+        if not from_path:
+            await self.predict()
+
+        self.results(from_path)
+
+        if save_diagrams:
+            self.save_diagrams()
 
     @property
     def treatment_source_results(self) -> pd.DataFrame:

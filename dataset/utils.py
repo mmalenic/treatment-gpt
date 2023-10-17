@@ -16,7 +16,7 @@ def save_fig(save_to, plt=plt, tight=True):
     """
     if tight:
         plt.tight_layout()
-    plt.savefig(save_to, format="svg", dpi=300)
+    plt.savefig(save_to, format="png", dpi=300)
     try:
         plt.cla()
         plt.clf()

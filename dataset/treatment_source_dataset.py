@@ -178,18 +178,18 @@ class TreatmentSourceDataset:
         ).transpose()
 
         Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)
-        heat_map(cls_report, "Blues", f"{save_to}/heatmaps/heatmap_blue.svg")
-        heat_map(cls_report, "Reds", f"{save_to}/heatmaps/heatmap_red.svg")
-        heat_map(cls_report, "Greens", f"{save_to}/heatmaps/heatmap_green.svg")
-        heat_map(cls_report, "Oranges", f"{save_to}/heatmaps/heatmap_orange.svg")
-        heat_map(cls_report, "Purples", f"{save_to}/heatmaps/heatmap_purple.svg")
+        heat_map(cls_report, "Blues", f"{save_to}/heatmaps/heatmap_blue.png")
+        heat_map(cls_report, "Reds", f"{save_to}/heatmaps/heatmap_red.png")
+        heat_map(cls_report, "Greens", f"{save_to}/heatmaps/heatmap_green.png")
+        heat_map(cls_report, "Oranges", f"{save_to}/heatmaps/heatmap_orange.png")
+        heat_map(cls_report, "Purples", f"{save_to}/heatmaps/heatmap_purple.png")
 
         plt.clf()
         plt.figure()
         plot = sns.barplot(melt_level, x="Evidence level", y="value")
         plot.set_title("Accuracy for evidence levels")
         plot.set(ylabel="Accuracy score", xlabel="Evidence level")
-        save_fig(f"{save_to}/accuracy_level.svg")
+        save_fig(f"{save_to}/accuracy_level.png")
 
         plt.clf()
         plt.figure()
@@ -198,7 +198,7 @@ class TreatmentSourceDataset:
         plot.set(ylabel="Accuracy score", xlabel="Cancer types")
         plt.subplots_adjust(bottom=0.3)
         plt.xticks(rotation=90)
-        save_fig(f"{save_to}/accuracy_cancer_type_level.svg")
+        save_fig(f"{save_to}/accuracy_cancer_type_level.png")
 
         plt.clf()
 

@@ -291,33 +291,33 @@ class GenePairDataset:
                 lambda x: heat_map(
                     x,
                     "Blues",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_blue.svg",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_blue.png",
                 )
             )
             df.groupby(["cancer_type"]).apply(
                 lambda x: heat_map(
-                    x, "Reds", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_red.svg"
+                    x, "Reds", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_red.png"
                 )
             )
             df.groupby(["cancer_type"]).apply(
                 lambda x: heat_map(
                     x,
                     "Greens",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_green.svg",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_green.png",
                 )
             )
             df.groupby(["cancer_type"]).apply(
                 lambda x: heat_map(
                     x,
                     "Oranges",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_orange.svg",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_orange.png",
                 )
             )
             df.groupby(["cancer_type"]).apply(
                 lambda x: heat_map(
                     x,
                     "Purples",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_purple.svg",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_purple.png",
                 )
             )
 
@@ -372,7 +372,7 @@ class GenePairDataset:
         plot = sns.barplot(df, x="correlation_type", y="accuracy_score")
         plot.set_title("Accuracy for correlation type")
         plot.set(xlabel="Correlation type", ylabel="Accuracy score")
-        save_fig(f"{save_to}/accuracy_score.svg")
+        save_fig(f"{save_to}/accuracy_score.png")
 
         plt.clf()
         plt.figure()
@@ -384,7 +384,7 @@ class GenePairDataset:
         plt.xlabel("p-value")
         plt.subplots_adjust(top=0.9)
         plot._legend.set_title("Correlation type")
-        save_fig(f"{save_to}/accuracy_p_val_for_correlation.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_p_val_for_correlation.png", tight=False)
 
         plt.clf()
         plt.figure()
@@ -396,7 +396,7 @@ class GenePairDataset:
         plt.xlabel("Odds")
         plt.subplots_adjust(top=0.9)
         plot._legend.set_title("Correlation type")
-        save_fig(f"{save_to}/accuracy_odds_for_correlation.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_odds_for_correlation.png", tight=False)
 
         plt.clf()
         plt.figure()
@@ -411,7 +411,7 @@ class GenePairDataset:
         plt.xlabel("p-value")
         plt.subplots_adjust(top=0.9)
         plot._legend.set_title("Correlation type")
-        save_fig(f"{save_to}/accuracy_p_value_mutually_exclusive.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_p_value_mutually_exclusive.png", tight=False)
 
         plt.clf()
         plt.figure()
@@ -426,7 +426,7 @@ class GenePairDataset:
         plt.xlabel("Odds")
         plt.subplots_adjust(top=0.9)
         plot._legend.set_title("Correlation type")
-        save_fig(f"{save_to}/accuracy_odds_mutually_exclusive.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_odds_mutually_exclusive.png", tight=False)
 
         plt.clf()
         plt.figure()
@@ -438,7 +438,7 @@ class GenePairDataset:
         plt.xlabel("p-value")
         plt.subplots_adjust(top=0.9)
         plot._legend.set_title("Correlation type")
-        save_fig(f"{save_to}/accuracy_p_value_co_occurring.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_p_value_co_occurring.png", tight=False)
 
         plt.clf()
         plt.figure()
@@ -450,7 +450,7 @@ class GenePairDataset:
         plt.xlabel("Odds")
         plt.subplots_adjust(top=0.9)
         plot._legend.set_title("Correlation type")
-        save_fig(f"{save_to}/accuracy_odds_co_occurring.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_odds_co_occurring.png", tight=False)
 
         plt.clf()
         plt.figure()
@@ -459,7 +459,7 @@ class GenePairDataset:
         )
         plot.set_title("Accuracy for evidence levels and correlation type")
         plot.set(ylabel="Accuracy score", xlabel="Correlation type")
-        save_fig(f"{save_to}/accuracy_level_correlation_type.svg")
+        save_fig(f"{save_to}/accuracy_level_correlation_type.png")
 
         plt.clf()
         plt.figure()
@@ -468,7 +468,7 @@ class GenePairDataset:
         plot.set(ylabel="Accuracy score", xlabel="Cancer type")
         plt.subplots_adjust(bottom=0.3)
         plt.xticks(rotation=90)
-        save_fig(f"{save_to}/accuracy_cancer_type.svg", tight=False)
+        save_fig(f"{save_to}/accuracy_cancer_type.png", tight=False)
 
         plt.clf()
 
