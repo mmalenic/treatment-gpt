@@ -132,7 +132,6 @@ class TreatmentSourceDataset:
                 save_to,
                 x_label="Treatment",
                 y_label="",
-                title=f"Scores for treatment source dataset",
                 width=30,
                 height=10,
             )
@@ -187,14 +186,12 @@ class TreatmentSourceDataset:
         plt.clf()
         plt.figure()
         plot = sns.barplot(melt_level, x="Evidence level", y="value")
-        plot.set_title("Accuracy for evidence levels")
         plot.set(ylabel="Accuracy score", xlabel="Evidence level")
         save_fig(f"{save_to}/accuracy_level.png")
 
         plt.clf()
         plt.figure()
         plot = sns.barplot(melt_cancer_type, x="Cancer type", y="value")
-        plot.set_title("Accuracy for cancer types")
         plot.set(ylabel="Accuracy score", xlabel="Cancer types")
         plt.subplots_adjust(bottom=0.3)
         plt.xticks(rotation=90)

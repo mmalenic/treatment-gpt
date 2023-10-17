@@ -682,7 +682,6 @@ class RunConfiguration:
         )
         g.despine(left=True)
         g.fig.subplots_adjust(top=0.9)
-        g.fig.suptitle("COT comparison")
         save_fig(save_to + "cot_comparison.png")
 
         g = sns.catplot(
@@ -700,8 +699,7 @@ class RunConfiguration:
         )
         g.despine(left=True)
         g.fig.subplots_adjust(top=0.9)
-        g.fig.suptitle("Model comparison")
-        save_fig(save_to + "model_comparison.png")
+        save_fig(save_to + "model_comparison.png", tight=False)
 
         g = sns.catplot(
             data=results,
@@ -718,8 +716,7 @@ class RunConfiguration:
         )
         g.despine(left=True)
         g.fig.subplots_adjust(top=0.9)
-        g.fig.suptitle("Model comparison")
-        save_fig(save_to + "list_of_answers.png")
+        save_fig(save_to + "list_of_answers.png", tight=False)
 
     async def run_all(self, from_path: bool = False, save_diagrams: bool = True):
         """

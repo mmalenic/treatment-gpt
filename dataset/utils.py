@@ -26,7 +26,7 @@ def save_fig(save_to, plt=plt, tight=True):
 
 
 def heatmap_for_cls_report(
-    x, colour, save_to, x_label, y_label, title, height=15, width=10
+    x, colour, save_to, x_label, y_label, title=None, height=15, width=10
 ):
     """
     Create heatmaps per cancer type.
@@ -58,7 +58,8 @@ def heatmap_for_cls_report(
     )
     ax.set_aspect("equal")
 
-    ax.set_title(title)
+    if title is not None:
+        ax.set_title(title)
 
     save_fig(save_to, fig)
 

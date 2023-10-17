@@ -271,7 +271,6 @@ class GenePairDataset:
             return x
 
         def heat_map(x, colour, save_to):
-            x["cancer_type"] = f"Scores for {x['cancer_type'].iloc[0]}"
             x = x.set_index("Treatment")
 
             return heatmap_for_cls_report(
@@ -280,7 +279,6 @@ class GenePairDataset:
                 save_to,
                 x_label="Treatment",
                 y_label="Score",
-                title=f"Scores for {x['cancer_type'].iloc[0]}",
             )
 
         def plot_heatmaps(df, save_to):
@@ -370,7 +368,6 @@ class GenePairDataset:
         plt.clf()
         plt.figure()
         plot = sns.barplot(df, x="correlation_type", y="accuracy_score")
-        plot.set_title("Accuracy for correlation type")
         plot.set(xlabel="Correlation type", ylabel="Accuracy score")
         save_fig(f"{save_to}/accuracy_score.png")
 
@@ -379,7 +376,6 @@ class GenePairDataset:
         plot = sns.lmplot(
             data=has_cor, y="accuracy_score", x="p_val", hue="correlation_type"
         )
-        plt.title("Accuracy and p-value for correlations")
         plt.ylabel("Accuracy score")
         plt.xlabel("p-value")
         plt.subplots_adjust(top=0.9)
@@ -391,7 +387,6 @@ class GenePairDataset:
         plot = sns.lmplot(
             data=has_cor, y="accuracy_score", x="odds", hue="correlation_type"
         )
-        plt.title("Accuracy and odds for correlations")
         plt.ylabel("Accuracy score")
         plt.xlabel("Odds")
         plt.subplots_adjust(top=0.9)
@@ -406,7 +401,6 @@ class GenePairDataset:
             x="p_val",
             hue="correlation_type",
         )
-        plt.title("Accuracy and p-value for mutually exclusive correlations")
         plt.ylabel("Accuracy score")
         plt.xlabel("p-value")
         plt.subplots_adjust(top=0.9)
@@ -421,7 +415,6 @@ class GenePairDataset:
             x="odds",
             hue="correlation_type",
         )
-        plt.title("Accuracy and odds for mutually exclusive correlations")
         plt.ylabel("Accuracy score")
         plt.xlabel("Odds")
         plt.subplots_adjust(top=0.9)
@@ -433,7 +426,6 @@ class GenePairDataset:
         plot = sns.lmplot(
             data=cooccuring, y="accuracy_score", x="p_val", hue="correlation_type"
         )
-        plt.title("Accuracy and p-value for co-occurring correlations")
         plt.ylabel("Accuracy score")
         plt.xlabel("p-value")
         plt.subplots_adjust(top=0.9)
@@ -445,7 +437,6 @@ class GenePairDataset:
         plot = sns.lmplot(
             data=cooccuring, y="accuracy_score", x="odds", hue="correlation_type"
         )
-        plt.title("Accuracy and odds for co-occurring correlations")
         plt.ylabel("Accuracy score")
         plt.xlabel("Odds")
         plt.subplots_adjust(top=0.9)
@@ -457,14 +448,12 @@ class GenePairDataset:
         plot = sns.barplot(
             melt_correlation_type, x="correlation_type", y="value", hue="Evidence level"
         )
-        plot.set_title("Accuracy for evidence levels and correlation type")
         plot.set(ylabel="Accuracy score", xlabel="Correlation type")
         save_fig(f"{save_to}/accuracy_level_correlation_type.png")
 
         plt.clf()
         plt.figure()
         plot = sns.barplot(df_cancer_types, x="cancer_type_code", y="accuracy_score")
-        plot.set_title("Accuracy for cancer types")
         plot.set(ylabel="Accuracy score", xlabel="Cancer type")
         plt.subplots_adjust(bottom=0.3)
         plt.xticks(rotation=90)
