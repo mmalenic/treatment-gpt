@@ -565,14 +565,16 @@ class RunConfiguration:
 
         if from_path and Path("data/gene_pair_results.xlsx").exists():
             self._gene_pair_results = pd.read_excel("data/gene_pair_results.xlsx")
-            self.results_diagram(self._gene_pair_results, "data/gene_pair_results_")
+            self.results_diagram(
+                self._gene_pair_results, "data/gene_pair_results_", "a"
+            )
 
         if from_path and Path("data/treatment_source_results.xlsx").exists():
             self._treatment_source_results = pd.read_excel(
                 "data/treatment_source_results.xlsx"
             )
             self.results_diagram(
-                self._treatment_source_results, "data/treatment_source_results_"
+                self._treatment_source_results, "data/treatment_source_results_", "b"
             )
 
         if from_path:

@@ -196,6 +196,20 @@ class GenePairDataset:
             for z in y.split("+")
         ]
         counter = Counter(labels)
+
+        return (
+            pd.DataFrame.from_dict(counter, orient="index")
+            .reset_index()
+            .sort_values(by=0, ascending=False)
+        )
+
+    def gene_counts(self) -> pd.DataFrame:
+        """
+        Get the gene counts.
+        """
+        genes = self._df["gene_x"].to_list() + self._df["gene_y"].to_list()
+        counter = Counter(genes)
+
         return (
             pd.DataFrame.from_dict(counter, orient="index")
             .reset_index()
@@ -275,14 +289,14 @@ class GenePairDataset:
         Save all diagrams.
         """
 
-        def treatment_count(x):
-            nonlocal i
-            x["treatment_count"] = len(
-                list(dict.fromkeys([z for y in x["y_true"] for z in y]).keys())
-            )
-            x["group_number"] = i
-            i += 1
-            return x
+        # def treatment_count(x):
+        #     nonlocal i
+        #     x["treatment_count"] = len(
+        #         list(dict.fromkeys([z for y in x["y_true"] for z in y]).keys())
+        #     )
+        #     x["group_number"] = i
+        #     i += 1
+        #     return x
 
         def cls_report(x):
             return pd.DataFrame(
@@ -398,12 +412,12 @@ class GenePairDataset:
             "Evidence level",
         ] = "B"
 
-        i = 0
-        group_by_cancer_type = (
-            df.groupby(["cancer_type"])
-            .apply(treatment_count)
-            .reset_index(allow_duplicates=True)
-        )
+        # i = 0
+        # group_by_cancer_type = (
+        #     df.groupby(["cancer_type"])
+        #     .apply(treatment_count)
+        #     .reset_index(allow_duplicates=True)
+        # )
 
         group_by_cancer_type = (
             df.groupby(["cancer_type"]).apply(cls_report).reset_index()
