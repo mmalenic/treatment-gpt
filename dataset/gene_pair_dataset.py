@@ -412,13 +412,6 @@ class GenePairDataset:
             "Evidence level",
         ] = "B"
 
-        # i = 0
-        # group_by_cancer_type = (
-        #     df.groupby(["cancer_type"])
-        #     .apply(treatment_count)
-        #     .reset_index(allow_duplicates=True)
-        # )
-
         group_by_cancer_type = (
             df.groupby(["cancer_type"]).apply(cls_report).reset_index()
         )

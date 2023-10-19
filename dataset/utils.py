@@ -33,6 +33,8 @@ def heatmap_for_cls_report(
     """
     cmap = sns.color_palette(colour, as_cmap=True)
 
+    print("heatmap:", save_to)
+
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
