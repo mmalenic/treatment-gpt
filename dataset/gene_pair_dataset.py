@@ -1,4 +1,5 @@
 import itertools
+from collections import Counter
 from pathlib import Path
 from typing import Optional, List
 import seaborn as sns
@@ -164,6 +165,7 @@ class GenePairDataset:
                             "odds": row["odds"],
                             "treatments": treatment_sublist,
                             "y_true": y_true_processed,
+                            "y_true_original": y_true,
                             "y_pred": np.nan,
                         }
                     )
@@ -182,6 +184,23 @@ class GenePairDataset:
                 treatments.update({treatment: None for treatment in data["y_true"]})
 
         return list(treatments.keys())
+
+    def label_counts(self) -> pd.DataFrame:
+        """
+        Get the label counts.
+        """
+        labels = [
+            z.strip()
+            for x in self._df["y_true_original"].to_list()
+            for y in x
+            for z in y.split("+")
+        ]
+        counter = Counter(labels)
+        return (
+            pd.DataFrame.from_dict(counter, orient="index")
+            .reset_index()
+            .sort_values(by=0, ascending=False)
+        )
 
     def results(self, x) -> pd.DataFrame:
         """
@@ -255,6 +274,15 @@ class GenePairDataset:
         """
         Save all diagrams.
         """
+
+        def treatment_count(x):
+            nonlocal i
+            x["treatment_count"] = len(
+                list(dict.fromkeys([z for y in x["y_true"] for z in y]).keys())
+            )
+            x["group_number"] = i
+            i += 1
+            return x
 
         def cls_report(x):
             return pd.DataFrame(
@@ -356,6 +384,26 @@ class GenePairDataset:
             melt_correlation_type["Evidence level"] == "accuracy_score_b_level",
             "Evidence level",
         ] = "B"
+
+        melt_level = df.melt(
+            value_vars=["accuracy_score_a_level", "accuracy_score_b_level"],
+        )
+        melt_level = melt_level.rename(columns={"variable": "Evidence level"})
+        melt_level.loc[
+            melt_level["Evidence level"] == "accuracy_score_a_level",
+            "Evidence level",
+        ] = "A"
+        melt_level.loc[
+            melt_level["Evidence level"] == "accuracy_score_b_level",
+            "Evidence level",
+        ] = "B"
+
+        i = 0
+        group_by_cancer_type = (
+            df.groupby(["cancer_type"])
+            .apply(treatment_count)
+            .reset_index(allow_duplicates=True)
+        )
 
         group_by_cancer_type = (
             df.groupby(["cancer_type"]).apply(cls_report).reset_index()
@@ -466,6 +514,8 @@ class GenePairDataset:
         plot.set(ylabel="Accuracy score", xlabel="Cancer type")
         plt.subplots_adjust(bottom=0.3)
         plt.xticks(rotation=90)
+        plt.subplots_adjust(top=0.9)
+        plt.title("a", x=0, fontweight="bold", fontsize=16)
         save_fig(f"{save_to}/accuracy_cancer_type.png", tight=False)
 
         plt.clf()

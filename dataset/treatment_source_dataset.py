@@ -1,4 +1,5 @@
 import itertools
+from collections import Counter
 from pathlib import Path
 from typing import List
 
@@ -110,7 +111,11 @@ class TreatmentSourceDataset:
                 )
 
         self._df = pd.DataFrame(self._dataset)
-        self._df = self._df.groupby(["source", "y_true"]).agg(list).reset_index()
+        self._df = (
+            self._df.groupby(["source", "y_true", "y_true_original"])
+            .agg(list)
+            .reset_index()
+        )
         self._df["treatments"] = self._df["treatments"].apply(lambda x: x[0])
         self._df["y_pred"] = np.nan
 
@@ -195,6 +200,8 @@ class TreatmentSourceDataset:
         plt.figure()
         plot = sns.barplot(melt_level, x="Evidence level", y="value")
         plot.set(ylabel="Accuracy score", xlabel="Evidence level")
+        plt.subplots_adjust(top=0.9)
+        plt.title("b", x=0, fontweight="bold", fontsize=16)
         save_fig(f"{save_to}/accuracy_level.png")
 
         plt.clf()
@@ -203,6 +210,8 @@ class TreatmentSourceDataset:
         plot.set(ylabel="Accuracy score", xlabel="Cancer types")
         plt.subplots_adjust(bottom=0.3)
         plt.xticks(rotation=90)
+        plt.subplots_adjust(top=0.9)
+        plt.title("b", x=0, fontweight="bold", fontsize=16)
         save_fig(f"{save_to}/accuracy_cancer_type_level.png")
 
         plt.clf()
@@ -250,6 +259,18 @@ class TreatmentSourceDataset:
         Return the dataframe of the dataset.
         """
         return list(dict.fromkeys([x[0] for x in self._all_treatments]))
+
+    def label_counts(self) -> pd.DataFrame:
+        """
+        Get the label counts.
+        """
+        labels = self._df["y_true_original"].to_list()
+        counter = Counter(labels)
+        return (
+            pd.DataFrame.from_dict(counter, orient="index")
+            .reset_index()
+            .sort_values(by=0, ascending=False)
+        )
 
     @property
     def df(self) -> pd.DataFrame:

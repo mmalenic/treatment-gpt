@@ -540,14 +540,16 @@ class RunConfiguration:
             "treatment_all",
         )
 
-        self.run_configuration["all"] = [
-            gene_pair_datasets_3_5,
-            gene_pair_datasets_4,
-            gene_pair_datasets_all,
-            treatment_source_datasets_3_5,
-            treatment_source_datasets_4,
-            treatment_source_datasets_all,
-        ]
+        self.run_configuration["all"] = dict(
+            [
+                ("gene_pair_3_5", gene_pair_datasets_3_5),
+                ("gene_pair_4", gene_pair_datasets_4),
+                ("gene_pair_all", gene_pair_datasets_all),
+                ("treatment_3_5", treatment_source_datasets_3_5),
+                ("treatment_4", treatment_source_datasets_4),
+                ("treatment_all", treatment_source_datasets_all),
+            ]
+        )
 
     async def predict(self):
         """
@@ -618,15 +620,21 @@ class RunConfiguration:
 
             return " + ".join(y)
 
-        def process_results(df, run):
-            out = run["classifier"].base_dataset.aggregate_results()
-            out["Model name"] = run["model_type"]
-            out["Run type"] = (
-                "zero shot" if "zero_shot" in run["run_name"] else "few shot"
-            )
-            out["List of answers"] = "no" if "no_list" in run["run_name"] else "yes"
-            out["COT"] = "COT" if "cot" in run["run_name"] else "no COT"
-            out["Report name"] = out.apply(label_report, axis=1)
+        def process_results(df, run, dataset):
+            out = dataset
+
+            try:
+                out["Model name"] = run["model_type"]
+                out["Run type"] = (
+                    "zero shot" if "zero_shot" in run["run_name"] else "few shot"
+                )
+                out["List of answers"] = "no" if "no_list" in run["run_name"] else "yes"
+                out["Chain-of-thought"] = (
+                    "COT" if "cot" in run["run_name"] else "no COT"
+                )
+                out["Report name"] = out.apply(label_report, axis=1)
+            except (KeyError, TypeError) as _:
+                pass
 
             df = pd.concat(
                 [df, out],
@@ -641,11 +649,13 @@ class RunConfiguration:
         for run in self.run_configuration["runs"]:
             dataset = run["classifier"].base_dataset
             if isinstance(dataset, GenePairDataset):
-                self._gene_pair_results = process_results(self._gene_pair_results, run)
+                self._gene_pair_results = process_results(
+                    self._gene_pair_results, run, dataset.aggregate_results()
+                )
                 gene_pair_dataset = dataset
             else:
                 self._treatment_source_results = process_results(
-                    self._treatment_source_results, run
+                    self._treatment_source_results, run, dataset.aggregate_results()
                 )
                 treatment_source_dataset = dataset
 
@@ -664,24 +674,35 @@ class RunConfiguration:
 
         if not Path("data/gene_pair_results.xlsx").exists():
             self._gene_pair_results.to_excel("data/gene_pair_results.xlsx")
-            self.results_diagram(self._gene_pair_results, "data/gene_pair_results.png")
+            self.results_diagram(
+                self._gene_pair_results, "data/gene_pair_results.png", "a"
+            )
 
         if not Path("data/treatment_source_results.xlsx").exists():
             self._treatment_source_results.to_excel(
                 "data/treatment_source_results.xlsx"
             )
             self.results_diagram(
-                self._treatment_source_results, "data/treatment_source_results"
+                self._treatment_source_results, "data/treatment_source_results", "b"
             )
 
+        for name, run in self.run_configuration["all"].items():
+            self.run_configuration["aggregate_results_" + name] = process_results(
+                pd.DataFrame(), run, run.aggregate_results()
+            )
+
+            if not Path(f"data/aggregate_results_{name}.xlsx").exists():
+                dataset = self.run_configuration["aggregate_results_" + name]
+                dataset.to_excel(f"data/aggregate_results_{name}.xlsx")
+
     @staticmethod
-    def results_diagram(results, save_to):
+    def results_diagram(results, save_to, title):
         results = results[results["Model name"] != "dummy"]
         g = sns.catplot(
             data=results,
             col="Model name",
             y="accuracy",
-            x="COT",
+            x="Chain-of-thought",
             hue="Run type",
             capsize=0.1,
             palette="YlGnBu_d",
@@ -692,13 +713,14 @@ class RunConfiguration:
         )
         g.despine(left=True)
         g.fig.subplots_adjust(top=0.9)
+        g.fig.suptitle(title, x=0, fontweight="bold", fontsize=16)
         save_fig(save_to + "cot_comparison.png")
 
         g = sns.catplot(
             data=results,
             x="Model name",
             y="accuracy",
-            hue="COT",
+            hue="Chain-of-thought",
             col="Run type",
             capsize=0.1,
             palette="YlGnBu_d",
@@ -709,13 +731,14 @@ class RunConfiguration:
         )
         g.despine(left=True)
         g.fig.subplots_adjust(top=0.9)
+        g.fig.suptitle(title, x=0)
         save_fig(save_to + "model_comparison.png", tight=False)
 
         g = sns.catplot(
             data=results,
             x="List of answers",
             y="accuracy",
-            hue="COT",
+            hue="Chain-of-thought",
             col="Run type",
             capsize=0.1,
             palette="YlGnBu_d",
@@ -726,6 +749,7 @@ class RunConfiguration:
         )
         g.despine(left=True)
         g.fig.subplots_adjust(top=0.9)
+        g.fig.suptitle(title, x=0, fontweight="bold", fontsize=16)
         save_fig(save_to + "list_of_answers.png", tight=False)
 
     async def run_all(self, from_path: bool = False, save_diagrams: bool = True):
@@ -738,10 +762,10 @@ class RunConfiguration:
         if not from_path:
             await self.predict()
 
-        self.results(from_path)
-
         if save_diagrams:
             self.save_diagrams()
+
+        self.results(from_path)
 
     @property
     def treatment_source_results(self) -> pd.DataFrame:
