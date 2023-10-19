@@ -289,15 +289,6 @@ class GenePairDataset:
         Save all diagrams.
         """
 
-        # def treatment_count(x):
-        #     nonlocal i
-        #     x["treatment_count"] = len(
-        #         list(dict.fromkeys([z for y in x["y_true"] for z in y]).keys())
-        #     )
-        #     x["group_number"] = i
-        #     i += 1
-        #     return x
-
         def cls_report(x):
             return pd.DataFrame(
                 classification_report(
@@ -371,7 +362,8 @@ class GenePairDataset:
             )
 
         Path(save_to).mkdir(exist_ok=True, parents=True)
-        Path(f"{save_to}/heatmaps/").mkdir(exist_ok=True, parents=True)
+        heatmaps_save = Path(f"{save_to}/heatmaps/")
+        heatmaps_save.mkdir(exist_ok=True, parents=True)
 
         df = self.df.copy()
         df.loc[df["correlation_type"] == "none", "correlation_type"] = "no correlation"
@@ -421,13 +413,15 @@ class GenePairDataset:
         group_by_cancer_type = group_by_cancer_type[
             group_by_cancer_type.apply(
                 lambda x: True
-                if x["Treatment"] in self.treatments_for(x["cancer_type"])
+                if process_plus(x["Treatment"], self)
+                in self.treatments_for(x["cancer_type"])
                 else False,
                 axis=1,
             )
         ]
 
-        plot_heatmaps(group_by_cancer_type, save_to)
+        print(heatmaps_save)
+        plot_heatmaps(group_by_cancer_type, heatmaps_save)
 
         plt.clf()
         plt.figure()
