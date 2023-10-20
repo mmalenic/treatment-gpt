@@ -14,7 +14,7 @@ repos:
         args: [ '--exclude-files', '.*\.ipynb$', "--baseline", ".secrets.baseline" ]
       - id: detect-secrets
         name: 'detect-secrets-jupyter'
-        args: [ '--exclude-files', '.*[^i][^p][^y][^n][^b]$', '--exclude-lines', '"(hash|id|image/\w+)":.*', "--baseline", ".secrets.baseline" ]
+        args: [ '--exclude-lines', '"(hash|id|image/\w+)":.*', "--baseline", ".secrets.baseline" ]
         exclude: package.lock.json
 
   - repo: https://github.com/psf/black-pre-commit-mirror
