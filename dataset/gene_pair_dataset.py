@@ -420,8 +420,7 @@ class GenePairDataset:
             )
         ]
 
-        print(heatmaps_save)
-        plot_heatmaps(group_by_cancer_type, heatmaps_save)
+        plot_heatmaps(group_by_cancer_type, save_to)
 
         plt.clf()
         plt.figure()
