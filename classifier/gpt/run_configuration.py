@@ -1,13 +1,12 @@
 import os.path
 from collections import Counter
+from itertools import chain
 from pathlib import Path
-from typing import Callable
 
 import pandas as pd
+import seaborn as sns
 from sklearn import metrics
-from sklearn.metrics import f1_score, precision_score, recall_score
 
-import classifier
 from classifier import util
 from classifier.gpt.no_sources_classifier import NoSourcesGenePairGPTClassifier
 from classifier.gpt.no_sources_no_list_classifier import (
@@ -18,16 +17,9 @@ from classifier.gpt.treatment_only_classifier import TreatmentSourceGPTClassifie
 from classifier.gpt.treatment_only_no_list_classifier import (
     TreatmentSourceNoListGPTClassifier,
 )
+from dataset.gene_pair_dataset import GenePairDataset
 from dataset.load_protect import LoadProtect
 from dataset.treatment_source_dataset import TreatmentSourceDataset
-from dataset.gene_pair_dataset import GenePairDataset
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-from sklearn.dummy import DummyClassifier
-from itertools import chain
-
 from dataset.utils import results, save_fig
 
 

@@ -1,13 +1,11 @@
+import re
+
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 import seaborn as sns
+from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.metrics import f1_score, precision_score, recall_score
-
-from dataset.load_protect import LoadProtect
-
-import re
 
 
 def save_fig(save_to, plt=plt, tight=True):

@@ -1,31 +1,20 @@
-import ast
 import asyncio
 import json
 import os
-import time
+from abc import ABC, abstractmethod
+from decimal import *
 from json import JSONDecoder
 from pathlib import Path
-from typing import Literal, List, Any, Dict, Optional
-from abc import ABC, abstractmethod
+from typing import Literal, List, Any
 
 import numpy as np
+import openai
 import pandas as pd
 import tiktoken
-
-from joblib import Parallel, delayed
-from decimal import *
-
 from openai.error import Timeout, ServiceUnavailableError, APIError, RateLimitError
-from requests import ReadTimeout
-
-from dataset.utils import process_plus
-import openai
-from sklearn import metrics
-from sklearn.metrics import hamming_loss
-from sklearn.preprocessing import MultiLabelBinarizer
 
 from classifier.gpt.prompt_templates import Prompts
-from classifier.util import accuracy_score
+from dataset.utils import process_plus
 
 
 class BaseGPTClassifier(ABC):

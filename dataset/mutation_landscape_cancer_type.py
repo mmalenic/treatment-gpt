@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Optional, List
+from typing import List
 
 import pandas as pd
-import numpy as np
 
 
 class MutationLandscapeCancerType:

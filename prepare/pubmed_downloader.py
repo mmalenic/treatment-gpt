@@ -1,16 +1,14 @@
 import os.path
+import re
+import time
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from urllib.request import urlretrieve
-from bs4 import BeautifulSoup
 
-from Bio import Entrez
 import metapub
-
-import time
-from datetime import datetime
-
-import re
+from Bio import Entrez
+from bs4 import BeautifulSoup
 
 
 class PubmedDownloader:

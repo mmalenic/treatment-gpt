@@ -1,10 +1,9 @@
 import os
+from pathlib import Path
 
 import pandas as pd
 
 from classifier.command import Command
-from pathlib import Path
-
 from classifier.util import find_file, check_prerequisite
 
 

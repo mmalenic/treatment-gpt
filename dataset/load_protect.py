@@ -1,11 +1,10 @@
-import json
+import itertools
 import os
 from ast import literal_eval
 from pathlib import Path
 from typing import List, Tuple
 
 import pandas as pd
-import itertools
 
 from classifier.util import find_file
 from dataset.alternative_treatment_names import AlternativeTreatmentNames

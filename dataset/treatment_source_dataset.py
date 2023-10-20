@@ -1,26 +1,20 @@
-import itertools
+from collections import Counter
 from collections import Counter
 from pathlib import Path
 from typing import List
 
-from matplotlib import pyplot as plt
-import seaborn as sns
 import numpy as np
 import pandas as pd
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+import seaborn as sns
+from matplotlib import pyplot as plt
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
-    f1_score,
-    precision_score,
-    recall_score,
 )
 
 from dataset.gene_pair_dataset import GenePairDataset
-from dataset.utils import process_plus
 from dataset.load_protect import LoadProtect
-import random
-
+from dataset.utils import process_plus
 from dataset.utils import (
     save_fig,
     heatmap_for_cls_report,

@@ -1,5 +1,3 @@
-from inspect import cleandoc
-from textwrap import dedent
 from typing import Literal
 
 
@@ -21,10 +19,6 @@ class Prompts:
     _multi_label_json_task_prompt_template = "Provide your response in a JSON format containing a single key `treatments` and a value corresponding to the array of assigned treatments."
 
     _single_label_json_task_prompt_template = "Provide your response in a JSON format containing a single key `treatment` and a value corresponding to the treatment."
-
-    # _multi_label_cot_json_task_prompt_template = "Provide your reasoning steps, and then provide JSON containing a single key `treatments` and a value corresponding to the array of assigned treatments."
-
-    # _single_label_cot_json_task_prompt_template = "Provide your reasoning steps, and then provide JSON containing a single key `treatment` and a value corresponding to the treatment."
 
     _json_response_prompt_template = "Your JSON response:"
 

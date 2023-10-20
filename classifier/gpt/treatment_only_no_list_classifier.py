@@ -3,14 +3,11 @@ import json
 import os
 import random
 from hashlib import md5
-from typing import Literal
 
 import pandas as pd
 
 from classifier.gpt.base_gpt_classifier import BaseGPTClassifier
 from classifier.gpt.prompt_templates import *
-from dataset.gene_pair_dataset import GenePairDataset
-from dataset.load_protect import LoadProtect
 from dataset.treatment_source_dataset import TreatmentSourceDataset
 
 

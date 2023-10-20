@@ -3,14 +3,12 @@ import json
 import os.path
 import random
 from hashlib import md5
-from typing import Literal, get_args
 
 import pandas as pd
 
 from classifier.gpt.base_gpt_classifier import BaseGPTClassifier
 from classifier.gpt.prompt_templates import *
 from dataset.gene_pair_dataset import GenePairDataset
-from dataset.load_protect import LoadProtect
 
 
 class NoSourcesNoListGenePairGPTClassifier(BaseGPTClassifier):

@@ -1,5 +1,3 @@
-from typing import Any
-
 from prepare.all_samples import AllSamples
 from prepare.reference import Reference
 from prepare.serve import Serve

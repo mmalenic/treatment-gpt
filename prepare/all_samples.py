@@ -1,7 +1,9 @@
 import os
-import boto3
-from prepare.sample import Sample
 import shutil
+
+import boto3
+
+from prepare.sample import Sample
 
 
 class AllSamples:

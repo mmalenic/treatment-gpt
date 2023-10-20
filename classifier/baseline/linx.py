@@ -1,9 +1,10 @@
+import os
 from pathlib import Path
+
+import pandas as pd
 
 from classifier.command import Command
 from classifier.util import find_file, check_prerequisite
-import os
-import pandas as pd
 
 
 class Linx:

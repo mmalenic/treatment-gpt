@@ -1,29 +1,22 @@
-import itertools
+from collections import Counter
+import random
 from collections import Counter
 from pathlib import Path
 from typing import Optional, List
-import seaborn as sns
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from matplotlib import pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.metrics import (
     hamming_loss,
     classification_report,
-    f1_score,
-    precision_score,
-    recall_score,
 )
-from sklearn.utils import check_consistent_length
-
-from dataset.utils import process_plus
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from classifier.util import accuracy_score
 from dataset.load_protect import LoadProtect
-import random
-
+from dataset.utils import process_plus
 from dataset.utils import (
     save_fig,
     heatmap_for_cls_report,

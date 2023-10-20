@@ -1,8 +1,4 @@
 import sys
-import random
-
-import numpy as np
-import openai
 
 from classifier.gpt.run_configuration import RunConfiguration
 from dataset.alternative_treatment_names import AlternativeTreatmentNames
@@ -11,11 +7,7 @@ from dataset.load_protect import LoadProtect
 from dataset.treatment_source_dataset import TreatmentSourceDataset
 
 sys.path.append("..")
-from classifier.baseline.all_protect import AllProtect
 from dataset.mutation_landscape_cancer_type import MutationLandscapeCancerType
-from prepare.all_samples import AllSamples
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 
 class RunClassifier:
