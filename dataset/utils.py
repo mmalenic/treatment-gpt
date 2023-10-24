@@ -55,6 +55,12 @@ def heatmap_for_cls_report(
     x = x[["precision", "recall", "f1-score"]].sort_values(by="f1-score")
     x = x.transpose() if transpose else x
 
+    cbar_kws = (
+        {"use_gridspec": False, "location": "top", "pad": 0.02}
+        if transpose
+        else {"pad": 0.02}
+    )
+
     ax = sns.heatmap(
         x,
         annot=True,
@@ -65,7 +71,7 @@ def heatmap_for_cls_report(
         cmap=cmap,
         vmin=0,
         vmax=1,
-        cbar_kws={"pad": 0.02},
+        cbar_kws=cbar_kws,
     )
     ax.set_aspect("equal")
 
