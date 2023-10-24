@@ -24,7 +24,15 @@ def save_fig(save_to, plt=plt, tight=True):
 
 
 def heatmap_for_cls_report(
-    x, colour, save_to, x_label, y_label, title=None, height=15, width=10
+    x,
+    colour,
+    save_to,
+    x_label,
+    y_label,
+    title=None,
+    height=15,
+    width=10,
+    transpose=True,
 ):
     """
     Create heatmaps per cancer type.
@@ -44,8 +52,11 @@ def heatmap_for_cls_report(
     cbar_ax = divider.new_horizontal(size="5%", pad=0.5, pack_start=False)
     fig.add_axes(cbar_ax)
 
+    x = x[["precision", "recall", "f1-score"]].sort_values(by="f1-score")
+    x = x.transpose() if transpose else x
+
     ax = sns.heatmap(
-        x[["precision", "recall", "f1-score"]].sort_values(by="f1-score").transpose(),
+        x,
         annot=True,
         linewidth=0.5,
         square=True,

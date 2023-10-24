@@ -305,7 +305,7 @@ class GenePairDataset:
             )
             return x
 
-        def heat_map(x, colour, save_to, height, width):
+        def heat_map(x, colour, save_to, height, width, transpose=True):
             x = x.set_index("Treatment")
 
             return heatmap_for_cls_report(
@@ -316,6 +316,7 @@ class GenePairDataset:
                 y_label="Score",
                 height=height,
                 width=width,
+                transpose=transpose,
             )
 
         def plot_heatmaps(df, save_to):
@@ -326,7 +327,7 @@ class GenePairDataset:
                 lambda x: heat_map(
                     x,
                     "Blues",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_small.png",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_small_transposed.png",
                     12,
                     5,
                 )
@@ -335,7 +336,7 @@ class GenePairDataset:
                 lambda x: heat_map(
                     x,
                     "Blues",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_medium.png",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_medium_transposed.png",
                     12,
                     10,
                 )
@@ -344,9 +345,39 @@ class GenePairDataset:
                 lambda x: heat_map(
                     x,
                     "Blues",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_large.png",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_large_transposed.png",
                     12,
                     15,
+                )
+            )
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x,
+                    "Blues",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_small.png",
+                    5,
+                    12,
+                    transpose=False,
+                )
+            )
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x,
+                    "Blues",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_medium.png",
+                    10,
+                    12,
+                    transpose=False,
+                )
+            )
+            df.groupby(["cancer_type"]).apply(
+                lambda x: heat_map(
+                    x,
+                    "Blues",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_large.png",
+                    15,
+                    12,
+                    transpose=False,
                 )
             )
 
