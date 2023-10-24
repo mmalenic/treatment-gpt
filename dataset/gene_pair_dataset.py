@@ -305,7 +305,7 @@ class GenePairDataset:
             )
             return x
 
-        def heat_map(x, colour, save_to):
+        def heat_map(x, colour, save_to, height, width):
             x = x.set_index("Treatment")
 
             return heatmap_for_cls_report(
@@ -314,6 +314,8 @@ class GenePairDataset:
                 save_to,
                 x_label="Treatment",
                 y_label="Score",
+                height=height,
+                width=width,
             )
 
         def plot_heatmaps(df, save_to):
@@ -324,33 +326,27 @@ class GenePairDataset:
                 lambda x: heat_map(
                     x,
                     "Blues",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_blue.png",
-                )
-            )
-            df.groupby(["cancer_type"]).apply(
-                lambda x: heat_map(
-                    x, "Reds", f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_red.png"
-                )
-            )
-            df.groupby(["cancer_type"]).apply(
-                lambda x: heat_map(
-                    x,
-                    "Greens",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_green.png",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_small.png",
+                    12,
+                    5,
                 )
             )
             df.groupby(["cancer_type"]).apply(
                 lambda x: heat_map(
                     x,
-                    "Oranges",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_orange.png",
+                    "Blues",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_medium.png",
+                    12,
+                    10,
                 )
             )
             df.groupby(["cancer_type"]).apply(
                 lambda x: heat_map(
                     x,
-                    "Purples",
-                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_purple.png",
+                    "Blues",
+                    f"{save_to}/heatmaps/{x['cancer_type'].iloc[0]}_large.png",
+                    12,
+                    15,
                 )
             )
 
