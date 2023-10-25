@@ -49,17 +49,16 @@ def heatmap_for_cls_report(
     ax.set_ylabel(y_label)
 
     divider = make_axes_locatable(ax)
-    cbar_ax = divider.new_horizontal(size="5%", pad=0.5, pack_start=False)
+    cbar_ax = (
+        divider.new_horizontal(size="5%", pad=0.5, pack_start=False)
+        if transpose
+        else divider.new_vertical(size="5%", pad=0.5, pack_start=False)
+    )
+
     fig.add_axes(cbar_ax)
 
     x = x[["precision", "recall", "f1-score"]].sort_values(by="f1-score")
     x = x.transpose() if transpose else x
-
-    cbar_kws = (
-        {"use_gridspec": False, "location": "top", "pad": 0.02}
-        if transpose
-        else {"pad": 0.02}
-    )
 
     ax = sns.heatmap(
         x,
@@ -71,9 +70,14 @@ def heatmap_for_cls_report(
         cmap=cmap,
         vmin=0,
         vmax=1,
-        cbar_kws=cbar_kws,
+        cbar_kws={"pad": 0.02}
+        if transpose
+        else {"pad": 0.02, "orientation": "horizontal"},
     )
     ax.set_aspect("equal")
+
+    if not transpose:
+        cbar_ax.xaxis.set_ticks_position("top")
 
     if title is not None:
         ax.set_title(title)
